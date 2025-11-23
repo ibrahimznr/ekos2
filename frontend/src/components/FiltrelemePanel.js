@@ -123,7 +123,7 @@ const FiltrelemePanel = ({ filters, onFilterChange }) => {
               <SelectValue placeholder="Tüm durumlar" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Tüm durumlar</SelectItem>
+              <SelectItem value="all">Tüm durumlar</SelectItem>
               <SelectItem value="Uygun">Uygun</SelectItem>
               <SelectItem value="Uygun Değil">Uygun Değil</SelectItem>
             </SelectContent>
