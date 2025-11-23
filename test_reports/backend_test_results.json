@@ -1,0 +1,158 @@
+{
+  "timestamp": "2025-11-23T18:00:45.908635",
+  "total_tests": 30,
+  "passed_tests": 30,
+  "success_rate": 100.0,
+  "test_results": [
+    {
+      "test": "Admin Login",
+      "status": "PASS",
+      "details": "Status: 200, Response: {\n  \"access_token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJmODNkZDhmOS0zYWI0LTRhMzEtOTYwMS00ODcwMzFjYTZiOGEiLCJleHAiOjE3NjQwMDcyNDR9.DSUEX9KdS05bsXXVDtgchtR5Dv5ftQ6eR4mOYI6rAYg\",\n  \"token_ty..."
+    },
+    {
+      "test": "Get Current User",
+      "status": "PASS",
+      "details": "Status: 200, Response: {\n  \"id\": \"f83dd8f9-3ab4-4a31-9601-487031ca6b8a\",\n  \"email\": \"admin@ekipman.com\",\n  \"role\": \"admin\",\n  \"created_at\": \"2025-11-23T17:58:51.754151Z\"\n}..."
+    },
+    {
+      "test": "Invalid Login",
+      "status": "PASS",
+      "details": "Status: 401, Response: {\n  \"detail\": \"Email veya \\u015fifre hatal\\u0131\"\n}..."
+    },
+    {
+      "test": "Dashboard Stats",
+      "status": "PASS",
+      "details": "Status: 200, Response: {\n  \"total_raporlar\": 0,\n  \"monthly_raporlar\": 0,\n  \"uygun_count\": 0,\n  \"uygun_degil_count\": 0,\n  \"expiring_30_days\": 0,\n  \"expiring_7_days\": 0,\n  \"kategori_dagilim\": []\n}..."
+    },
+    {
+      "test": "Dashboard - total_raporlar field",
+      "status": "PASS",
+      "details": "Value: 0"
+    },
+    {
+      "test": "Dashboard - monthly_raporlar field",
+      "status": "PASS",
+      "details": "Value: 0"
+    },
+    {
+      "test": "Dashboard - uygun_count field",
+      "status": "PASS",
+      "details": "Value: 0"
+    },
+    {
+      "test": "Dashboard - uygun_degil_count field",
+      "status": "PASS",
+      "details": "Value: 0"
+    },
+    {
+      "test": "Get Categories",
+      "status": "PASS",
+      "details": "Status: 200, Response: [\n  {\n    \"id\": \"b103d134-cfe6-4d72-ae25-c39fc9e8ff97\",\n    \"isim\": \"Asans\\u00f6r\",\n    \"aciklama\": \"Asans\\u00f6r ekipmanlar\\u0131\",\n    \"created_at\": \"2025-11-23T17:58:51.784355Z\"\n  },\n  {\n    \"id\": ..."
+    },
+    {
+      "test": "Categories Count",
+      "status": "PASS",
+      "details": "Found 5 categories"
+    },
+    {
+      "test": "Create Category",
+      "status": "PASS",
+      "details": "Status: 200, Response: {\n  \"id\": \"c127f84c-11a5-4cc7-8a06-954e2a885bcf\",\n  \"isim\": \"Test Kategori 180044\",\n  \"aciklama\": \"Test kategorisi\",\n  \"created_at\": \"2025-11-23T18:00:44.614470Z\"\n}..."
+    },
+    {
+      "test": "Delete Category",
+      "status": "PASS",
+      "details": "Status: 200, Response: {\n  \"message\": \"Kategori silindi\"\n}..."
+    },
+    {
+      "test": "Get Reports",
+      "status": "PASS",
+      "details": "Status: 200, Response: []..."
+    },
+    {
+      "test": "Reports Count",
+      "status": "PASS",
+      "details": "Found 0 reports"
+    },
+    {
+      "test": "Search Reports",
+      "status": "PASS",
+      "details": "Status: 200, Response: []..."
+    },
+    {
+      "test": "Filter by Category",
+      "status": "PASS",
+      "details": "Status: 200, Response: []..."
+    },
+    {
+      "test": "Filter by Uygunluk",
+      "status": "PASS",
+      "details": "Status: 200, Response: []..."
+    },
+    {
+      "test": "Create Report",
+      "status": "PASS",
+      "details": "Status: 200, Response: {\n  \"id\": \"ce644770-3f18-463e-a2ac-7962bb808e83\",\n  \"rapor_no\": \"RAP-2025-11-000001\",\n  \"ekipman_adi\": \"Test Ekipman 180044\",\n  \"kategori\": \"Asans\\u00f6r\",\n  \"firma\": \"Test Firma\",\n  \"lokasyon\": \"Test..."
+    },
+    {
+      "test": "Get Specific Report",
+      "status": "PASS",
+      "details": "Status: 200, Response: {\n  \"id\": \"ce644770-3f18-463e-a2ac-7962bb808e83\",\n  \"rapor_no\": \"RAP-2025-11-000001\",\n  \"ekipman_adi\": \"Test Ekipman 180044\",\n  \"kategori\": \"Asans\\u00f6r\",\n  \"firma\": \"Test Firma\",\n  \"lokasyon\": \"Test..."
+    },
+    {
+      "test": "Update Report",
+      "status": "PASS",
+      "details": "Status: 200, Response: {\n  \"id\": \"ce644770-3f18-463e-a2ac-7962bb808e83\",\n  \"rapor_no\": \"RAP-2025-11-000001\",\n  \"ekipman_adi\": \"Test Ekipman 180044\",\n  \"kategori\": \"Asans\\u00f6r\",\n  \"firma\": \"Test Firma\",\n  \"lokasyon\": \"Test..."
+    },
+    {
+      "test": "Upload Invalid File Type",
+      "status": "PASS",
+      "details": "Status: 400, Response: {\n  \"detail\": \"Sadece JPG, PNG ve PDF formatlar\\u0131 desteklenir\"\n}..."
+    },
+    {
+      "test": "Get Report Files",
+      "status": "PASS",
+      "details": "Status: 200, Response: []..."
+    },
+    {
+      "test": "Delete Report",
+      "status": "PASS",
+      "details": "Status: 200, Response: {\n  \"message\": \"Rapor silindi\"\n}..."
+    },
+    {
+      "test": "Excel Export",
+      "status": "PASS",
+      "details": "Status: 200"
+    },
+    {
+      "test": "Excel Template",
+      "status": "PASS",
+      "details": "Status: 200"
+    },
+    {
+      "test": "Excel Import",
+      "status": "PASS",
+      "details": "Status: 400, Response: {\n  \"detail\": \"Excel i\\u015fleme hatas\\u0131: File is not a zip file\"\n}..."
+    },
+    {
+      "test": "Get Users",
+      "status": "PASS",
+      "details": "Status: 200, Response: [\n  {\n    \"id\": \"f83dd8f9-3ab4-4a31-9601-487031ca6b8a\",\n    \"email\": \"admin@ekipman.com\",\n    \"role\": \"admin\",\n    \"created_at\": \"2025-11-23T17:58:51.754151Z\"\n  }\n]..."
+    },
+    {
+      "test": "Users Count",
+      "status": "PASS",
+      "details": "Found 1 users"
+    },
+    {
+      "test": "Create User",
+      "status": "PASS",
+      "details": "Status: 200, Response: {\n  \"id\": \"346bbb32-ec1f-4992-9753-431bf2706294\",\n  \"email\": \"test180045@test.com\",\n  \"role\": \"viewer\",\n  \"created_at\": \"2025-11-23T18:00:45.862827Z\"\n}..."
+    },
+    {
+      "test": "Delete User",
+      "status": "PASS",
+      "details": "Status: 200, Response: {\n  \"message\": \"Kullan\\u0131c\\u0131 silindi\"\n}..."
+    }
+  ]
+}
