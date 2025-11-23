@@ -83,7 +83,7 @@ const FiltrelemePanel = ({ filters, onFilterChange }) => {
               <SelectValue placeholder="Tüm kategoriler" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Tüm kategoriler</SelectItem>
+              <SelectItem value="all">Tüm kategoriler</SelectItem>
               {kategoriler.map((kat) => (
                 <SelectItem key={kat.id} value={kat.isim}>
                   {kat.isim}
