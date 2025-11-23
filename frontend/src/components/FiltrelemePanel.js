@@ -104,7 +104,7 @@ const FiltrelemePanel = ({ filters, onFilterChange }) => {
               <SelectValue placeholder="Tüm periyotlar" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Tüm periyotlar</SelectItem>
+              <SelectItem value="all">Tüm periyotlar</SelectItem>
               <SelectItem value="3 Aylık">3 Aylık</SelectItem>
               <SelectItem value="6 Aylık">6 Aylık</SelectItem>
               <SelectItem value="12 Aylık">12 Aylık</SelectItem>
