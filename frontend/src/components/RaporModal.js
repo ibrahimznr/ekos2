@@ -74,12 +74,41 @@ const RaporModal = ({ open, onClose, rapor, onSuccess }) => {
     }
   };
 
+  const handleFileChange = (e) => {
+    const files = Array.from(e.target.files);
+    const validFiles = [];
+    
+    for (const file of files) {
+      // Check file size (4GB)
+      if (file.size > 4 * 1024 * 1024 * 1024) {
+        toast.error(`${file.name}: Dosya boyutu 4GB'dan büyük olamaz`);
+        continue;
+      }
+      
+      // Check file type
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf'];
+      if (!allowedTypes.includes(file.type)) {
+        toast.error(`${file.name}: Sadece JPG, PNG ve PDF formatları desteklenir`);
+        continue;
+      }
+      
+      validFiles.push(file);
+    }
+    
+    setSelectedFiles([...selectedFiles, ...validFiles]);
+  };
+
+  const handleRemoveFile = (index) => {
+    setSelectedFiles(selectedFiles.filter((_, i) => i !== index));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
 
     try {
       const token = localStorage.getItem('token');
+      let raporId = rapor?.id;
       
       if (rapor) {
         // Update
@@ -89,14 +118,39 @@ const RaporModal = ({ open, onClose, rapor, onSuccess }) => {
         toast.success('Rapor güncellendi');
       } else {
         // Create
-        await axios.post(`${API}/raporlar`, formData, {
+        const response = await axios.post(`${API}/raporlar`, formData, {
           headers: { Authorization: `Bearer ${token}` },
         });
+        raporId = response.data.id;
         toast.success('Rapor oluşturuldu');
+      }
+      
+      // Upload files if any
+      if (selectedFiles.length > 0 && raporId) {
+        for (const file of selectedFiles) {
+          const fileFormData = new FormData();
+          fileFormData.append('file', file);
+          
+          try {
+            await axios.post(`${API}/upload/${raporId}`, fileFormData, {
+              headers: {
+                Authorization: `Bearer ${token}`,
+                'Content-Type': 'multipart/form-data',
+              },
+            });
+          } catch (fileError) {
+            toast.error(`${file.name} yüklenemedi`);
+          }
+        }
+        
+        if (selectedFiles.length > 0) {
+          toast.success(`${selectedFiles.length} dosya yüklendi`);
+        }
       }
       
       onSuccess();
       onClose();
+      setSelectedFiles([]);
     } catch (error) {
       toast.error(error.response?.data?.detail || 'Rapor kaydedilemedi');
     } finally {
