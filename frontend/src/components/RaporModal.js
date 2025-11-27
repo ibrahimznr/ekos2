@@ -20,6 +20,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { toast } from 'sonner';
+import { Upload, X, FileText } from 'lucide-react';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -27,6 +28,7 @@ const API = `${BACKEND_URL}/api`;
 const RaporModal = ({ open, onClose, rapor, onSuccess }) => {
   const [loading, setLoading] = useState(false);
   const [kategoriler, setKategoriler] = useState([]);
+  const [selectedFiles, setSelectedFiles] = useState([]);
   const [formData, setFormData] = useState({
     ekipman_adi: '',
     kategori: '',
