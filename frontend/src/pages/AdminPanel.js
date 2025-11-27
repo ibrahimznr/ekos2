@@ -689,7 +689,7 @@ const AdminPanel = () => {
 
       {/* Create Proje Dialog */}
       <Dialog open={showProjeDialog} onOpenChange={setShowProjeDialog}>
-        <DialogContent data-testid="create-project-dialog">
+        <DialogContent className="max-w-3xl" data-testid="create-project-dialog">
           <DialogHeader>
             <DialogTitle>Yeni Proje Oluştur</DialogTitle>
             <DialogDescription>
@@ -697,24 +697,89 @@ const AdminPanel = () => {
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="proje-adi">Proje Adı *</Label>
+                <Input
+                  id="proje-adi"
+                  placeholder="Örn: Ankara Konut Projesi"
+                  value={newProje.proje_adi}
+                  onChange={(e) => setNewProje({ ...newProje, proje_adi: e.target.value })}
+                  data-testid="project-name-input"
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="proje-kodu">Proje Kodu *</Label>
+                <Input
+                  id="proje-kodu"
+                  placeholder="Örn: PRJ-2025-001"
+                  value={newProje.proje_kodu}
+                  onChange={(e) => setNewProje({ ...newProje, proje_kodu: e.target.value })}
+                  data-testid="project-code-input"
+                  required
+                />
+              </div>
+            </div>
+            
             <div className="space-y-2">
-              <Label htmlFor="proje-adi">Proje Adı</Label>
+              <Label htmlFor="proje-lokasyon">Lokasyon</Label>
               <Input
-                id="proje-adi"
-                placeholder="Örn: Ankara Konut Projesi"
-                value={newProje.proje_adi}
-                onChange={(e) => setNewProje({ ...newProje, proje_adi: e.target.value })}
-                data-testid="project-name-input"
+                id="proje-lokasyon"
+                placeholder="Proje lokasyonu"
+                value={newProje.lokasyon}
+                onChange={(e) => setNewProje({ ...newProje, lokasyon: e.target.value })}
+                data-testid="project-location-input"
               />
             </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="baslangic-tarihi">Başlangıç Tarihi</Label>
+                <Input
+                  id="baslangic-tarihi"
+                  type="date"
+                  value={newProje.baslangic_tarihi}
+                  onChange={(e) => setNewProje({ ...newProje, baslangic_tarihi: e.target.value })}
+                  data-testid="project-start-date-input"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="bitis-tarihi">Bitiş Tarihi</Label>
+                <Input
+                  id="bitis-tarihi"
+                  type="date"
+                  value={newProje.bitis_tarihi}
+                  onChange={(e) => setNewProje({ ...newProje, bitis_tarihi: e.target.value })}
+                  data-testid="project-end-date-input"
+                />
+              </div>
+            </div>
+
             <div className="space-y-2">
-              <Label htmlFor="proje-aciklama">Açıklama (Opsiyonel)</Label>
-              <Input
+              <Label htmlFor="proje-durum">Durum</Label>
+              <Select value={newProje.durum} onValueChange={(value) => setNewProje({ ...newProje, durum: value })}>
+                <SelectTrigger data-testid="project-status-select">
+                  <SelectValue placeholder="Durum seçin" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Aktif">Aktif</SelectItem>
+                  <SelectItem value="Tamamlandı">Tamamlandı</SelectItem>
+                  <SelectItem value="Askıda">Askıda</SelectItem>
+                  <SelectItem value="İptal">İptal</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="proje-aciklama">Açıklama</Label>
+              <Textarea
                 id="proje-aciklama"
-                placeholder="Proje açıklaması"
+                placeholder="Proje hakkında detaylı açıklama"
                 value={newProje.aciklama}
                 onChange={(e) => setNewProje({ ...newProje, aciklama: e.target.value })}
                 data-testid="project-description-input"
+                rows={3}
               />
             </div>
           </div>
