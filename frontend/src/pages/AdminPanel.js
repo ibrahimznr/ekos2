@@ -319,6 +319,17 @@ const AdminPanel = () => {
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
+              <Label htmlFor="user-username">Kullanıcı Adı</Label>
+              <Input
+                id="user-username"
+                type="text"
+                placeholder="kullaniciadi"
+                value={newUser.username}
+                onChange={(e) => setNewUser({ ...newUser, username: e.target.value })}
+                data-testid="user-username-input"
+              />
+            </div>
+            <div className="space-y-2">
               <Label htmlFor="user-email">Email</Label>
               <Input
                 id="user-email"
@@ -338,6 +349,17 @@ const AdminPanel = () => {
                 value={newUser.password}
                 onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
                 data-testid="user-password-input"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="user-password-confirm">Şifre Tekrar</Label>
+              <Input
+                id="user-password-confirm"
+                type="password"
+                placeholder="••••••••"
+                value={newUser.password_confirm}
+                onChange={(e) => setNewUser({ ...newUser, password_confirm: e.target.value })}
+                data-testid="user-password-confirm-input"
               />
             </div>
             <div className="space-y-2">
