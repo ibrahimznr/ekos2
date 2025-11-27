@@ -205,9 +205,11 @@ async def startup_db():
     admin_exists = await db.users.find_one({"email": "admin@ekipman.com"})
     if not admin_exists:
         admin = User(
+            username="admin",
             email="admin@ekipman.com",
             password=get_password_hash("admin123"),
-            role="admin"
+            role="admin",
+            email_verified=True
         )
         doc = admin.model_dump()
         doc['created_at'] = doc['created_at'].isoformat()
