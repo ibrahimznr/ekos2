@@ -513,18 +513,62 @@ const AdminPanel = () => {
         </DialogContent>
       </Dialog>
 
+      {/* Create Proje Dialog */}
+      <Dialog open={showProjeDialog} onOpenChange={setShowProjeDialog}>
+        <DialogContent data-testid="create-project-dialog">
+          <DialogHeader>
+            <DialogTitle>Yeni Proje Oluştur</DialogTitle>
+            <DialogDescription>
+              Raporlar için yeni bir proje ekleyin
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="proje-adi">Proje Adı</Label>
+              <Input
+                id="proje-adi"
+                placeholder="Örn: Ankara Konut Projesi"
+                value={newProje.proje_adi}
+                onChange={(e) => setNewProje({ ...newProje, proje_adi: e.target.value })}
+                data-testid="project-name-input"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="proje-aciklama">Açıklama (Opsiyonel)</Label>
+              <Input
+                id="proje-aciklama"
+                placeholder="Proje açıklaması"
+                value={newProje.aciklama}
+                onChange={(e) => setNewProje({ ...newProje, aciklama: e.target.value })}
+                data-testid="project-description-input"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowProjeDialog(false)} data-testid="cancel-project-button">
+              İptal
+            </Button>
+            <Button onClick={handleCreateProje} data-testid="submit-project-button">
+              Oluştur
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2">
               <AlertCircle className="h-5 w-5 text-red-600" />
-              {deleteType === 'user' ? 'Kullanıcıyı Sil' : 'Kategoriyi Sil'}
+              {deleteType === 'user' ? 'Kullanıcıyı Sil' : deleteType === 'kategori' ? 'Kategoriyi Sil' : 'Projeyi Sil'}
             </AlertDialogTitle>
             <AlertDialogDescription>
               {deleteType === 'user'
                 ? `${deleteItem?.email} kullanıcısını silmek istediğinizden emin misiniz?`
-                : `${deleteItem?.isim} kategorisini silmek istediğinizden emin misiniz? Bu kategoriye ait raporlar etkilenmeyecektir.`}
+                : deleteType === 'kategori'
+                ? `${deleteItem?.isim} kategorisini silmek istediğinizden emin misiniz? Bu kategoriye ait raporlar etkilenmeyecektir.`
+                : `${deleteItem?.proje_adi} projesini silmek istediğinizden emin misiniz?`}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
