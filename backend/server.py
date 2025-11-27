@@ -206,13 +206,23 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
     
     return user
 
-async def generate_rapor_no(sehir_kodu: str):
+def get_sehir_kodu(sehir_ismi: str) -> str:
+    """Get city code from city name"""
+    for sehir in SEHIRLER:
+        if sehir['isim'] == sehir_ismi:
+            return sehir['kod']
+    return "XXX"  # Default if not found
+
+async def generate_rapor_no(sehir: str):
     """
-    Generate report number in format: PKYYYY-SEHIR###
-    Example: PK2025-ANK025
+    Generate report number in format: PKYYYY-SEHIRKODU###
+    Example: PK2025-ANK025 (for Ankara)
     """
     now = datetime.now(timezone.utc)
     year = now.strftime("%Y")
+    
+    # Get city code from city name
+    sehir_kodu = get_sehir_kodu(sehir)
     prefix = f"PK{year}-{sehir_kodu}"
     
     # Get the last report for this city and year
