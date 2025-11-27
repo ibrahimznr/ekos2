@@ -699,22 +699,23 @@ async def get_dashboard_stats(current_user: dict = Depends(get_current_user)):
     thirty_days = (now + timedelta(days=30)).date()
     seven_days = (now + timedelta(days=7)).date()
     
-    all_raporlar = await db.raporlar.find({"gecerlilik_tarihi": {"$ne": None}}, {"_id": 0}).to_list(10000)
+    all_raporlar = await db.raporlar.find({}, {"_id": 0}).to_list(10000)
     
     expiring_30_days = 0
     expiring_7_days = 0
     
     for rapor in all_raporlar:
-        if rapor.get("gecerlilik_tarihi"):
+        gecerlilik_str = rapor.get("gecerlilik_tarihi")
+        if gecerlilik_str and gecerlilik_str.strip():
             try:
                 from datetime import datetime as dt
-                gecerlilik = dt.strptime(rapor["gecerlilik_tarihi"], "%Y-%m-%d").date()
+                gecerlilik = dt.strptime(gecerlilik_str, "%Y-%m-%d").date()
                 if now_date <= gecerlilik <= thirty_days:
                     expiring_30_days += 1
                 if now_date <= gecerlilik <= seven_days:
                     expiring_7_days += 1
-            except:
-                pass
+            except Exception as e:
+                continue
     
     # Category distribution
     kategoriler = await db.kategoriler.find({}, {"_id": 0}).to_list(1000)
