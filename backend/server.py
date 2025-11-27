@@ -507,13 +507,37 @@ async def create_rapor(rapor_create: RaporCreate, current_user: dict = Depends(g
     if current_user["role"] not in ["admin", "inspector"]:
         raise HTTPException(status_code=403, detail="Rapor oluşturma yetkiniz yok")
     
-    rapor_no = await generate_rapor_no()
+    # Get proje
+    proje = await db.projeler.find_one({"id": rapor_create.proje_id}, {"_id": 0})
+    if not proje:
+        raise HTTPException(status_code=404, detail="Proje bulunamadı")
+    
+    # Get sehir kodu
+    sehir_obj = next((s for s in SEHIRLER if s["isim"] == rapor_create.sehir), None)
+    if not sehir_obj:
+        raise HTTPException(status_code=400, detail="Geçersiz şehir")
+    
+    rapor_no = await generate_rapor_no(sehir_obj["kod"])
     
     rapor = Rapor(
         rapor_no=rapor_no,
+        proje_id=proje["id"],
+        proje_adi=proje["proje_adi"],
+        sehir=rapor_create.sehir,
+        sehir_kodu=sehir_obj["kod"],
         created_by=current_user["id"],
         created_by_username=current_user["username"],
-        **rapor_create.model_dump()
+        ekipman_adi=rapor_create.ekipman_adi,
+        kategori=rapor_create.kategori,
+        alt_kategori=rapor_create.alt_kategori,
+        firma=rapor_create.firma,
+        lokasyon=rapor_create.lokasyon,
+        marka_model=rapor_create.marka_model,
+        seri_no=rapor_create.seri_no,
+        periyot=rapor_create.periyot,
+        gecerlilik_tarihi=rapor_create.gecerlilik_tarihi,
+        aciklama=rapor_create.aciklama,
+        uygunluk=rapor_create.uygunluk
     )
     
     doc = rapor.model_dump()
