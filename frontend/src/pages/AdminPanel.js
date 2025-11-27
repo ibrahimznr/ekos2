@@ -138,7 +138,8 @@ const AdminPanel = () => {
       });
       toast.success('Kategori oluşturuldu');
       setShowKategoriDialog(false);
-      setNewKategori({ isim: '', aciklama: '' });
+      setNewKategori({ isim: '', aciklama: '', alt_kategoriler: [] });
+      setAltKategoriInput('');
       fetchKategoriler();
     } catch (error) {
       toast.error(error.response?.data?.detail || 'Kategori oluşturulamadı');
