@@ -206,6 +206,27 @@ async def generate_rapor_no():
 # Initialize default admin
 @app.on_event("startup")
 async def startup_db():
+    # Create indexes for better performance
+    try:
+        # Users collection indexes
+        await db.users.create_index("email", unique=True)
+        await db.users.create_index("username")
+        
+        # Raporlar collection indexes
+        await db.raporlar.create_index("rapor_no", unique=True)
+        await db.raporlar.create_index("kategori")
+        await db.raporlar.create_index("created_at")
+        await db.raporlar.create_index("gecerlilik_tarihi")
+        await db.raporlar.create_index("uygunluk")
+        await db.raporlar.create_index([("created_at", -1)])  # Descending for latest first
+        
+        # Kategoriler collection indexes
+        await db.kategoriler.create_index("isim", unique=True)
+        
+        logger.info("Database indexes created successfully")
+    except Exception as e:
+        logger.warning(f"Index creation error (may already exist): {e}")
+    
     # Create default admin if not exists
     admin_exists = await db.users.find_one({"email": "admin@ekipman.com"})
     if not admin_exists:
