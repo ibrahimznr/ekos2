@@ -28,7 +28,7 @@ backend:
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: false
         agent: "main"
@@ -36,6 +36,9 @@ backend:
       - working: true
         agent: "main"
         comment: "Fixed by moving endpoint definitions before app.include_router(). Tested with curl - GET/POST/DELETE working"
+      - working: true
+        agent: "testing"
+        comment: "E2E tested: Successfully created 'Test Otomasyon Projesi' through AdminPanel UI. Project appears in dashboard and can be selected in report creation."
 
   - task: "Cities (Şehirler) API"
     implemented: true
