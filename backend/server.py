@@ -717,17 +717,15 @@ async def get_dashboard_stats(current_user: dict = Depends(get_current_user)):
             except Exception as e:
                 continue
     
-    # Category distribution (top 6)
-    kategoriler = await db.kategoriler.find({}, {"_id": 0}).to_list(1000)
-    kategori_dagilim = []
+    # Category distribution (top 6) - get unique categories from reports
+    pipeline = [
+        {"$group": {"_id": "$kategori", "count": {"$sum": 1}}},
+        {"$sort": {"count": -1}},
+        {"$limit": 6},
+        {"$project": {"kategori": "$_id", "count": 1, "_id": 0}}
+    ]
     
-    for kat in kategoriler:
-        count = await db.raporlar.count_documents({"kategori": kat["isim"]})
-        if count > 0:
-            kategori_dagilim.append({"kategori": kat["isim"], "count": count})
-    
-    # Sort by count and limit to top 6
-    kategori_dagilim = sorted(kategori_dagilim, key=lambda x: x["count"], reverse=True)[:6]
+    kategori_dagilim = await db.raporlar.aggregate(pipeline).to_list(6)
     
     return {
         "total_raporlar": total_raporlar,
