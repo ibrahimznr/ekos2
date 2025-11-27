@@ -212,6 +212,86 @@ const AdminPanel = () => {
     }
   };
 
+  const handleBulkDelete = async (type) => {
+    const token = localStorage.getItem('token');
+    let ids = [];
+    let endpoint = '';
+    
+    if (type === 'user') {
+      ids = selectedUsers;
+      endpoint = `${API}/users/bulk-delete`;
+    } else if (type === 'kategori') {
+      ids = selectedKategoriler;
+      endpoint = `${API}/kategoriler/bulk-delete`;
+    } else if (type === 'proje') {
+      ids = selectedProjeler;
+      endpoint = `${API}/projeler/bulk-delete`;
+    }
+    
+    if (ids.length === 0) {
+      toast.error('Lütfen silmek için en az bir öğe seçin');
+      return;
+    }
+    
+    try {
+      const response = await axios.post(endpoint, ids, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      toast.success(response.data.message);
+      
+      if (type === 'user') {
+        setSelectedUsers([]);
+        fetchUsers();
+      } else if (type === 'kategori') {
+        setSelectedKategoriler([]);
+        fetchKategoriler();
+      } else if (type === 'proje') {
+        setSelectedProjeler([]);
+        fetchProjeler();
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Toplu silme işlemi başarısız');
+    }
+  };
+
+  const handleSelectAll = (type) => {
+    if (type === 'user') {
+      if (selectedUsers.length === users.filter(u => u.id !== user?.id).length) {
+        setSelectedUsers([]);
+      } else {
+        setSelectedUsers(users.filter(u => u.id !== user?.id).map(u => u.id));
+      }
+    } else if (type === 'kategori') {
+      if (selectedKategoriler.length === kategoriler.length) {
+        setSelectedKategoriler([]);
+      } else {
+        setSelectedKategoriler(kategoriler.map(k => k.id));
+      }
+    } else if (type === 'proje') {
+      if (selectedProjeler.length === projeler.length) {
+        setSelectedProjeler([]);
+      } else {
+        setSelectedProjeler(projeler.map(p => p.id));
+      }
+    }
+  };
+
+  const handleToggleSelect = (id, type) => {
+    if (type === 'user') {
+      setSelectedUsers(prev => 
+        prev.includes(id) ? prev.filter(uid => uid !== id) : [...prev, id]
+      );
+    } else if (type === 'kategori') {
+      setSelectedKategoriler(prev =>
+        prev.includes(id) ? prev.filter(kid => kid !== id) : [...prev, id]
+      );
+    } else if (type === 'proje') {
+      setSelectedProjeler(prev =>
+        prev.includes(id) ? prev.filter(pid => pid !== id) : [...prev, id]
+      );
+    }
+  };
+
   const getRoleBadgeColor = (role) => {
     switch (role) {
       case 'admin':
