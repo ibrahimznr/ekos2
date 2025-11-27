@@ -86,24 +86,41 @@ class Kategori(BaseModel):
     model_config = ConfigDict(extra="ignore")
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     isim: str
+    alt_kategoriler: List[str] = []
     aciklama: Optional[str] = None
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 class KategoriCreate(BaseModel):
     isim: str
+    alt_kategoriler: List[str] = []
+    aciklama: Optional[str] = None
+
+class Proje(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    proje_adi: str
+    aciklama: Optional[str] = None
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class ProjeCreate(BaseModel):
+    proje_adi: str
     aciklama: Optional[str] = None
 
 class Rapor(BaseModel):
     model_config = ConfigDict(extra="ignore")
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     rapor_no: str
+    proje_id: str
+    proje_adi: str
+    sehir: str
+    sehir_kodu: str
     ekipman_adi: str
     kategori: str
+    alt_kategori: Optional[str] = None
     firma: str
     lokasyon: Optional[str] = None
     marka_model: Optional[str] = None
     seri_no: Optional[str] = None
-    alt_kategori: Optional[str] = None
     periyot: Optional[str] = None  # 3/6/12 Aylık
     gecerlilik_tarihi: Optional[str] = None
     aciklama: Optional[str] = None
