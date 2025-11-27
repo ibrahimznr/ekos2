@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
-import { FileCheck, Shield } from 'lucide-react';
+import { FileCheck, Shield, UserPlus } from 'lucide-react';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -102,12 +102,19 @@ const Login = () => {
               </Button>
             </form>
 
-            {/* Demo Credentials */}
+            {/* Register Link */}
             <div className="mt-6 pt-6 border-t border-gray-200">
-              <p className="text-sm text-gray-600 text-center mb-3 font-medium">Demo Hesap</p>
-              <div className="bg-blue-50 rounded-lg p-3 space-y-1">
-                <p className="text-xs text-gray-700"><span className="font-semibold">Email:</span> admin@ekipman.com</p>
-                <p className="text-xs text-gray-700"><span className="font-semibold">Şifre:</span> admin123</p>
+              <div className="text-center">
+                <p className="text-sm text-gray-600 mb-3">Hesabınız yok mu?</p>
+                <Button
+                  variant="outline"
+                  className="w-full border-blue-600 text-blue-700 hover:bg-blue-50"
+                  onClick={() => navigate('/register')}
+                  data-testid="register-link-button"
+                >
+                  <UserPlus className="w-4 h-4 mr-2" />
+                  Kayıt Ol
+                </Button>
               </div>
             </div>
           </CardContent>
