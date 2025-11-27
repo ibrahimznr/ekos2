@@ -69,7 +69,7 @@ const Layout = ({ children }) => {
             {/* User Menu */}
             <div className="flex items-center gap-3">
               <div className="hidden sm:block text-right">
-                <p className="text-sm font-medium text-gray-800">{user.email}</p>
+                <p className="text-sm font-medium text-gray-800">{user.username || user.email}</p>
                 <p className="text-xs text-gray-600">
                   {user.role === 'admin' ? 'Yönetici' : user.role === 'inspector' ? 'Müfettiş' : 'Görüntüleyici'}
                 </p>
