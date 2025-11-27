@@ -313,6 +313,72 @@ const RaporModal = ({ open, onClose, rapor, onSuccess }) => {
             />
           </div>
 
+          {/* Medya Dosyaları */}
+          <div className="space-y-3 border-t pt-4">
+            <div className="flex items-center justify-between">
+              <Label className="text-base font-semibold">Medya Dosyaları</Label>
+              <div>
+                <input
+                  type="file"
+                  id="rapor-file-upload"
+                  className="hidden"
+                  onChange={handleFileChange}
+                  accept=".jpg,.jpeg,.png,.pdf"
+                  multiple
+                  data-testid="rapor-file-input"
+                />
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  onClick={() => document.getElementById('rapor-file-upload').click()}
+                  data-testid="add-file-button"
+                >
+                  <Upload className="h-4 w-4 mr-2" />
+                  Dosya Ekle
+                </Button>
+              </div>
+            </div>
+
+            {selectedFiles.length > 0 && (
+              <div className="space-y-2">
+                {selectedFiles.map((file, index) => (
+                  <div
+                    key={index}
+                    className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200"
+                    data-testid={`selected-file-${index}`}
+                  >
+                    <div className="flex items-center gap-3 flex-1">
+                      <FileText className="h-5 w-5 text-blue-600" />
+                      <div className="flex-1">
+                        <p className="font-medium text-gray-800 text-sm">{file.name}</p>
+                        <p className="text-xs text-gray-500">
+                          {(file.size / 1024 / 1024).toFixed(2)} MB
+                        </p>
+                      </div>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleRemoveFile(index)}
+                      className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                      data-testid={`remove-file-${index}`}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+              <p className="text-xs text-blue-800">
+                <strong>Not:</strong> Maksimum dosya boyutu 4GB. Desteklenen formatlar: JPG, PNG, PDF. Birden fazla dosya seçebilirsiniz.
+              </p>
+            </div>
+          </div>
+
           <DialogFooter>
             <Button type="button" variant="outline" onClick={onClose} data-testid="cancel-button">
               İptal
