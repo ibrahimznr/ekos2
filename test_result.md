@@ -98,7 +98,7 @@ backend:
         comment: "E2E tested: Successfully created report 'Test Forklift Playwright' with all fields including project, city, category, subcategory. Report appears in list with correct data display."
 
 frontend:
-  - task: "Admin Panel - Projects Tab"
+  - task: "Admin Panel - Projects Tab with New Form Layout & Bulk Selection"
     implemented: true
     working: true
     file: "/app/frontend/src/pages/AdminPanel.js"
@@ -115,6 +115,9 @@ frontend:
       - working: true
         agent: "testing"
         comment: "E2E tested: Projects tab fully functional. Created 'Test Otomasyon Projesi' successfully. Project creation dialog works, form validation works, and new projects appear in the list immediately."
+      - working: true
+        agent: "testing"
+        comment: "NEW FEATURES TESTED: ✅ New Project Form has perfect 2-column grid layout as requested ✅ All required fields present: Proje Adı (left), Proje Kodu (right), Lokasyon (full width), Başlangıç Tarihi (left), Bitiş Tarihi (right), Durum dropdown (Aktif/Tamamlandı/Askıda/İptal), Açıklama textarea ✅ Bulk selection working: select all checkbox + individual project checkboxes ✅ 'Seçilenleri Sil' button appears when projects selected ✅ Project cards display proje_kodu in blue mono font, durum badge with colors, lokasyon with 📍 icon"
 
   - task: "Admin Panel - Category Management with Subcategories"
     implemented: true
