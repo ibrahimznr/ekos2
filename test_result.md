@@ -88,11 +88,14 @@ backend:
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "medium"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: true
         agent: "main"
         comment: "Create, read, update, delete operations with project association, city, and hierarchical categories"
+      - working: true
+        agent: "testing"
+        comment: "E2E tested: Successfully created report 'Test Forklift Playwright' with all fields including project, city, category, subcategory. Report appears in list with correct data display."
 
 frontend:
   - task: "Admin Panel - Projects Tab"
