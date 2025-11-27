@@ -244,7 +244,14 @@ const Raporlar = () => {
                       <div className="flex items-start justify-between gap-4">
                         <div>
                           <h3 className="text-xl font-bold text-gray-800 mb-1">{rapor.ekipman_adi}</h3>
-                          <p className="text-sm text-gray-500 font-medium">{rapor.rapor_no}</p>
+                          <div className="flex items-center gap-3">
+                            <p className="text-sm text-gray-500 font-medium">{rapor.rapor_no}</p>
+                            {rapor.created_by_username && (
+                              <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
+                                {rapor.created_by_username}
+                              </span>
+                            )}
+                          </div>
                         </div>
                         {rapor.uygunluk && (
                           <span
