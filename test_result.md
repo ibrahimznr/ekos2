@@ -104,7 +104,7 @@ frontend:
     file: "/app/frontend/src/pages/AdminPanel.js"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: false
         agent: "main"
@@ -112,6 +112,9 @@ frontend:
       - working: true
         agent: "main"
         comment: "After fixing backend API, projects tab now displays and manages projects correctly"
+      - working: true
+        agent: "testing"
+        comment: "E2E tested: Projects tab fully functional. Created 'Test Otomasyon Projesi' successfully. Project creation dialog works, form validation works, and new projects appear in the list immediately."
 
   - task: "Admin Panel - Category Management with Subcategories"
     implemented: true
