@@ -51,7 +51,7 @@ const AdminPanel = () => {
   const [deleteItem, setDeleteItem] = useState(null);
   const [deleteType, setDeleteType] = useState(''); // 'user' or 'kategori'
   
-  const [newUser, setNewUser] = useState({ email: '', password: '', role: 'viewer' });
+  const [newUser, setNewUser] = useState({ username: '', email: '', password: '', password_confirm: '', role: 'viewer' });
   const [newKategori, setNewKategori] = useState({ isim: '', aciklama: '' });
 
   useEffect(() => {
