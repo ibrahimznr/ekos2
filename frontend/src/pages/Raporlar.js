@@ -41,6 +41,7 @@ const Raporlar = () => {
   
   const [selectedRapor, setSelectedRapor] = useState(null);
   const [deleteRaporId, setDeleteRaporId] = useState(null);
+  const [selectedRaporlar, setSelectedRaporlar] = useState([]);
   const [user, setUser] = useState(null);
 
   useEffect(() => {
