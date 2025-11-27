@@ -236,27 +236,94 @@ async def startup_db():
 # Auth Routes
 @api_router.post("/auth/register", response_model=UserResponse)
 async def register(user_create: UserCreate):
-    # Check if user exists
-    existing = await db.users.find_one({"email": user_create.email})
-    if existing:
+    # Validate passwords match
+    if user_create.password != user_create.password_confirm:
+        raise HTTPException(status_code=400, detail="Şifreler eşleşmiyor")
+    
+    # Check password length
+    if len(user_create.password) < 6:
+        raise HTTPException(status_code=400, detail="Şifre en az 6 karakter olmalıdır")
+    
+    # Check if email exists
+    existing_email = await db.users.find_one({"email": user_create.email})
+    if existing_email:
         raise HTTPException(status_code=400, detail="Bu email zaten kayıtlı")
     
+    # Check if username exists
+    existing_username = await db.users.find_one({"username": user_create.username})
+    if existing_username:
+        raise HTTPException(status_code=400, detail="Bu kullanıcı adı zaten alınmış")
+    
+    # Generate verification code
+    import random
+    verification_code = ''.join([str(random.randint(0, 9)) for _ in range(6)])
+    
     user = User(
+        username=user_create.username,
         email=user_create.email,
         password=get_password_hash(user_create.password),
-        role=user_create.role
+        role=user_create.role,
+        email_verified=False,
+        verification_code=verification_code
     )
     
     doc = user.model_dump()
     doc['created_at'] = doc['created_at'].isoformat()
     await db.users.insert_one(doc)
     
+    # In production, send email here
+    # For now, just log the code
+    logger.info(f"Verification code for {user.email}: {verification_code}")
+    
     return UserResponse(
         id=user.id,
+        username=user.username,
         email=user.email,
         role=user.role,
+        email_verified=user.email_verified,
         created_at=user.created_at
     )
+
+@api_router.post("/auth/verify-email")
+async def verify_email(verify_data: VerifyEmail):
+    user = await db.users.find_one({"email": verify_data.email}, {"_id": 0})
+    if not user:
+        raise HTTPException(status_code=404, detail="Kullanıcı bulunamadı")
+    
+    if user.get("email_verified"):
+        raise HTTPException(status_code=400, detail="Email zaten doğrulanmış")
+    
+    if user.get("verification_code") != verify_data.code:
+        raise HTTPException(status_code=400, detail="Doğrulama kodu hatalı")
+    
+    await db.users.update_one(
+        {"email": verify_data.email},
+        {"$set": {"email_verified": True, "verification_code": None}}
+    )
+    
+    return {"message": "Email başarıyla doğrulandı"}
+
+@api_router.post("/auth/resend-code")
+async def resend_verification_code(email: EmailStr):
+    user = await db.users.find_one({"email": email}, {"_id": 0})
+    if not user:
+        raise HTTPException(status_code=404, detail="Kullanıcı bulunamadı")
+    
+    if user.get("email_verified"):
+        raise HTTPException(status_code=400, detail="Email zaten doğrulanmış")
+    
+    # Generate new code
+    import random
+    verification_code = ''.join([str(random.randint(0, 9)) for _ in range(6)])
+    
+    await db.users.update_one(
+        {"email": email},
+        {"$set": {"verification_code": verification_code}}
+    )
+    
+    logger.info(f"New verification code for {email}: {verification_code}")
+    
+    return {"message": "Doğrulama kodu yeniden gönderildi"}
 
 @api_router.post("/auth/login", response_model=Token)
 async def login(user_login: UserLogin):
