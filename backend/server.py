@@ -1038,6 +1038,14 @@ async def delete_proje(proje_id: str, current_user: dict = Depends(get_current_u
         raise HTTPException(status_code=404, detail="Proje bulunamadı")
     return {"message": "Proje silindi"}
 
+@api_router.post("/projeler/bulk-delete")
+async def bulk_delete_projeler(proje_ids: List[str], current_user: dict = Depends(get_current_user)):
+    if current_user["role"] != "admin":
+        raise HTTPException(status_code=403, detail="Bu işlem için yetkiniz yok")
+    
+    result = await db.projeler.delete_many({"id": {"$in": proje_ids}})
+    return {"message": f"{result.deleted_count} proje silindi", "deleted_count": result.deleted_count}
+
 # Include router
 app.include_router(api_router)
 
