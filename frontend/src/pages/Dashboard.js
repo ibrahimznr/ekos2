@@ -19,15 +19,30 @@ const Dashboard = () => {
     fetchStats();
   }, []);
 
-  const fetchStats = async () => {
+  const fetchStats = async (retryCount = 0) => {
     try {
       const token = localStorage.getItem('token');
+      if (!token) {
+        navigate('/login');
+        return;
+      }
+      
       const response = await axios.get(`${API}/dashboard/stats`, {
         headers: { Authorization: `Bearer ${token}` },
+        timeout: 10000, // 10 second timeout
       });
       setStats(response.data);
     } catch (error) {
-      toast.error('İstatistikler yüklenemedi');
+      if (error.response?.status === 401) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        navigate('/login');
+      } else if (retryCount < 2) {
+        // Retry up to 2 times
+        setTimeout(() => fetchStats(retryCount + 1), 1000);
+      } else {
+        toast.error('İstatistikler yüklenemedi. Lütfen sayfayı yenileyin.');
+      }
     } finally {
       setLoading(false);
     }
