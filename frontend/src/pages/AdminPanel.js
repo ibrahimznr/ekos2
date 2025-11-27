@@ -329,7 +329,22 @@ const AdminPanel = () => {
                       <div className="flex-1">
                         <h3 className="font-semibold text-gray-800 mb-2">{kat.isim}</h3>
                         {kat.aciklama && (
-                          <p className="text-sm text-gray-600">{kat.aciklama}</p>
+                          <p className="text-sm text-gray-600 mb-2">{kat.aciklama}</p>
+                        )}
+                        {kat.alt_kategoriler && kat.alt_kategoriler.length > 0 && (
+                          <div className="mt-2">
+                            <p className="text-xs text-gray-500 mb-1">Alt Kategoriler:</p>
+                            <div className="flex flex-wrap gap-1">
+                              {kat.alt_kategoriler.map((altKat, idx) => (
+                                <span
+                                  key={idx}
+                                  className="inline-block bg-blue-50 text-blue-700 px-2 py-0.5 rounded text-xs"
+                                >
+                                  {altKat}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
                         )}
                       </div>
                       <Button
