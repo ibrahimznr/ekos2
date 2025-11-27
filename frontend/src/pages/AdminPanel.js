@@ -238,7 +238,8 @@ const AdminPanel = () => {
                   <CardContent className="p-6">
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex-1">
-                        <h3 className="font-semibold text-gray-800 mb-1">{u.email}</h3>
+                        <h3 className="font-semibold text-gray-800 mb-1">@{u.username}</h3>
+                        <p className="text-xs text-gray-600 mb-2">{u.email}</p>
                         <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium border ${getRoleBadgeColor(u.role)}`}>
                           {getRoleLabel(u.role)}
                         </span>
