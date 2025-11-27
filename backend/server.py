@@ -978,6 +978,46 @@ async def delete_user(user_id: str, current_user: dict = Depends(get_current_use
     
     return {"message": "Kullanıcı silindi"}
 
+# Şehirler endpoint
+@api_router.get("/sehirler")
+async def get_sehirler():
+    return SEHIRLER
+
+# Kategori-Alt Kategori Map
+@api_router.get("/kategori-alt-kategoriler")
+async def get_kategori_alt_kategoriler():
+    return KATEGORI_ALT_KATEGORI
+
+# Projeler endpoints
+@api_router.get("/projeler", response_model=List[Proje])
+async def get_projeler(current_user: dict = Depends(get_current_user)):
+    projeler = await db.projeler.find({}, {"_id": 0}).to_list(1000)
+    for proje in projeler:
+        if isinstance(proje['created_at'], str):
+            proje['created_at'] = datetime.fromisoformat(proje['created_at'])
+    return projeler
+
+@api_router.post("/projeler", response_model=Proje)
+async def create_proje(proje_create: ProjeCreate, current_user: dict = Depends(get_current_user)):
+    if current_user["role"] != "admin":
+        raise HTTPException(status_code=403, detail="Bu işlem için yetkiniz yok")
+    
+    proje = Proje(**proje_create.model_dump())
+    doc = proje.model_dump()
+    doc['created_at'] = doc['created_at'].isoformat()
+    await db.projeler.insert_one(doc)
+    return proje
+
+@api_router.delete("/projeler/{proje_id}")
+async def delete_proje(proje_id: str, current_user: dict = Depends(get_current_user)):
+    if current_user["role"] != "admin":
+        raise HTTPException(status_code=403, detail="Bu işlem için yetkiniz yok")
+    
+    result = await db.projeler.delete_one({"id": proje_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Proje bulunamadı")
+    return {"message": "Proje silindi"}
+
 # Include router
 app.include_router(api_router)
 
