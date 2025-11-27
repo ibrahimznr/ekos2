@@ -97,14 +97,14 @@ const FiltrelemePanel = ({ filters, onFilterChange }) => {
         <div className="space-y-1">
           <Label className="text-xs text-gray-600">Periyot</Label>
           <Select
-            value={localFilters.periyot || ""}
-            onValueChange={(value) => handleFilterChange('periyot', value)}
+            value={localFilters.periyot || "__all__"}
+            onValueChange={(value) => handleFilterChange('periyot', value === "__all__" ? "" : value)}
           >
             <SelectTrigger data-testid="filter-periyot-select">
               <SelectValue placeholder="Tüm periyotlar" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Tüm periyotlar</SelectItem>
+              <SelectItem value="__all__">Tüm periyotlar</SelectItem>
               <SelectItem value="3 Aylık">3 Aylık</SelectItem>
               <SelectItem value="6 Aylık">6 Aylık</SelectItem>
               <SelectItem value="12 Aylık">12 Aylık</SelectItem>
@@ -116,14 +116,14 @@ const FiltrelemePanel = ({ filters, onFilterChange }) => {
         <div className="space-y-1">
           <Label className="text-xs text-gray-600">Uygunluk</Label>
           <Select
-            value={localFilters.uygunluk || ""}
-            onValueChange={(value) => handleFilterChange('uygunluk', value)}
+            value={localFilters.uygunluk || "__all__"}
+            onValueChange={(value) => handleFilterChange('uygunluk', value === "__all__" ? "" : value)}
           >
             <SelectTrigger data-testid="filter-uygunluk-select">
               <SelectValue placeholder="Tüm durumlar" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Tüm durumlar</SelectItem>
+              <SelectItem value="__all__">Tüm durumlar</SelectItem>
               <SelectItem value="Uygun">Uygun</SelectItem>
               <SelectItem value="Uygun Değil">Uygun Değil</SelectItem>
             </SelectContent>
