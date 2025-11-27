@@ -493,8 +493,8 @@ const AdminPanel = () => {
                                     </span>
                                   ))}
                                 </div>
-                              )}
-                            </div>
+                              </div>
+                            )}
                           </div>
                           <Button
                             variant="ghost"
