@@ -45,14 +45,19 @@ UPLOAD_DIR.mkdir(exist_ok=True)
 class User(BaseModel):
     model_config = ConfigDict(extra="ignore")
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    username: str
     email: EmailStr
     password: str
     role: str = "viewer"  # admin, inspector, viewer
+    email_verified: bool = False
+    verification_code: Optional[str] = None
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 class UserCreate(BaseModel):
+    username: str
     email: EmailStr
     password: str
+    password_confirm: str
     role: str = "viewer"
 
 class UserLogin(BaseModel):
@@ -61,9 +66,15 @@ class UserLogin(BaseModel):
 
 class UserResponse(BaseModel):
     id: str
+    username: str
     email: str
     role: str
+    email_verified: bool
     created_at: datetime
+
+class VerifyEmail(BaseModel):
+    email: EmailStr
+    code: str
 
 class Token(BaseModel):
     access_token: str
