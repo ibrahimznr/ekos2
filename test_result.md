@@ -119,7 +119,7 @@ frontend:
         agent: "testing"
         comment: "NEW FEATURES TESTED: ✅ New Project Form has perfect 2-column grid layout as requested ✅ All required fields present: Proje Adı (left), Proje Kodu (right), Lokasyon (full width), Başlangıç Tarihi (left), Bitiş Tarihi (right), Durum dropdown (Aktif/Tamamlandı/Askıda/İptal), Açıklama textarea ✅ Bulk selection working: select all checkbox + individual project checkboxes ✅ 'Seçilenleri Sil' button appears when projects selected ✅ Project cards display proje_kodu in blue mono font, durum badge with colors, lokasyon with 📍 icon"
 
-  - task: "Admin Panel - Category Management with Subcategories"
+  - task: "Admin Panel - Category Management with Subcategories & Bulk Selection"
     implemented: true
     working: true
     file: "/app/frontend/src/pages/AdminPanel.js"
@@ -133,6 +133,9 @@ frontend:
       - working: true
         agent: "testing"
         comment: "FIXED: Missing X import causing JavaScript errors. E2E tested: Category creation with subcategories fully working. Created 'Test Ekipman' with 'Alt Test 1' and 'Alt Test 2'. Subcategories display as blue badges correctly."
+      - working: true
+        agent: "testing"
+        comment: "BULK SELECTION TESTED: ✅ Categories tab shows 84 categories with select all checkbox ✅ Each category card has individual checkbox ✅ Subcategories display as blue badges (e.g., 'Kaldırma-İletme' with 'Teleskopik Yükleyici') ✅ 'Seçilenleri Sil' button functionality ready ✅ All bulk selection UI elements working correctly"
 
   - task: "Dashboard - Projects List Display"
     implemented: true
