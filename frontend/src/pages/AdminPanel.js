@@ -48,12 +48,14 @@ const AdminPanel = () => {
   
   const [showUserDialog, setShowUserDialog] = useState(false);
   const [showKategoriDialog, setShowKategoriDialog] = useState(false);
+  const [showProjeDialog, setShowProjeDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [deleteItem, setDeleteItem] = useState(null);
-  const [deleteType, setDeleteType] = useState(''); // 'user' or 'kategori'
+  const [deleteType, setDeleteType] = useState(''); // 'user', 'kategori', or 'proje'
   
   const [newUser, setNewUser] = useState({ username: '', email: '', password: '', password_confirm: '', role: 'viewer' });
   const [newKategori, setNewKategori] = useState({ isim: '', aciklama: '' });
+  const [newProje, setNewProje] = useState({ proje_adi: '', aciklama: '' });
 
   useEffect(() => {
     const userData = localStorage.getItem('user');
