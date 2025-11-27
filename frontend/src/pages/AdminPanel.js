@@ -345,6 +345,50 @@ const AdminPanel = () => {
               ))}
             </div>
           </TabsContent>
+
+          {/* Projeler Tab */}
+          <TabsContent value="projeler" className="space-y-4">
+            <div className="flex justify-between items-center">
+              <p className="text-gray-600">{projeler.length} proje</p>
+              <Button
+                onClick={() => setShowProjeDialog(true)}
+                className="bg-gradient-to-r from-blue-700 to-blue-600 hover:from-blue-800 hover:to-blue-700 text-white"
+                data-testid="create-project-button"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Yeni Proje
+              </Button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {projeler.map((proje) => (
+                <Card key={proje.id} className="card-hover shadow-md" data-testid={`project-card-${proje.id}`}>
+                  <CardContent className="p-6">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <h3 className="font-semibold text-gray-800 mb-2">{proje.proje_adi}</h3>
+                        {proje.aciklama && (
+                          <p className="text-sm text-gray-600">{proje.aciklama}</p>
+                        )}
+                        <p className="text-xs text-gray-500 mt-2">
+                          {new Date(proje.created_at).toLocaleDateString('tr-TR')}
+                        </p>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleDeleteClick(proje, 'proje')}
+                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                        data-testid={`delete-project-${proje.id}`}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </TabsContent>
         </Tabs>
       </div>
 
