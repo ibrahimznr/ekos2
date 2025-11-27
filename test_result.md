@@ -176,6 +176,17 @@ frontend:
     needs_retesting: false
     status_history:
       - working: true
+  - task: "Admin Panel - Users Management with Bulk Selection"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/pages/AdminPanel.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "BULK SELECTION TESTED: ✅ Users tab shows 4 users with select all checkbox ✅ Each user card has individual checkbox (except current admin) ✅ User cards display username, email, role badges (Yönetici/Müfettiş/Görüntüleyici) with proper colors ✅ 'Seçilenleri Sil' button functionality ready ✅ Current admin user excluded from bulk selection as expected ✅ All bulk selection UI elements working correctly"
         agent: "main"
         comment: "Proje and Şehir dropdowns added and working. Required fields marked with *"
       - working: true
