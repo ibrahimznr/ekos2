@@ -54,7 +54,8 @@ const AdminPanel = () => {
   const [deleteType, setDeleteType] = useState(''); // 'user', 'kategori', or 'proje'
   
   const [newUser, setNewUser] = useState({ username: '', email: '', password: '', password_confirm: '', role: 'viewer' });
-  const [newKategori, setNewKategori] = useState({ isim: '', aciklama: '' });
+  const [newKategori, setNewKategori] = useState({ isim: '', aciklama: '', alt_kategoriler: [] });
+  const [altKategoriInput, setAltKategoriInput] = useState('');
   const [newProje, setNewProje] = useState({ proje_adi: '', aciklama: '' });
 
   useEffect(() => {
