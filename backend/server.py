@@ -706,14 +706,23 @@ async def get_dashboard_stats(current_user: dict = Depends(get_current_user)):
     
     for rapor in all_raporlar:
         gecerlilik_str = rapor.get("gecerlilik_tarihi")
-        if gecerlilik_str and gecerlilik_str.strip():
+        if gecerlilik_str and str(gecerlilik_str).strip():
             try:
                 from datetime import datetime as dt
-                gecerlilik = dt.strptime(gecerlilik_str, "%Y-%m-%d").date()
-                if now_date <= gecerlilik <= thirty_days:
-                    expiring_30_days += 1
-                if now_date <= gecerlilik <= seven_days:
-                    expiring_7_days += 1
+                # Try multiple date formats
+                gecerlilik = None
+                for fmt in ["%Y-%m-%d", "%Y-%m-%d %H:%M:%S", "%Y-%m-%dT%H:%M:%S"]:
+                    try:
+                        gecerlilik = dt.strptime(str(gecerlilik_str), fmt).date()
+                        break
+                    except:
+                        continue
+                
+                if gecerlilik:
+                    if now_date <= gecerlilik <= thirty_days:
+                        expiring_30_days += 1
+                    if now_date <= gecerlilik <= seven_days:
+                        expiring_7_days += 1
             except Exception as e:
                 continue
     
