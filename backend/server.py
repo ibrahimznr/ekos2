@@ -450,6 +450,7 @@ async def create_rapor(rapor_create: RaporCreate, current_user: dict = Depends(g
     rapor = Rapor(
         rapor_no=rapor_no,
         created_by=current_user["id"],
+        created_by_username=current_user["username"],
         **rapor_create.model_dump()
     )
     
