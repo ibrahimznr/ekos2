@@ -58,11 +58,14 @@ backend:
     file: "/app/backend/server.py, /app/backend/constants.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: true
         agent: "main"
         comment: "Categories can now have subcategories. API endpoint /kategori-alt-kategoriler returns mapping"
+      - working: true
+        agent: "testing"
+        comment: "E2E tested: Created 'Test Ekipman' category with subcategories 'Alt Test 1' and 'Alt Test 2'. Subcategories display as blue badges in AdminPanel. Backend API working correctly."
 
   - task: "Report Number Generation - New Format"
     implemented: true
