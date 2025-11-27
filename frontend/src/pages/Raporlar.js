@@ -51,9 +51,14 @@ const Raporlar = () => {
     fetchRaporlar();
   }, []);
 
-  const fetchRaporlar = async (customFilters = {}) => {
+  const fetchRaporlar = async (customFilters = {}, retryCount = 0) => {
     try {
       const token = localStorage.getItem('token');
+      if (!token) {
+        navigate('/login');
+        return;
+      }
+      
       const params = new URLSearchParams();
       
       if (searchTerm) params.append('arama', searchTerm);
@@ -61,12 +66,24 @@ const Raporlar = () => {
       if (customFilters.periyot || filters.periyot) params.append('periyot', customFilters.periyot || filters.periyot);
       if (customFilters.uygunluk || filters.uygunluk) params.append('uygunluk', customFilters.uygunluk || filters.uygunluk);
       
+      // Add limit for better performance
+      params.append('limit', '500');
+      
       const response = await axios.get(`${API}/raporlar?${params.toString()}`, {
         headers: { Authorization: `Bearer ${token}` },
+        timeout: 10000, // 10 second timeout
       });
       setRaporlar(response.data);
     } catch (error) {
-      toast.error('Raporlar yüklenemedi');
+      if (error.response?.status === 401) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        navigate('/login');
+      } else if (retryCount < 2) {
+        setTimeout(() => fetchRaporlar(customFilters, retryCount + 1), 1000);
+      } else {
+        toast.error('Raporlar yüklenemedi. Lütfen sayfayı yenileyin.');
+      }
     } finally {
       setLoading(false);
     }
