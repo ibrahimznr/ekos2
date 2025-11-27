@@ -243,7 +243,7 @@ const AdminPanel = () => {
 
         {/* Tabs */}
         <Tabs defaultValue="users" className="space-y-6">
-          <TabsList className="grid w-full max-w-md grid-cols-2">
+          <TabsList className="grid w-full max-w-2xl grid-cols-3">
             <TabsTrigger value="users" className="flex items-center gap-2" data-testid="users-tab">
               <Users className="h-4 w-4" />
               Kullanıcılar
@@ -251,6 +251,10 @@ const AdminPanel = () => {
             <TabsTrigger value="kategoriler" className="flex items-center gap-2" data-testid="categories-tab">
               <FolderTree className="h-4 w-4" />
               Kategoriler
+            </TabsTrigger>
+            <TabsTrigger value="projeler" className="flex items-center gap-2" data-testid="projects-tab">
+              <FolderKanban className="h-4 w-4" />
+              Projeler
             </TabsTrigger>
           </TabsList>
 
