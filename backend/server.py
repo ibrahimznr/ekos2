@@ -269,22 +269,43 @@ async def startup_db():
         await db.users.insert_one(doc)
         logger.info("Default admin created")
     
-    # Create default categories
-    default_categories = [
-        {"isim": "Asansör", "aciklama": "Asansör ekipmanları"},
-        {"isim": "Kaldırma Platformu", "aciklama": "Kaldırma platformları"},
-        {"isim": "Vinç", "aciklama": "Vinç ekipmanları"},
-        {"isim": "Forklift", "aciklama": "Forklift ekipmanları"},
-        {"isim": "İskele", "aciklama": "İskele sistemleri"}
-    ]
-    
-    for cat in default_categories:
-        exists = await db.kategoriler.find_one({"isim": cat["isim"]})
+    # Create default categories with subcategories
+    for cat_name, alt_kats in KATEGORI_ALT_KATEGORI.items():
+        exists = await db.kategoriler.find_one({"isim": cat_name})
         if not exists:
-            kategori = Kategori(**cat)
+            kategori = Kategori(
+                isim=cat_name,
+                alt_kategoriler=alt_kats,
+                aciklama=f"{cat_name} ekipmanları"
+            )
             doc = kategori.model_dump()
             doc['created_at'] = doc['created_at'].isoformat()
             await db.kategoriler.insert_one(doc)
+    
+    # Create default project
+    default_proje_exists = await db.projeler.find_one({"proje_adi": "Çukurova Deprem Konutları Projesi"})
+    if not default_proje_exists:
+        default_proje = Proje(
+            proje_adi="Çukurova Deprem Konutları Projesi",
+            aciklama="Varsayılan proje"
+        )
+        doc = default_proje.model_dump()
+        doc['created_at'] = doc['created_at'].isoformat()
+        await db.projeler.insert_one(doc)
+        logger.info("Default project created")
+        
+        # Assign all existing reports to this project
+        default_proje_id = doc["id"]
+        await db.raporlar.update_many(
+            {"proje_id": {"$exists": False}},
+            {"$set": {
+                "proje_id": default_proje_id,
+                "proje_adi": "Çukurova Deprem Konutları Projesi",
+                "sehir": "Adana",
+                "sehir_kodu": "ADA"
+            }}
+        )
+        logger.info("Existing reports assigned to default project")
 
 # Auth Routes
 @api_router.post("/auth/register", response_model=UserResponse)
