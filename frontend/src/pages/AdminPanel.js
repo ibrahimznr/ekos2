@@ -167,7 +167,7 @@ const AdminPanel = () => {
       });
       toast.success('Proje oluşturuldu');
       setShowProjeDialog(false);
-      setNewProje({ proje_adi: '', aciklama: '' });
+      setNewProje({ proje_adi: '', proje_kodu: '', lokasyon: '', baslangic_tarihi: '', bitis_tarihi: '', durum: 'Aktif', aciklama: '' });
       fetchProjeler();
     } catch (error) {
       toast.error(error.response?.data?.detail || 'Proje oluşturulamadı');
