@@ -34,7 +34,7 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 security = HTTPBearer()
 
 # Create the main app
-app = FastAPI(title="Ekipman Muayene Raporları Sistemi")
+app = FastAPI(title="EKOS - Ekipman Kontrol Otomasyon Sistemi")
 api_router = APIRouter(prefix="/api")
 
 # Upload directory
