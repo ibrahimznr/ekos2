@@ -548,7 +548,7 @@ async def create_rapor(rapor_create: RaporCreate, current_user: dict = Depends(g
     if not sehir_obj:
         raise HTTPException(status_code=400, detail="Geçersiz şehir")
     
-    rapor_no = await generate_rapor_no(sehir_obj["kod"])
+    rapor_no = await generate_rapor_no(rapor_create.sehir)
     
     rapor = Rapor(
         rapor_no=rapor_no,
