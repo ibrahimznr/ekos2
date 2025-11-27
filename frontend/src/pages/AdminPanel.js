@@ -56,7 +56,20 @@ const AdminPanel = () => {
   const [newUser, setNewUser] = useState({ username: '', email: '', password: '', password_confirm: '', role: 'viewer' });
   const [newKategori, setNewKategori] = useState({ isim: '', aciklama: '', alt_kategoriler: [] });
   const [altKategoriInput, setAltKategoriInput] = useState('');
-  const [newProje, setNewProje] = useState({ proje_adi: '', aciklama: '' });
+  const [newProje, setNewProje] = useState({ 
+    proje_adi: '', 
+    proje_kodu: '', 
+    lokasyon: '', 
+    baslangic_tarihi: '', 
+    bitis_tarihi: '', 
+    durum: 'Aktif', 
+    aciklama: '' 
+  });
+  
+  // Bulk delete state
+  const [selectedUsers, setSelectedUsers] = useState([]);
+  const [selectedKategoriler, setSelectedKategoriler] = useState([]);
+  const [selectedProjeler, setSelectedProjeler] = useState([]);
 
   useEffect(() => {
     const userData = localStorage.getItem('user');
