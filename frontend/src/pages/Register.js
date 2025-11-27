@@ -14,10 +14,11 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { toast } from 'sonner';
-import { FileCheck, UserPlus, ArrowLeft, Mail, CheckCircle } from 'lucide-react';
+import { UserPlus, ArrowLeft, Mail, CheckCircle } from 'lucide-react';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
+const LOGO_URL = 'https://customer-assets.emergentagent.com/job_e367b8d0-918c-4b70-9385-6b8d91452ae9/artifacts/v8wd60u8_Firefly_Gemini%20Flash_I%20designed%20a%20web%20application.%20I%20am%20a%20periodic%20checkup%20specialist.%20I%20record%20the%20equipm%20731040.png';
 
 const Register = () => {
   const navigate = useNavigate();
@@ -95,11 +96,18 @@ const Register = () => {
       <div className="w-full max-w-md">
         {/* Header Section */}
         <div className="text-center mb-8 animate-fade-in">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-white rounded-full mb-4 shadow-lg">
-            <FileCheck className="w-8 h-8 text-blue-700" />
+          <div className="inline-flex items-center justify-center mb-4">
+            <img 
+              src={LOGO_URL} 
+              alt="EKOS Logo" 
+              className="w-32 h-32 object-contain"
+              onError={(e) => {
+                e.target.style.display = 'none';
+              }}
+            />
           </div>
           <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2" style={{ fontFamily: 'IBM Plex Sans, sans-serif' }}>
-            Ekipman Muayene Sistemi
+            EKOS
           </h1>
           <p className="text-blue-100 text-base sm:text-lg">Yeni hesap oluştur</p>
         </div>
@@ -201,7 +209,7 @@ const Register = () => {
 
         {/* Footer */}
         <p className="text-center text-blue-100 text-sm mt-6">
-          © 2025 Ekipman Muayene Sistemi. Tüm hakları saklıdır.
+          © 2025 EKOS - Ekipman Kontrol Otomasyon Sistemi. Tüm hakları saklıdır.
         </p>
       </div>
 
