@@ -181,6 +181,12 @@ const AdminPanel = () => {
         });
         toast.success('Kategori silindi');
         fetchKategoriler();
+      } else if (deleteType === 'proje') {
+        await axios.delete(`${API}/projeler/${deleteItem.id}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        toast.success('Proje silindi');
+        fetchProjeler();
       }
     } catch (error) {
       toast.error(error.response?.data?.detail || 'Silme işlemi başarısız');
