@@ -152,11 +152,14 @@ frontend:
     file: "/app/frontend/src/components/RaporModal.js"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: true
         agent: "main"
         comment: "When category is selected, alt kategori dropdown populates with relevant subcategories. Tested manually with screenshot"
+      - working: true
+        agent: "testing"
+        comment: "E2E tested: Cascading dropdown working perfectly. Selected 'Forklift' category and alt kategori dropdown enabled and populated with subcategories. User can select subcategory successfully."
 
   - task: "Report Modal - Project and City Fields"
     implemented: true
