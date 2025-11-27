@@ -642,6 +642,23 @@ async def delete_rapor(rapor_id: str, current_user: dict = Depends(get_current_u
     
     return {"message": "Rapor silindi"}
 
+@api_router.post("/raporlar/bulk-delete")
+async def bulk_delete_raporlar(rapor_ids: List[str], current_user: dict = Depends(get_current_user)):
+    if current_user["role"] not in ["admin", "inspector"]:
+        raise HTTPException(status_code=403, detail="Rapor silme yetkiniz yok")
+    
+    # Delete associated files for all reports
+    for rapor_id in rapor_ids:
+        dosyalar = await db.medya_dosyalari.find({"rapor_id": rapor_id}, {"_id": 0}).to_list(100)
+        for dosya in dosyalar:
+            dosya_path = Path(dosya["dosya_yolu"])
+            if dosya_path.exists():
+                dosya_path.unlink()
+        await db.medya_dosyalari.delete_many({"rapor_id": rapor_id})
+    
+    result = await db.raporlar.delete_many({"id": {"$in": rapor_ids}})
+    return {"message": f"{result.deleted_count} rapor silindi", "deleted_count": result.deleted_count}
+
 # File Upload Routes
 @api_router.post("/upload/{rapor_id}")
 async def upload_file(
