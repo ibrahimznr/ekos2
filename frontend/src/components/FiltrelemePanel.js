@@ -40,9 +40,7 @@ const FiltrelemePanel = ({ filters, onFilterChange }) => {
   };
 
   const handleFilterChange = (field, value) => {
-    // Convert "all" back to empty string for API
-    const apiValue = value === "all" ? "" : value;
-    const newFilters = { ...localFilters, [field]: apiValue };
+    const newFilters = { ...localFilters, [field]: value };
     setLocalFilters(newFilters);
     onFilterChange(newFilters);
   };
