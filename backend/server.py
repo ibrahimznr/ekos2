@@ -341,8 +341,10 @@ async def login(user_login: UserLogin):
         token_type="bearer",
         user=UserResponse(
             id=user["id"],
+            username=user["username"],
             email=user["email"],
             role=user["role"],
+            email_verified=user.get("email_verified", False),
             created_at=datetime.fromisoformat(user["created_at"]) if isinstance(user["created_at"], str) else user["created_at"]
         )
     )
