@@ -844,8 +844,10 @@ async def get_users(current_user: dict = Depends(get_current_user)):
     for user in users:
         result.append(UserResponse(
             id=user["id"],
+            username=user["username"],
             email=user["email"],
             role=user["role"],
+            email_verified=user.get("email_verified", False),
             created_at=datetime.fromisoformat(user["created_at"]) if isinstance(user["created_at"], str) else user["created_at"]
         ))
     
