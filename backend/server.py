@@ -1006,6 +1006,20 @@ async def delete_user(user_id: str, current_user: dict = Depends(get_current_use
     
     return {"message": "Kullanıcı silindi"}
 
+@api_router.post("/users/bulk-delete")
+async def bulk_delete_users(user_ids: List[str], current_user: dict = Depends(get_current_user)):
+    if current_user["role"] != "admin":
+        raise HTTPException(status_code=403, detail="Bu işlem için yetkiniz yok")
+    
+    # Remove current user from deletion list
+    user_ids = [uid for uid in user_ids if uid != current_user["id"]]
+    
+    if not user_ids:
+        raise HTTPException(status_code=400, detail="Silinecek kullanıcı bulunamadı veya kendi hesabınızı silemezsiniz")
+    
+    result = await db.users.delete_many({"id": {"$in": user_ids}})
+    return {"message": f"{result.deleted_count} kullanıcı silindi", "deleted_count": result.deleted_count}
+
 # Şehirler endpoint
 @api_router.get("/sehirler")
 async def get_sehirler():
