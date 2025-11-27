@@ -76,14 +76,14 @@ const FiltrelemePanel = ({ filters, onFilterChange }) => {
         <div className="space-y-1">
           <Label className="text-xs text-gray-600">Kategori</Label>
           <Select
-            value={localFilters.kategori || ""}
-            onValueChange={(value) => handleFilterChange('kategori', value)}
+            value={localFilters.kategori || "__all__"}
+            onValueChange={(value) => handleFilterChange('kategori', value === "__all__" ? "" : value)}
           >
             <SelectTrigger data-testid="filter-kategori-select">
               <SelectValue placeholder="Tüm kategoriler" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Tüm kategoriler</SelectItem>
+              <SelectItem value="__all__">Tüm kategoriler</SelectItem>
               {kategoriler.map((kat) => (
                 <SelectItem key={kat.id} value={kat.isim}>
                   {kat.isim}
