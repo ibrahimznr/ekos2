@@ -431,10 +431,10 @@ async def upload_file(
     if current_user["role"] not in ["admin", "inspector"]:
         raise HTTPException(status_code=403, detail="Dosya yükleme yetkiniz yok")
     
-    # Check file size (2MB)
+    # Check file size (4GB)
     content = await file.read()
-    if len(content) > 2 * 1024 * 1024:
-        raise HTTPException(status_code=400, detail="Dosya boyutu 2MB'dan büyük olamaz")
+    if len(content) > 4 * 1024 * 1024 * 1024:
+        raise HTTPException(status_code=400, detail="Dosya boyutu 4GB'dan büyük olamaz")
     
     # Check file type
     allowed_types = ["image/jpeg", "image/jpg", "image/png", "application/pdf"]
