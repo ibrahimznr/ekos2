@@ -167,11 +167,14 @@ frontend:
     file: "/app/frontend/src/components/RaporModal.js"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: true
         agent: "main"
         comment: "Proje and Şehir dropdowns added and working. Required fields marked with *"
+      - working: true
+        agent: "testing"
+        comment: "E2E tested: Project and city dropdowns working correctly. Successfully selected 'Test Otomasyon Projesi' and 'Ankara'. All form fields functional including equipment name, company, location, etc."
 
 metadata:
   created_by: "main_agent"
