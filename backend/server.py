@@ -108,6 +108,7 @@ class Rapor(BaseModel):
     aciklama: Optional[str] = None
     uygunluk: Optional[str] = None  # Uygun/Uygun Değil
     created_by: str
+    created_by_username: str
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
