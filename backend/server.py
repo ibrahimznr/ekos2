@@ -453,6 +453,9 @@ async def get_raporlar(
             rapor['created_at'] = datetime.fromisoformat(rapor['created_at'])
         if isinstance(rapor['updated_at'], str):
             rapor['updated_at'] = datetime.fromisoformat(rapor['updated_at'])
+        # Fallback for old reports without username
+        if 'created_by_username' not in rapor or not rapor['created_by_username']:
+            rapor['created_by_username'] = 'Bilinmiyor'
     
     return raporlar
 
