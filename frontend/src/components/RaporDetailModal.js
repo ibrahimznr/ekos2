@@ -278,7 +278,7 @@ const RaporDetailModal = ({ open, onClose, rapor }) => {
 
               <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
                 <p className="text-xs text-blue-800">
-                  <strong>Not:</strong> Maksimum dosya boyutu 2MB. Desteklenen formatlar: JPG, PNG, PDF
+                  <strong>Not:</strong> Maksimum dosya boyutu 4GB. Desteklenen formatlar: JPG, PNG, PDF
                 </p>
               </div>
             </CardContent>
