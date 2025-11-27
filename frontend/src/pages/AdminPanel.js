@@ -107,7 +107,7 @@ const AdminPanel = () => {
       });
       toast.success('Kullanıcı oluşturuldu');
       setShowUserDialog(false);
-      setNewUser({ email: '', password: '', role: 'viewer' });
+      setNewUser({ username: '', email: '', password: '', password_confirm: '', role: 'viewer' });
       fetchUsers();
     } catch (error) {
       toast.error(error.response?.data?.detail || 'Kullanıcı oluşturulamadı');
