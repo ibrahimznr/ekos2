@@ -50,6 +50,18 @@ const Dashboard = () => {
     }
   };
 
+  const fetchProjeler = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get(`${API}/projeler`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setProjeler(response.data);
+    } catch (error) {
+      console.error('Projeler yüklenemedi');
+    }
+  };
+
   if (loading) {
     return (
       <Layout>
