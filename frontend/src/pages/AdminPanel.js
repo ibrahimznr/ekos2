@@ -144,6 +144,21 @@ const AdminPanel = () => {
     }
   };
 
+  const handleCreateProje = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      await axios.post(`${API}/projeler`, newProje, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      toast.success('Proje oluşturuldu');
+      setShowProjeDialog(false);
+      setNewProje({ proje_adi: '', aciklama: '' });
+      fetchProjeler();
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Proje oluşturulamadı');
+    }
+  };
+
   const handleDeleteClick = (item, type) => {
     setDeleteItem(item);
     setDeleteType(type);
