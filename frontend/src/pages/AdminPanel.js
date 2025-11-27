@@ -358,44 +358,73 @@ const AdminPanel = () => {
           {/* Users Tab */}
           <TabsContent value="users" className="space-y-4">
             <div className="flex justify-between items-center">
-              <p className="text-gray-600">{users.length} kullanıcı</p>
-              <Button
-                onClick={() => setShowUserDialog(true)}
-                className="bg-gradient-to-r from-blue-700 to-blue-600 hover:from-blue-800 hover:to-blue-700 text-white"
-                data-testid="create-user-button"
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                Yeni Kullanıcı
-              </Button>
+              <div className="flex items-center gap-3">
+                <Checkbox
+                  checked={selectedUsers.length === users.filter(u => u.id !== user?.id).length && users.length > 1}
+                  onCheckedChange={() => handleSelectAll('user')}
+                />
+                <p className="text-gray-600">{users.length} kullanıcı {selectedUsers.length > 0 && `(${selectedUsers.length} seçili)`}</p>
+              </div>
+              <div className="flex gap-2">
+                {selectedUsers.length > 0 && (
+                  <Button
+                    variant="destructive"
+                    onClick={() => handleBulkDelete('user')}
+                    data-testid="bulk-delete-users-button"
+                  >
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Seçilenleri Sil ({selectedUsers.length})
+                  </Button>
+                )}
+                <Button
+                  onClick={() => setShowUserDialog(true)}
+                  className="bg-gradient-to-r from-blue-700 to-blue-600 hover:from-blue-800 hover:to-blue-700 text-white"
+                  data-testid="create-user-button"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Yeni Kullanıcı
+                </Button>
+              </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {users.map((u) => (
                 <Card key={u.id} className="card-hover shadow-md" data-testid={`user-card-${u.id}`}>
                   <CardContent className="p-6">
-                    <div className="flex items-start justify-between mb-3">
-                      <div className="flex-1">
-                        <h3 className="font-semibold text-gray-800 mb-1">@{u.username}</h3>
-                        <p className="text-xs text-gray-600 mb-2">{u.email}</p>
-                        <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium border ${getRoleBadgeColor(u.role)}`}>
-                          {getRoleLabel(u.role)}
-                        </span>
-                      </div>
+                    <div className="flex items-start gap-3">
                       {u.id !== user?.id && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleDeleteClick(u, 'user')}
-                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                          data-testid={`delete-user-${u.id}`}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                        <Checkbox
+                          checked={selectedUsers.includes(u.id)}
+                          onCheckedChange={() => handleToggleSelect(u.id, 'user')}
+                          className="mt-1"
+                        />
                       )}
+                      <div className="flex-1">
+                        <div className="flex items-start justify-between mb-3">
+                          <div className="flex-1">
+                            <h3 className="font-semibold text-gray-800 mb-1">@{u.username}</h3>
+                            <p className="text-xs text-gray-600 mb-2">{u.email}</p>
+                            <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium border ${getRoleBadgeColor(u.role)}`}>
+                              {getRoleLabel(u.role)}
+                            </span>
+                          </div>
+                          {u.id !== user?.id && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleDeleteClick(u, 'user')}
+                              className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                              data-testid={`delete-user-${u.id}`}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          )}
+                        </div>
+                        <p className="text-xs text-gray-500">
+                          Oluşturulma: {new Date(u.created_at).toLocaleDateString('tr-TR')}
+                        </p>
+                      </div>
                     </div>
-                    <p className="text-xs text-gray-500">
-                      Oluşturulma: {new Date(u.created_at).toLocaleDateString('tr-TR')}
-                    </p>
                   </CardContent>
                 </Card>
               ))}
