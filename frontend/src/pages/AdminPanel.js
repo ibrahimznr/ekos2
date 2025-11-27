@@ -43,6 +43,7 @@ const AdminPanel = () => {
   const [user, setUser] = useState(null);
   const [users, setUsers] = useState([]);
   const [kategoriler, setKategoriler] = useState([]);
+  const [projeler, setProjeler] = useState([]);
   const [loading, setLoading] = useState(true);
   
   const [showUserDialog, setShowUserDialog] = useState(false);
