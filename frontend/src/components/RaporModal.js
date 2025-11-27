@@ -27,16 +27,22 @@ const API = `${BACKEND_URL}/api`;
 
 const RaporModal = ({ open, onClose, rapor, onSuccess }) => {
   const [loading, setLoading] = useState(false);
+  const [projeler, setProjeler] = useState([]);
+  const [sehirler, setSehirler] = useState([]);
   const [kategoriler, setKategoriler] = useState([]);
+  const [altKategoriler, setAltKategoriler] = useState([]);
+  const [kategoriAltKategoriMap, setKategoriAltKategoriMap] = useState({});
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [formData, setFormData] = useState({
+    proje_id: '',
+    sehir: '',
     ekipman_adi: '',
     kategori: '',
+    alt_kategori: '',
     firma: '',
     lokasyon: '',
     marka_model: '',
     seri_no: '',
-    alt_kategori: '',
     periyot: '',
     gecerlilik_tarihi: '',
     uygunluk: '',
@@ -44,23 +50,56 @@ const RaporModal = ({ open, onClose, rapor, onSuccess }) => {
   });
 
   useEffect(() => {
-    fetchKategoriler();
+    if (open) {
+      fetchProjeler();
+      fetchSehirler();
+      fetchKategoriler();
+      fetchKategoriAltKategoriMap();
+    }
     if (rapor) {
       setFormData({
+        proje_id: rapor.proje_id || '',
+        sehir: rapor.sehir || '',
         ekipman_adi: rapor.ekipman_adi || '',
         kategori: rapor.kategori || '',
+        alt_kategori: rapor.alt_kategori || '',
         firma: rapor.firma || '',
         lokasyon: rapor.lokasyon || '',
         marka_model: rapor.marka_model || '',
         seri_no: rapor.seri_no || '',
-        alt_kategori: rapor.alt_kategori || '',
         periyot: rapor.periyot || '',
         gecerlilik_tarihi: rapor.gecerlilik_tarihi || '',
         uygunluk: rapor.uygunluk || '',
         aciklama: rapor.aciklama || '',
       });
+      
+      // Load alt kategoriler if kategori exists
+      if (rapor.kategori && kategoriAltKategoriMap[rapor.kategori]) {
+        setAltKategoriler(kategoriAltKategoriMap[rapor.kategori]);
+      }
     }
-  }, [rapor]);
+  }, [open, rapor]);
+
+  const fetchProjeler = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get(`${API}/projeler`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setProjeler(response.data);
+    } catch (error) {
+      toast.error('Projeler yüklenemedi');
+    }
+  };
+
+  const fetchSehirler = async () => {
+    try {
+      const response = await axios.get(`${API}/sehirler`);
+      setSehirler(response.data);
+    } catch (error) {
+      toast.error('Şehirler yüklenemedi');
+    }
+  };
 
   const fetchKategoriler = async () => {
     try {
@@ -68,9 +107,29 @@ const RaporModal = ({ open, onClose, rapor, onSuccess }) => {
       const response = await axios.get(`${API}/kategoriler`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setKategoriler(response.data);
+      // Get unique kategoriler by isim
+      const uniqueKategoriler = [];
+      const seenNames = new Set();
+      
+      response.data.forEach(kat => {
+        if (!seenNames.has(kat.isim)) {
+          seenNames.add(kat.isim);
+          uniqueKategoriler.push(kat);
+        }
+      });
+      
+      setKategoriler(uniqueKategoriler);
     } catch (error) {
       toast.error('Kategoriler yüklenemedi');
+    }
+  };
+
+  const fetchKategoriAltKategoriMap = async () => {
+    try {
+      const response = await axios.get(`${API}/kategori-alt-kategoriler`);
+      setKategoriAltKategoriMap(response.data);
+    } catch (error) {
+      console.error('Kategori-alt kategori map yüklenemedi');
     }
   };
 
@@ -79,13 +138,11 @@ const RaporModal = ({ open, onClose, rapor, onSuccess }) => {
     const validFiles = [];
     
     for (const file of files) {
-      // Check file size (4GB)
       if (file.size > 4 * 1024 * 1024 * 1024) {
         toast.error(`${file.name}: Dosya boyutu 4GB'dan büyük olamaz`);
         continue;
       }
       
-      // Check file type
       const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf'];
       if (!allowedTypes.includes(file.type)) {
         toast.error(`${file.name}: Sadece JPG, PNG ve PDF formatları desteklenir`);
@@ -160,11 +217,18 @@ const RaporModal = ({ open, onClose, rapor, onSuccess }) => {
 
   const handleChange = (field, value) => {
     setFormData({ ...formData, [field]: value });
+    
+    // When kategori changes, update alt kategoriler
+    if (field === 'kategori') {
+      const altKats = kategoriAltKategoriMap[value] || [];
+      setAltKategoriler(altKats);
+      setFormData({ ...formData, kategori: value, alt_kategori: '' });
+    }
   };
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto" data-testid="rapor-modal">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto" data-testid="rapor-modal">
         <DialogHeader>
           <DialogTitle>{rapor ? 'Raporu Düzenle' : 'Yeni Rapor Oluştur'}</DialogTitle>
           <DialogDescription>
@@ -174,6 +238,40 @@ const RaporModal = ({ open, onClose, rapor, onSuccess }) => {
 
         <form onSubmit={handleSubmit} className="space-y-4 py-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Proje */}
+            <div className="space-y-2">
+              <Label htmlFor="proje_id">Proje *</Label>
+              <Select value={formData.proje_id} onValueChange={(value) => handleChange('proje_id', value)} required>
+                <SelectTrigger data-testid="proje-select">
+                  <SelectValue placeholder="Proje seçin" />
+                </SelectTrigger>
+                <SelectContent>
+                  {projeler.map((proje) => (
+                    <SelectItem key={proje.id} value={proje.id}>
+                      {proje.proje_adi}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Şehir */}
+            <div className="space-y-2">
+              <Label htmlFor="sehir">Şehir *</Label>
+              <Select value={formData.sehir} onValueChange={(value) => handleChange('sehir', value)} required>
+                <SelectTrigger data-testid="sehir-select">
+                  <SelectValue placeholder="Şehir seçin" />
+                </SelectTrigger>
+                <SelectContent className="max-h-60">
+                  {sehirler.map((sehir) => (
+                    <SelectItem key={sehir.kod} value={sehir.isim}>
+                      {sehir.isim}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
             {/* Ekipman Adı */}
             <div className="space-y-2">
               <Label htmlFor="ekipman_adi">Ekipman Adı *</Label>
@@ -197,6 +295,27 @@ const RaporModal = ({ open, onClose, rapor, onSuccess }) => {
                   {kategoriler.map((kat) => (
                     <SelectItem key={kat.id} value={kat.isim}>
                       {kat.isim}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Alt Kategori */}
+            <div className="space-y-2">
+              <Label htmlFor="alt_kategori">Alt Kategori</Label>
+              <Select 
+                value={formData.alt_kategori} 
+                onValueChange={(value) => handleChange('alt_kategori', value)}
+                disabled={!formData.kategori || altKategoriler.length === 0}
+              >
+                <SelectTrigger data-testid="alt-kategori-select">
+                  <SelectValue placeholder={formData.kategori ? "Alt kategori seçin" : "Önce kategori seçin"} />
+                </SelectTrigger>
+                <SelectContent>
+                  {altKategoriler.map((altKat, index) => (
+                    <SelectItem key={index} value={altKat}>
+                      {altKat}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -245,17 +364,6 @@ const RaporModal = ({ open, onClose, rapor, onSuccess }) => {
                 value={formData.seri_no}
                 onChange={(e) => handleChange('seri_no', e.target.value)}
                 data-testid="seri-no-input"
-              />
-            </div>
-
-            {/* Alt Kategori */}
-            <div className="space-y-2">
-              <Label htmlFor="alt_kategori">Alt Kategori</Label>
-              <Input
-                id="alt_kategori"
-                value={formData.alt_kategori}
-                onChange={(e) => handleChange('alt_kategori', e.target.value)}
-                data-testid="alt-kategori-input"
               />
             </div>
 
@@ -314,70 +422,72 @@ const RaporModal = ({ open, onClose, rapor, onSuccess }) => {
           </div>
 
           {/* Medya Dosyaları */}
-          <div className="space-y-3 border-t pt-4">
-            <div className="flex items-center justify-between">
-              <Label className="text-base font-semibold">Medya Dosyaları</Label>
-              <div>
-                <input
-                  type="file"
-                  id="rapor-file-upload"
-                  className="hidden"
-                  onChange={handleFileChange}
-                  accept=".jpg,.jpeg,.png,.pdf"
-                  multiple
-                  data-testid="rapor-file-input"
-                />
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="outline"
-                  onClick={() => document.getElementById('rapor-file-upload').click()}
-                  data-testid="add-file-button"
-                >
-                  <Upload className="h-4 w-4 mr-2" />
-                  Dosya Ekle
-                </Button>
-              </div>
-            </div>
-
-            {selectedFiles.length > 0 && (
-              <div className="space-y-2">
-                {selectedFiles.map((file, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200"
-                    data-testid={`selected-file-${index}`}
+          {!rapor && (
+            <div className="space-y-3 border-t pt-4">
+              <div className="flex items-center justify-between">
+                <Label className="text-base font-semibold">Medya Dosyaları</Label>
+                <div>
+                  <input
+                    type="file"
+                    id="rapor-file-upload"
+                    className="hidden"
+                    onChange={handleFileChange}
+                    accept=".jpg,.jpeg,.png,.pdf"
+                    multiple
+                    data-testid="rapor-file-input"
+                  />
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    onClick={() => document.getElementById('rapor-file-upload').click()}
+                    data-testid="add-file-button"
                   >
-                    <div className="flex items-center gap-3 flex-1">
-                      <FileText className="h-5 w-5 text-blue-600" />
-                      <div className="flex-1">
-                        <p className="font-medium text-gray-800 text-sm">{file.name}</p>
-                        <p className="text-xs text-gray-500">
-                          {(file.size / 1024 / 1024).toFixed(2)} MB
-                        </p>
-                      </div>
-                    </div>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleRemoveFile(index)}
-                      className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                      data-testid={`remove-file-${index}`}
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </div>
-                ))}
+                    <Upload className="h-4 w-4 mr-2" />
+                    Dosya Ekle
+                  </Button>
+                </div>
               </div>
-            )}
 
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-              <p className="text-xs text-blue-800">
-                <strong>Not:</strong> Maksimum dosya boyutu 4GB. Desteklenen formatlar: JPG, PNG, PDF. Birden fazla dosya seçebilirsiniz.
-              </p>
+              {selectedFiles.length > 0 && (
+                <div className="space-y-2">
+                  {selectedFiles.map((file, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200"
+                      data-testid={`selected-file-${index}`}
+                    >
+                      <div className="flex items-center gap-3 flex-1">
+                        <FileText className="h-5 w-5 text-blue-600" />
+                        <div className="flex-1">
+                          <p className="font-medium text-gray-800 text-sm">{file.name}</p>
+                          <p className="text-xs text-gray-500">
+                            {(file.size / 1024 / 1024).toFixed(2)} MB
+                          </p>
+                        </div>
+                      </div>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleRemoveFile(index)}
+                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                        data-testid={`remove-file-${index}`}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                <p className="text-xs text-blue-800">
+                  <strong>Not:</strong> Maksimum dosya boyutu 4GB. Desteklenen formatlar: JPG, PNG, PDF. Birden fazla dosya seçebilirsiniz.
+                </p>
+              </div>
             </div>
-          </div>
+          )}
 
           <DialogFooter>
             <Button type="button" variant="outline" onClick={onClose} data-testid="cancel-button">
