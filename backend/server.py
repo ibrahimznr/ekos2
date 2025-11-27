@@ -484,6 +484,14 @@ async def delete_kategori(kategori_id: str, current_user: dict = Depends(get_cur
         raise HTTPException(status_code=404, detail="Kategori bulunamadı")
     return {"message": "Kategori silindi"}
 
+@api_router.post("/kategoriler/bulk-delete")
+async def bulk_delete_kategoriler(kategori_ids: List[str], current_user: dict = Depends(get_current_user)):
+    if current_user["role"] != "admin":
+        raise HTTPException(status_code=403, detail="Bu işlem için yetkiniz yok")
+    
+    result = await db.kategoriler.delete_many({"id": {"$in": kategori_ids}})
+    return {"message": f"{result.deleted_count} kategori silindi", "deleted_count": result.deleted_count}
+
 # Rapor Routes
 @api_router.get("/raporlar", response_model=List[Rapor])
 async def get_raporlar(
