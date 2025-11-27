@@ -844,7 +844,7 @@ async def get_users(current_user: dict = Depends(get_current_user)):
     for user in users:
         result.append(UserResponse(
             id=user["id"],
-            username=user["username"],
+            username=user.get("username", user["email"].split("@")[0]),
             email=user["email"],
             role=user["role"],
             email_verified=user.get("email_verified", False),
