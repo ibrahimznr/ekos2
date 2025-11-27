@@ -484,13 +484,14 @@ const AdminPanel = () => {
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="kategori-isim">Kategori Adı</Label>
+              <Label htmlFor="kategori-isim">Kategori Adı *</Label>
               <Input
                 id="kategori-isim"
                 placeholder="Örn: Vinç"
                 value={newKategori.isim}
                 onChange={(e) => setNewKategori({ ...newKategori, isim: e.target.value })}
                 data-testid="category-name-input"
+                required
               />
             </div>
             <div className="space-y-2">
@@ -502,6 +503,69 @@ const AdminPanel = () => {
                 onChange={(e) => setNewKategori({ ...newKategori, aciklama: e.target.value })}
                 data-testid="category-description-input"
               />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="alt-kategoriler">Alt Kategoriler (Opsiyonel)</Label>
+              <div className="flex gap-2">
+                <Input
+                  id="alt-kategoriler"
+                  placeholder="Alt kategori girin"
+                  value={altKategoriInput}
+                  onChange={(e) => setAltKategoriInput(e.target.value)}
+                  onKeyPress={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      if (altKategoriInput.trim()) {
+                        setNewKategori({
+                          ...newKategori,
+                          alt_kategoriler: [...newKategori.alt_kategoriler, altKategoriInput.trim()]
+                        });
+                        setAltKategoriInput('');
+                      }
+                    }
+                  }}
+                  data-testid="alt-category-input"
+                />
+                <Button
+                  type="button"
+                  onClick={() => {
+                    if (altKategoriInput.trim()) {
+                      setNewKategori({
+                        ...newKategori,
+                        alt_kategoriler: [...newKategori.alt_kategoriler, altKategoriInput.trim()]
+                      });
+                      setAltKategoriInput('');
+                    }
+                  }}
+                  data-testid="add-alt-category-button"
+                >
+                  <Plus className="h-4 w-4" />
+                </Button>
+              </div>
+              {newKategori.alt_kategoriler.length > 0 && (
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {newKategori.alt_kategoriler.map((altKat, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center gap-1 bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm"
+                    >
+                      <span>{altKat}</span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setNewKategori({
+                            ...newKategori,
+                            alt_kategoriler: newKategori.alt_kategoriler.filter((_, i) => i !== index)
+                          });
+                        }}
+                        className="hover:text-blue-900"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
           <DialogFooter>
