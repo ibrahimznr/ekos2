@@ -434,40 +434,65 @@ const AdminPanel = () => {
           {/* Kategoriler Tab */}
           <TabsContent value="kategoriler" className="space-y-4">
             <div className="flex justify-between items-center">
-              <p className="text-gray-600">{kategoriler.length} kategori</p>
-              <Button
-                onClick={() => setShowKategoriDialog(true)}
-                className="bg-gradient-to-r from-blue-700 to-blue-600 hover:from-blue-800 hover:to-blue-700 text-white"
-                data-testid="create-category-button"
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                Yeni Kategori
-              </Button>
+              <div className="flex items-center gap-3">
+                <Checkbox
+                  checked={selectedKategoriler.length === kategoriler.length && kategoriler.length > 0}
+                  onCheckedChange={() => handleSelectAll('kategori')}
+                />
+                <p className="text-gray-600">{kategoriler.length} kategori {selectedKategoriler.length > 0 && `(${selectedKategoriler.length} seçili)`}</p>
+              </div>
+              <div className="flex gap-2">
+                {selectedKategoriler.length > 0 && (
+                  <Button
+                    variant="destructive"
+                    onClick={() => handleBulkDelete('kategori')}
+                    data-testid="bulk-delete-categories-button"
+                  >
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Seçilenleri Sil ({selectedKategoriler.length})
+                  </Button>
+                )}
+                <Button
+                  onClick={() => setShowKategoriDialog(true)}
+                  className="bg-gradient-to-r from-blue-700 to-blue-600 hover:from-blue-800 hover:to-blue-700 text-white"
+                  data-testid="create-category-button"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Yeni Kategori
+                </Button>
+              </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {kategoriler.map((kat) => (
                 <Card key={kat.id} className="card-hover shadow-md" data-testid={`category-card-${kat.id}`}>
                   <CardContent className="p-6">
-                    <div className="flex items-start justify-between">
+                    <div className="flex items-start gap-3">
+                      <Checkbox
+                        checked={selectedKategoriler.includes(kat.id)}
+                        onCheckedChange={() => handleToggleSelect(kat.id, 'kategori')}
+                        className="mt-1"
+                      />
                       <div className="flex-1">
-                        <h3 className="font-semibold text-gray-800 mb-2">{kat.isim}</h3>
-                        {kat.aciklama && (
-                          <p className="text-sm text-gray-600 mb-2">{kat.aciklama}</p>
-                        )}
-                        {kat.alt_kategoriler && kat.alt_kategoriler.length > 0 && (
-                          <div className="mt-2">
-                            <p className="text-xs text-gray-500 mb-1">Alt Kategoriler:</p>
-                            <div className="flex flex-wrap gap-1">
-                              {kat.alt_kategoriler.map((altKat, idx) => (
-                                <span
-                                  key={idx}
-                                  className="inline-block bg-blue-50 text-blue-700 px-2 py-0.5 rounded text-xs"
-                                >
-                                  {altKat}
-                                </span>
-                              ))}
-                            </div>
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <h3 className="font-semibold text-gray-800 mb-2">{kat.isim}</h3>
+                            {kat.aciklama && (
+                              <p className="text-sm text-gray-600 mb-2">{kat.aciklama}</p>
+                            )}
+                            {kat.alt_kategoriler && kat.alt_kategoriler.length > 0 && (
+                              <div className="mt-2">
+                                <p className="text-xs text-gray-500 mb-1">Alt Kategoriler:</p>
+                                <div className="flex flex-wrap gap-1">
+                                  {kat.alt_kategoriler.map((altKat, idx) => (
+                                    <span
+                                      key={idx}
+                                      className="inline-block bg-blue-50 text-blue-700 px-2 py-0.5 rounded text-xs"
+                                    >
+                                      {altKat}
+                                    </span>
+                                  ))}
+                                </div>
                           </div>
                         )}
                       </div>
