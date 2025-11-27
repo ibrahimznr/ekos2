@@ -13,10 +13,12 @@ const API = `${BACKEND_URL}/api`;
 const Dashboard = () => {
   const navigate = useNavigate();
   const [stats, setStats] = useState(null);
+  const [projeler, setProjeler] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchStats();
+    fetchProjeler();
   }, []);
 
   const fetchStats = async (retryCount = 0) => {
