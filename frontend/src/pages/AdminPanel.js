@@ -102,6 +102,18 @@ const AdminPanel = () => {
     }
   };
 
+  const fetchProjeler = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get(`${API}/projeler`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setProjeler(response.data);
+    } catch (error) {
+      toast.error('Projeler yüklenemedi');
+    }
+  };
+
   const handleCreateUser = async () => {
     try {
       const token = localStorage.getItem('token');
