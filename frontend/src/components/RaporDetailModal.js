@@ -47,9 +47,9 @@ const RaporDetailModal = ({ open, onClose, rapor }) => {
     const file = e.target.files[0];
     if (!file) return;
 
-    // Check file size
-    if (file.size > 2 * 1024 * 1024) {
-      toast.error('Dosya boyutu 2MB\'dan büyük olamaz');
+    // Check file size (4GB)
+    if (file.size > 4 * 1024 * 1024 * 1024) {
+      toast.error('Dosya boyutu 4GB\'dan büyük olamaz');
       return;
     }
 
