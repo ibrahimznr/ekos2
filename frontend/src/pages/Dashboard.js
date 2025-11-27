@@ -219,6 +219,38 @@ const Dashboard = () => {
           </Card>
         </div>
 
+        {/* Projeler */}
+        <Card className="shadow-md" data-testid="projects-card">
+          <CardHeader>
+            <CardTitle className="text-lg">Projeler</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {projeler && projeler.length > 0 ? (
+              <div className="space-y-3">
+                {projeler.map((proje) => (
+                  <div
+                    key={proje.id}
+                    className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200 hover:shadow-md transition-shadow"
+                  >
+                    <h3 className="font-semibold text-gray-800">{proje.proje_adi}</h3>
+                    {proje.aciklama && (
+                      <p className="text-sm text-gray-600 mt-1">{proje.aciklama}</p>
+                    )}
+                    <p className="text-xs text-gray-500 mt-2">
+                      {new Date(proje.created_at).toLocaleDateString('tr-TR')}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8 text-gray-500">
+                <FileText className="h-12 w-12 mx-auto mb-2 text-gray-400" />
+                <p>Henüz proje bulunmuyor</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
         {/* Quick Actions */}
         <Card className="shadow-md">
           <CardHeader>
