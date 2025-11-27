@@ -122,11 +122,14 @@ frontend:
     file: "/app/frontend/src/pages/AdminPanel.js"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: true
         agent: "main"
         comment: "Added Alt Kategoriler field in category creation dialog. Categories now display their subcategories as badges in the card view"
+      - working: true
+        agent: "testing"
+        comment: "FIXED: Missing X import causing JavaScript errors. E2E tested: Category creation with subcategories fully working. Created 'Test Ekipman' with 'Alt Test 1' and 'Alt Test 2'. Subcategories display as blue badges correctly."
 
   - task: "Dashboard - Projects List Display"
     implemented: true
