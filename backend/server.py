@@ -206,24 +206,29 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
     
     return user
 
-async def generate_rapor_no():
+async def generate_rapor_no(sehir_kodu: str):
+    """
+    Generate report number in format: PKYYYY-SEHIR###
+    Example: PK2025-ANK025
+    """
     now = datetime.now(timezone.utc)
-    year_month = now.strftime("%Y-%m")
-    prefix = f"RAP-{year_month}-"
+    year = now.strftime("%Y")
+    prefix = f"PK{year}-{sehir_kodu}"
     
-    # Get the last report for this month
+    # Get the last report for this city and year
     last_report = await db.raporlar.find_one(
         {"rapor_no": {"$regex": f"^{prefix}"}},
         sort=[("created_at", -1)]
     )
     
     if last_report:
-        last_no = int(last_report["rapor_no"].split("-")[-1])
+        last_no_str = last_report["rapor_no"].split(sehir_kodu)[-1]
+        last_no = int(last_no_str)
         new_no = last_no + 1
     else:
         new_no = 1
     
-    return f"{prefix}{str(new_no).zfill(6)}"
+    return f"{prefix}{str(new_no).zfill(3)}"
 
 # Initialize default admin
 @app.on_event("startup")
