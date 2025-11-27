@@ -74,7 +74,7 @@ const AdminPanel = () => {
   }, [navigate]);
 
   const fetchData = async () => {
-    await Promise.all([fetchUsers(), fetchKategoriler()]);
+    await Promise.all([fetchUsers(), fetchKategoriler(), fetchProjeler()]);
     setLoading(false);
   };
 
