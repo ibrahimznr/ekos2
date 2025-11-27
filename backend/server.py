@@ -809,17 +809,21 @@ async def get_dashboard_stats(current_user: dict = Depends(get_current_user)):
     uygun_count = await db.raporlar.count_documents({"uygunluk": "Uygun"})
     uygun_degil_count = await db.raporlar.count_documents({"uygunluk": "Uygun Değil"})
     
-    # Expiring reports (30 days)
+    # Expiring reports (30 days) - optimized query
     now_date = now.date()
     thirty_days = (now + timedelta(days=30)).date()
     seven_days = (now + timedelta(days=7)).date()
     
-    all_raporlar = await db.raporlar.find({}, {"_id": 0}).to_list(10000)
+    # Only fetch gecerlilik_tarihi field for performance
+    raporlar_with_dates = await db.raporlar.find(
+        {"gecerlilik_tarihi": {"$ne": None, "$ne": ""}}, 
+        {"gecerlilik_tarihi": 1, "_id": 0}
+    ).limit(5000).to_list(5000)
     
     expiring_30_days = 0
     expiring_7_days = 0
     
-    for rapor in all_raporlar:
+    for rapor in raporlar_with_dates:
         gecerlilik_str = rapor.get("gecerlilik_tarihi")
         if gecerlilik_str and str(gecerlilik_str).strip():
             try:
