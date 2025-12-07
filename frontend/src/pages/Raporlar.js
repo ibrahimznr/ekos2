@@ -156,10 +156,10 @@ const Raporlar = () => {
   };
 
   const handleSelectAll = () => {
-    if (selectedRaporlar.length === filteredRaporlar.length) {
+    if (selectedRaporlar.length === raporlar.length) {
       setSelectedRaporlar([]);
     } else {
-      setSelectedRaporlar(filteredRaporlar.map(r => r.id));
+      setSelectedRaporlar(raporlar.map(r => r.id));
     }
   };
 
