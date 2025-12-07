@@ -149,18 +149,26 @@ const Dashboard = () => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex flex-wrap gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
               <Button
                 onClick={() => setShowRaporModal(true)}
-                className="bg-gradient-to-r from-blue-700 to-blue-600 hover:from-blue-800 hover:to-blue-700 text-white"
+                className="bg-gradient-to-r from-blue-700 to-blue-600 hover:from-blue-800 hover:to-blue-700 text-white w-full justify-start"
               >
                 <Plus className="h-4 w-4 mr-2" />
                 Yeni Rapor Oluştur
               </Button>
               <Button
+                onClick={() => navigate('/admin')}
+                variant="outline"
+                className="border-indigo-600 text-indigo-700 hover:bg-indigo-50 w-full justify-start"
+              >
+                <FolderKanban className="h-4 w-4 mr-2" />
+                Projeler
+              </Button>
+              <Button
                 onClick={() => navigate('/raporlar')}
                 variant="outline"
-                className="border-blue-600 text-blue-700 hover:bg-blue-50"
+                className="border-blue-600 text-blue-700 hover:bg-blue-50 w-full justify-start"
               >
                 <FileText className="h-4 w-4 mr-2" />
                 Tüm Raporları Görüntüle
