@@ -98,6 +98,53 @@ const RaporDetailModal = ({ open, onClose, rapor }) => {
     }
   };
 
+  const handleDownloadFile = async (dosya) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get(`${API}/dosyalar/${dosya.id}/indir`, {
+        headers: { Authorization: `Bearer ${token}` },
+        responseType: 'blob',
+      });
+
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', dosya.dosya_adi);
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      toast.success('Dosya indirildi');
+    } catch (error) {
+      toast.error('Dosya indirilemedi');
+    }
+  };
+
+  const handlePreviewFile = async (dosya) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get(`${API}/dosyalar/${dosya.id}/indir`, {
+        headers: { Authorization: `Bearer ${token}` },
+        responseType: 'blob',
+      });
+
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      setPreviewFile({ ...dosya, url });
+      setShowPreview(true);
+    } catch (error) {
+      toast.error('Dosya önizlenemiyor');
+    }
+  };
+
+  const isImageFile = (filename) => {
+    const ext = filename.split('.').pop().toLowerCase();
+    return ['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext);
+  };
+
+  const isPdfFile = (filename) => {
+    return filename.toLowerCase().endsWith('.pdf');
+  };
+
   const canEdit = user?.role === 'admin' || user?.role === 'inspector';
 
   if (!rapor) return null;
