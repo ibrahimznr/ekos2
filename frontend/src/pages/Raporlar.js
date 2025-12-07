@@ -210,7 +210,7 @@ const Raporlar = () => {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="flex items-center gap-3">
             <Checkbox
-              checked={selectedRaporlar.length === filteredRaporlar.length && filteredRaporlar.length > 0}
+              checked={selectedRaporlar.length === raporlar.length && raporlar.length > 0}
               onCheckedChange={handleSelectAll}
             />
             <div>
