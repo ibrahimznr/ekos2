@@ -716,6 +716,23 @@ async def get_dosyalar(rapor_id: str, current_user: dict = Depends(get_current_u
             dosya['created_at'] = datetime.fromisoformat(dosya['created_at'])
     return dosyalar
 
+@api_router.get("/dosyalar/{dosya_id}/indir")
+async def download_dosya(dosya_id: str, current_user: dict = Depends(get_current_user)):
+    dosya = await db.medya_dosyalari.find_one({"id": dosya_id}, {"_id": 0})
+    if not dosya:
+        raise HTTPException(status_code=404, detail="Dosya bulunamadı")
+    
+    dosya_path = Path(dosya["dosya_yolu"])
+    if not dosya_path.exists():
+        raise HTTPException(status_code=404, detail="Dosya sistemde bulunamadı")
+    
+    from fastapi.responses import FileResponse
+    return FileResponse(
+        path=str(dosya_path),
+        filename=dosya["dosya_adi"],
+        media_type=dosya.get("dosya_tipi", "application/octet-stream")
+    )
+
 @api_router.delete("/dosyalar/{dosya_id}")
 async def delete_dosya(dosya_id: str, current_user: dict = Depends(get_current_user)):
     if current_user["role"] not in ["admin", "inspector"]:
