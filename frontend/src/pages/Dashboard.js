@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Layout from '@/components/Layout';
 import RaporModal from '@/components/RaporModal';
-import { FileText, CheckCircle2, XCircle, Calendar, TrendingUp, AlertTriangle, Plus } from 'lucide-react';
+import { FileText, CheckCircle2, XCircle, Calendar, TrendingUp, AlertTriangle, Plus, FolderKanban } from 'lucide-react';
 import { toast } from 'sonner';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
