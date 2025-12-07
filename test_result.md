@@ -202,6 +202,18 @@ frontend:
       - working: true
         agent: "testing"
         comment: "FIXED: Replaced 'filteredRaporlar' with 'raporlar' in handleSelectAll function and checkbox checked condition. Reports page now loads correctly without JavaScript errors. Bulk selection functionality working properly."
+
+  - task: "Dashboard Hızlı İşlemler and Media Features"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/pages/Dashboard.js, /app/frontend/src/components/RaporDetailModal.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "COMPREHENSIVE DASHBOARD AND MEDIA TESTING: ✅ Hızlı İşlemler positioned at TOP of dashboard before stats cards ✅ 'Yeni Rapor Oluştur' button functional with modal open/close ✅ Geçerlilik Uyarıları buttons ('30 Gün İçinde' and 'Süresi Geçenler') clickable with hover effects, navigate to Raporlar page ✅ Project cards clickable and filter reports correctly ✅ Media preview/download buttons all functional: Eye icon (👁️ Önizle), Download icon (⬇️ İndir) in green, Trash icon (🗑️ Sil) in red ✅ Preview modal opens for image files ✅ Category selection works without ResizeObserver errors, Alt Kategori dropdown enables properly. All requested dashboard and media functionality verified working."
         agent: "main"
         comment: "Proje and Şehir dropdowns added and working. Required fields marked with *"
       - working: true
