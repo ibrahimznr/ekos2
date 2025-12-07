@@ -187,6 +187,21 @@ frontend:
       - working: true
         agent: "testing"
         comment: "BULK SELECTION TESTED: ✅ Users tab shows 4 users with select all checkbox ✅ Each user card has individual checkbox (except current admin) ✅ User cards display username, email, role badges (Yönetici/Müfettiş/Görüntüleyici) with proper colors ✅ 'Seçilenleri Sil' button functionality ready ✅ Current admin user excluded from bulk selection as expected ✅ All bulk selection UI elements working correctly"
+
+  - task: "Reports Page JavaScript Error Fix"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/pages/Raporlar.js"
+    stuck_count: 0
+    priority: "critical"
+    needs_retesting: false
+    status_history:
+      - working: false
+        agent: "testing"
+        comment: "CRITICAL BUG: JavaScript runtime error 'filteredRaporlar is not defined' causing Reports page to crash with red error screen"
+      - working: true
+        agent: "testing"
+        comment: "FIXED: Replaced 'filteredRaporlar' with 'raporlar' in handleSelectAll function and checkbox checked condition. Reports page now loads correctly without JavaScript errors. Bulk selection functionality working properly."
         agent: "main"
         comment: "Proje and Şehir dropdowns added and working. Required fields marked with *"
       - working: true
