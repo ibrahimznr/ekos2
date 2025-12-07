@@ -50,7 +50,17 @@ const Raporlar = () => {
     if (userData) {
       setUser(JSON.parse(userData));
     }
-    fetchRaporlar();
+    
+    // Check if we have filtered reports from Dashboard
+    if (location.state?.filteredReports) {
+      setRaporlar(location.state.filteredReports);
+      setLoading(false);
+      toast.success(`${location.state.filterType}: ${location.state.filteredReports.length} rapor`);
+    } else if (location.state?.filterProjeId) {
+      fetchRaporlarByProje(location.state.filterProjeId);
+    } else {
+      fetchRaporlar();
+    }
   }, []);
 
   const fetchRaporlar = async (customFilters = {}, retryCount = 0) => {
