@@ -214,6 +214,18 @@ frontend:
       - working: true
         agent: "testing"
         comment: "COMPREHENSIVE DASHBOARD AND MEDIA TESTING: ✅ Hızlı İşlemler positioned at TOP of dashboard before stats cards ✅ 'Yeni Rapor Oluştur' button functional with modal open/close ✅ Geçerlilik Uyarıları buttons ('30 Gün İçinde' and 'Süresi Geçenler') clickable with hover effects, navigate to Raporlar page ✅ Project cards clickable and filter reports correctly ✅ Media preview/download buttons all functional: Eye icon (👁️ Önizle), Download icon (⬇️ İndir) in green, Trash icon (🗑️ Sil) in red ✅ Preview modal opens for image files ✅ Category selection works without ResizeObserver errors, Alt Kategori dropdown enables properly. All requested dashboard and media functionality verified working."
+
+  - task: "EKOS New Features - Projeler Button & Status Toggle"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/pages/Dashboard.js, /app/frontend/src/pages/Raporlar.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "NEW FEATURES TESTING COMPLETED: ✅ Dashboard Hızlı İşlemler: All 3 buttons found - 'Yeni Rapor Oluştur' (blue), 'Projeler' (NEW indigo/purple), 'Tüm Raporları Görüntüle' (blue outline) ✅ Projeler Navigation: Button correctly navigates to /admin ✅ Report Status Buttons: Aktif/Pasif toggle buttons working with '✓ Aktif' (green) and '⏸ Pasif' (gray), positioned next to Uygun badges, optimistic updates functional ✅ Mobile Responsive: All features work on mobile (375x667), buttons stack vertically, no layout issues ✅ All critical requirements met and verified working with admin credentials."
         agent: "main"
         comment: "Proje and Şehir dropdowns added and working. Required fields marked with *"
       - working: true
