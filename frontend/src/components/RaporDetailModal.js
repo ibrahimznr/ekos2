@@ -301,25 +301,57 @@ const RaporDetailModal = ({ open, onClose, rapor }) => {
                       data-testid={`file-item-${dosya.id}`}
                     >
                       <div className="flex items-center gap-3 flex-1">
-                        <FileText className="h-5 w-5 text-blue-600" />
+                        {isImageFile(dosya.dosya_adi) ? (
+                          <ImageIcon className="h-5 w-5 text-green-600" />
+                        ) : (
+                          <FileText className="h-5 w-5 text-blue-600" />
+                        )}
                         <div>
                           <p className="font-medium text-gray-800 text-sm">{dosya.dosya_adi}</p>
                           <p className="text-xs text-gray-500">
-                            {(dosya.dosya_boyutu / 1024).toFixed(2)} KB
+                            {dosya.dosya_boyutu < 1024 * 1024 
+                              ? `${(dosya.dosya_boyutu / 1024).toFixed(2)} KB`
+                              : `${(dosya.dosya_boyutu / (1024 * 1024)).toFixed(2)} MB`
+                            }
                           </p>
                         </div>
                       </div>
-                      {canEdit && (
+                      <div className="flex items-center gap-1">
+                        {(isImageFile(dosya.dosya_adi) || isPdfFile(dosya.dosya_adi)) && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handlePreviewFile(dosya)}
+                            className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                            data-testid={`preview-file-${dosya.id}`}
+                            title="Önizle"
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                        )}
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => handleDeleteFile(dosya.id)}
-                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                          data-testid={`delete-file-${dosya.id}`}
+                          onClick={() => handleDownloadFile(dosya)}
+                          className="text-green-600 hover:text-green-700 hover:bg-green-50"
+                          data-testid={`download-file-${dosya.id}`}
+                          title="İndir"
                         >
-                          <Trash2 className="h-4 w-4" />
+                          <Download className="h-4 w-4" />
                         </Button>
-                      )}
+                        {canEdit && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleDeleteFile(dosya.id)}
+                            className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                            data-testid={`delete-file-${dosya.id}`}
+                            title="Sil"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        )}
+                      </div>
                     </div>
                   ))}
                 </div>
