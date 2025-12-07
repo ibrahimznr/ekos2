@@ -231,27 +231,35 @@ const Dashboard = () => {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="flex items-center justify-between p-4 bg-amber-50 rounded-lg border border-amber-200">
+              <Button
+                onClick={fetchExpiringReports}
+                variant="outline"
+                className="w-full flex items-center justify-between p-4 h-auto bg-amber-50 hover:bg-amber-100 rounded-lg border border-amber-200"
+              >
                 <div className="flex items-center gap-3">
                   <Calendar className="h-8 w-8 text-amber-600" />
-                  <div>
+                  <div className="text-left">
                     <p className="font-semibold text-gray-800">30 Gün İçinde</p>
                     <p className="text-sm text-gray-600">Geçerliliği bitecek raporlar</p>
                   </div>
                 </div>
                 <div className="text-2xl font-bold text-amber-700">{stats?.expiring_30_days || 0}</div>
-              </div>
+              </Button>
               
-              <div className="flex items-center justify-between p-4 bg-red-50 rounded-lg border border-red-200">
+              <Button
+                onClick={fetchExpiredReports}
+                variant="outline"
+                className="w-full flex items-center justify-between p-4 h-auto bg-red-50 hover:bg-red-100 rounded-lg border border-red-200"
+              >
                 <div className="flex items-center gap-3">
                   <Calendar className="h-8 w-8 text-red-600" />
-                  <div>
-                    <p className="font-semibold text-gray-800">7 Gün İçinde</p>
-                    <p className="text-sm text-gray-600">Acil dikkat gerekiyor</p>
+                  <div className="text-left">
+                    <p className="font-semibold text-gray-800">Süresi Geçenler</p>
+                    <p className="text-sm text-gray-600">Acil yenileme gerekiyor</p>
                   </div>
                 </div>
-                <div className="text-2xl font-bold text-red-700">{stats?.expiring_7_days || 0}</div>
-              </div>
+                <div className="text-2xl font-bold text-red-700">{stats?.expired_count || 0}</div>
+              </Button>
             </CardContent>
           </Card>
 
