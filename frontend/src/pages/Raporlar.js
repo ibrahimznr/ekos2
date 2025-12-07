@@ -309,30 +309,36 @@ const Raporlar = () => {
             {raporlar.map((rapor) => (
               <Card key={rapor.id} className="card-hover shadow-md" data-testid={`report-card-${rapor.id}`}>
                 <CardContent className="p-6">
-                  <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-                    <div className="flex-1 space-y-3">
-                      {/* Header */}
-                      <div className="flex items-start justify-between gap-4">
-                        <div>
-                          <h3 className="text-xl font-bold text-gray-800 mb-1">{rapor.ekipman_adi}</h3>
-                          <div className="flex items-center gap-3">
-                            <p className="text-sm text-gray-500 font-medium">{rapor.rapor_no}</p>
-                            {rapor.created_by_username && (
-                              <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
-                                {rapor.created_by_username}
-                              </span>
-                            )}
+                  <div className="flex gap-3">
+                    <Checkbox
+                      checked={selectedRaporlar.includes(rapor.id)}
+                      onCheckedChange={() => handleToggleSelect(rapor.id)}
+                      className="mt-1"
+                    />
+                    <div className="flex-1 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                      <div className="flex-1 space-y-3">
+                        {/* Header */}
+                        <div className="flex items-start justify-between gap-4">
+                          <div>
+                            <h3 className="text-xl font-bold text-gray-800 mb-1">{rapor.ekipman_adi}</h3>
+                            <div className="flex items-center gap-3">
+                              <p className="text-sm text-gray-500 font-medium">{rapor.rapor_no}</p>
+                              {rapor.created_by_username && (
+                                <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
+                                  {rapor.created_by_username}
+                                </span>
+                              )}
+                            </div>
                           </div>
+                          {rapor.uygunluk && (
+                            <span
+                              className={rapor.uygunluk === 'Uygun' ? 'badge-success' : 'badge-danger'}
+                              data-testid={`uygunluk-badge-${rapor.id}`}
+                            >
+                              {rapor.uygunluk}
+                            </span>
+                          )}
                         </div>
-                        {rapor.uygunluk && (
-                          <span
-                            className={rapor.uygunluk === 'Uygun' ? 'badge-success' : 'badge-danger'}
-                            data-testid={`uygunluk-badge-${rapor.id}`}
-                          >
-                            {rapor.uygunluk}
-                          </span>
-                        )}
-                      </div>
                       
                       {/* Info Grid */}
                       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-sm">
