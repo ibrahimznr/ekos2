@@ -320,11 +320,15 @@ const Dashboard = () => {
             {projeler && projeler.length > 0 ? (
               <div className="space-y-3">
                 {projeler.map((proje) => (
-                  <div
+                  <button
                     key={proje.id}
-                    className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200 hover:shadow-md transition-shadow"
+                    onClick={() => handleProjectClick(proje.id)}
+                    className="w-full text-left p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200 hover:shadow-md hover:border-blue-400 transition-all cursor-pointer"
                   >
-                    <h3 className="font-semibold text-gray-800">{proje.proje_adi}</h3>
+                    <h3 className="font-semibold text-gray-800 hover:text-blue-700">{proje.proje_adi}</h3>
+                    {proje.proje_kodu && (
+                      <p className="text-xs text-blue-600 font-mono mt-1">{proje.proje_kodu}</p>
+                    )}
                     {proje.aciklama && (
                       <p className="text-sm text-gray-600 mt-1">{proje.aciklama}</p>
                     )}
