@@ -136,6 +136,39 @@ const Raporlar = () => {
     }
   };
 
+  const handleBulkDelete = async () => {
+    if (selectedRaporlar.length === 0) {
+      toast.error('Lütfen silmek için en az bir rapor seçin');
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.post(`${API}/raporlar/bulk-delete`, selectedRaporlar, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      toast.success(response.data.message);
+      setSelectedRaporlar([]);
+      fetchRaporlar();
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Toplu silme işlemi başarısız');
+    }
+  };
+
+  const handleSelectAll = () => {
+    if (selectedRaporlar.length === filteredRaporlar.length) {
+      setSelectedRaporlar([]);
+    } else {
+      setSelectedRaporlar(filteredRaporlar.map(r => r.id));
+    }
+  };
+
+  const handleToggleSelect = (raporId) => {
+    setSelectedRaporlar(prev => 
+      prev.includes(raporId) ? prev.filter(id => id !== raporId) : [...prev, raporId]
+    );
+  };
+
   const handleExportExcel = async () => {
     try {
       const token = localStorage.getItem('token');
