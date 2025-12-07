@@ -366,6 +366,67 @@ const RaporDetailModal = ({ open, onClose, rapor }) => {
           </Card>
         </div>
       </DialogContent>
+
+      {/* File Preview Dialog */}
+      <Dialog open={showPreview} onOpenChange={setShowPreview}>
+        <DialogContent className="max-w-5xl max-h-[90vh]">
+          <DialogHeader>
+            <DialogTitle>Dosya Önizleme</DialogTitle>
+            <DialogDescription>{previewFile?.dosya_adi}</DialogDescription>
+          </DialogHeader>
+          <div className="flex items-center justify-center bg-gray-100 rounded-lg p-4 max-h-[70vh] overflow-auto">
+            {previewFile && (
+              <>
+                {isImageFile(previewFile.dosya_adi) ? (
+                  <img 
+                    src={previewFile.url} 
+                    alt={previewFile.dosya_adi}
+                    className="max-w-full max-h-full object-contain"
+                  />
+                ) : isPdfFile(previewFile.dosya_adi) ? (
+                  <iframe
+                    src={previewFile.url}
+                    className="w-full h-[60vh]"
+                    title={previewFile.dosya_adi}
+                  />
+                ) : (
+                  <div className="text-center text-gray-500 py-8">
+                    <FileText className="h-16 w-16 mx-auto mb-4 text-gray-400" />
+                    <p>Bu dosya tipi önizlenemiyor</p>
+                    <Button
+                      onClick={() => handleDownloadFile(previewFile)}
+                      className="mt-4"
+                    >
+                      <Download className="h-4 w-4 mr-2" />
+                      İndir
+                    </Button>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+          <div className="flex justify-end gap-2 mt-4">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowPreview(false);
+                if (previewFile?.url) {
+                  window.URL.revokeObjectURL(previewFile.url);
+                }
+                setPreviewFile(null);
+              }}
+            >
+              Kapat
+            </Button>
+            {previewFile && (
+              <Button onClick={() => handleDownloadFile(previewFile)}>
+                <Download className="h-4 w-4 mr-2" />
+                İndir
+              </Button>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </Dialog>
   );
 };
