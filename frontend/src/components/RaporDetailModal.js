@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/dialog';
 import { Card, CardContent } from '@/components/ui/card';
 import { toast } from 'sonner';
-import { Upload, FileText, Download, Trash2, Calendar, Building, MapPin, Package } from 'lucide-react';
+import { Upload, FileText, Download, Trash2, Calendar, Building, MapPin, Package, Eye, Image as ImageIcon } from 'lucide-react';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
