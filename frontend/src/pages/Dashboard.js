@@ -140,6 +140,35 @@ const Dashboard = () => {
           <p className="text-gray-600">Ekipman muayene raporlarınızın genel görünümü</p>
         </div>
 
+        {/* Hızlı İşlemler */}
+        <Card className="shadow-md bg-gradient-to-r from-blue-50 to-blue-100">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <Plus className="h-5 w-5 text-blue-600" />
+              Hızlı İşlemler
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-wrap gap-3">
+              <Button
+                onClick={() => setShowRaporModal(true)}
+                className="bg-gradient-to-r from-blue-700 to-blue-600 hover:from-blue-800 hover:to-blue-700 text-white"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Yeni Rapor Oluştur
+              </Button>
+              <Button
+                onClick={() => navigate('/raporlar')}
+                variant="outline"
+                className="border-blue-600 text-blue-700 hover:bg-blue-50"
+              >
+                <FileText className="h-4 w-4 mr-2" />
+                Tüm Raporları Görüntüle
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {/* Total Reports */}
