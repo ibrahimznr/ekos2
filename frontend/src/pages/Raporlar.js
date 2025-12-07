@@ -208,11 +208,30 @@ const Raporlar = () => {
       <div className="space-y-6 animate-fade-in">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-800 mb-2">Raporlar</h1>
-            <p className="text-gray-600">{raporlar.length} rapor bulundu</p>
+          <div className="flex items-center gap-3">
+            <Checkbox
+              checked={selectedRaporlar.length === filteredRaporlar.length && filteredRaporlar.length > 0}
+              onCheckedChange={handleSelectAll}
+            />
+            <div>
+              <h1 className="text-3xl font-bold text-gray-800 mb-2">Raporlar</h1>
+              <p className="text-gray-600">
+                {raporlar.length} rapor bulundu 
+                {selectedRaporlar.length > 0 && ` (${selectedRaporlar.length} seçili)`}
+              </p>
+            </div>
           </div>
           <div className="flex flex-wrap gap-2">
+            {selectedRaporlar.length > 0 && canEdit && (
+              <Button
+                variant="destructive"
+                onClick={handleBulkDelete}
+                data-testid="bulk-delete-reports-button"
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                Seçilenleri Sil ({selectedRaporlar.length})
+              </Button>
+            )}
             {canEdit && (
               <>
                 <Button
