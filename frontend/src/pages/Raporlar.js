@@ -179,6 +179,28 @@ const Raporlar = () => {
     );
   };
 
+  const fetchRaporlarByProje = async (projeId) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get(`${API}/raporlar`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      
+      const filtered = response.data.filter(r => r.proje_id === projeId);
+      setRaporlar(filtered);
+      setLoading(false);
+      
+      if (filtered.length > 0) {
+        toast.success(`Proje raporları: ${filtered.length} rapor bulundu`);
+      } else {
+        toast.info('Bu proje için henüz rapor oluşturulmamış');
+      }
+    } catch (error) {
+      toast.error('Raporlar yüklenemedi');
+      setLoading(false);
+    }
+  };
+
   const handleExportExcel = async () => {
     try {
       const token = localStorage.getItem('token');
