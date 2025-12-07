@@ -335,7 +335,7 @@ const Dashboard = () => {
                     <p className="text-xs text-gray-500 mt-2">
                       {new Date(proje.created_at).toLocaleDateString('tr-TR')}
                     </p>
-                  </div>
+                  </button>
                 ))}
               </div>
             ) : (
