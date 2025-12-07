@@ -15,6 +15,9 @@ const Dashboard = () => {
   const [stats, setStats] = useState(null);
   const [projeler, setProjeler] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [showRaporModal, setShowRaporModal] = useState(false);
+  const [filteredRaporlar, setFilteredRaporlar] = useState([]);
+  const [filterType, setFilterType] = useState(null);
 
   useEffect(() => {
     fetchStats();
