@@ -20,6 +20,8 @@ const RaporDetailModal = ({ open, onClose, rapor }) => {
   const [dosyalar, setDosyalar] = useState([]);
   const [uploading, setUploading] = useState(false);
   const [user, setUser] = useState(null);
+  const [previewFile, setPreviewFile] = useState(null);
+  const [showPreview, setShowPreview] = useState(false);
 
   useEffect(() => {
     if (rapor) {
