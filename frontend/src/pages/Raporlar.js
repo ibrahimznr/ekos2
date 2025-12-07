@@ -380,10 +380,10 @@ const Raporlar = () => {
                     <div className="flex-1 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                       <div className="flex-1 space-y-3">
                         {/* Header */}
-                        <div className="flex items-start justify-between gap-4">
-                          <div>
-                            <h3 className="text-xl font-bold text-gray-800 mb-1">{rapor.ekipman_adi}</h3>
-                            <div className="flex items-center gap-3">
+                        <div className="flex items-start justify-between gap-2 sm:gap-4">
+                          <div className="flex-1">
+                            <h3 className="text-lg sm:text-xl font-bold text-gray-800 mb-1">{rapor.ekipman_adi}</h3>
+                            <div className="flex items-center gap-3 flex-wrap">
                               <p className="text-sm text-gray-500 font-medium">{rapor.rapor_no}</p>
                               {rapor.created_by_username && (
                                 <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
@@ -392,14 +392,33 @@ const Raporlar = () => {
                               )}
                             </div>
                           </div>
-                          {rapor.uygunluk && (
-                            <span
-                              className={rapor.uygunluk === 'Uygun' ? 'badge-success' : 'badge-danger'}
-                              data-testid={`uygunluk-badge-${rapor.id}`}
-                            >
-                              {rapor.uygunluk}
-                            </span>
-                          )}
+                          <div className="flex items-center gap-2 flex-shrink-0">
+                            {/* Durum Toggle */}
+                            {canEdit && (
+                              <Button
+                                onClick={() => handleToggleDurum(rapor.id, rapor.durum || 'Aktif')}
+                                size="sm"
+                                className={`
+                                  ${(rapor.durum || 'Aktif') === 'Aktif' 
+                                    ? 'bg-green-600 hover:bg-green-700 text-white' 
+                                    : 'bg-gray-400 hover:bg-gray-500 text-white'
+                                  }
+                                  text-xs sm:text-sm px-2 sm:px-3 py-1 min-w-[60px] sm:min-w-[70px]
+                                `}
+                                data-testid={`toggle-status-${rapor.id}`}
+                              >
+                                {(rapor.durum || 'Aktif') === 'Aktif' ? '✓ Aktif' : '⏸ Pasif'}
+                              </Button>
+                            )}
+                            {rapor.uygunluk && (
+                              <span
+                                className={`${rapor.uygunluk === 'Uygun' ? 'badge-success' : 'badge-danger'} text-xs sm:text-sm`}
+                                data-testid={`uygunluk-badge-${rapor.id}`}
+                              >
+                                {rapor.uygunluk}
+                              </span>
+                            )}
+                          </div>
                         </div>
                       
                       {/* Info Grid */}
