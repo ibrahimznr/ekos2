@@ -415,6 +415,7 @@ const Raporlar = () => {
                       )}
                     </div>
                   </div>
+                  </div>
                 </CardContent>
               </Card>
             ))}
