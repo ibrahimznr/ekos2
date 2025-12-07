@@ -204,6 +204,33 @@ const Raporlar = () => {
     }
   };
 
+  const handleToggleDurum = async (raporId, currentDurum) => {
+    try {
+      const token = localStorage.getItem('token');
+      
+      // Optimistic update
+      setRaporlar(prev => prev.map(r => 
+        r.id === raporId 
+          ? { ...r, durum: currentDurum === 'Aktif' ? 'Pasif' : 'Aktif' }
+          : r
+      ));
+      
+      const response = await axios.patch(`${API}/raporlar/${raporId}/durum`, {}, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      
+      toast.success(response.data.message);
+    } catch (error) {
+      // Revert on error
+      setRaporlar(prev => prev.map(r => 
+        r.id === raporId 
+          ? { ...r, durum: currentDurum }
+          : r
+      ));
+      toast.error(error.response?.data?.detail || 'Durum güncellenemedi');
+    }
+  };
+
   const handleExportExcel = async () => {
     try {
       const token = localStorage.getItem('token');
