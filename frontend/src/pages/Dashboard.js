@@ -346,35 +346,20 @@ const Dashboard = () => {
             )}
           </CardContent>
         </Card>
-
-        {/* Quick Actions */}
-        <Card className="shadow-md">
-          <CardHeader>
-            <CardTitle className="text-lg">Hızlı İşlemler</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-wrap gap-3">
-              <Button
-                onClick={() => navigate('/raporlar')}
-                className="bg-gradient-to-r from-blue-700 to-blue-600 hover:from-blue-800 hover:to-blue-700 text-white shadow-sm"
-                data-testid="view-all-reports-button"
-              >
-                <FileText className="h-4 w-4 mr-2" />
-                Tüm Raporları Görüntüle
-              </Button>
-              <Button
-                onClick={() => navigate('/raporlar?filter=expiring')}
-                variant="outline"
-                className="border-amber-600 text-amber-700 hover:bg-amber-50"
-                data-testid="expiring-reports-button"
-              >
-                <AlertTriangle className="h-4 w-4 mr-2" />
-                Süresi Dolanlar
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
       </div>
+
+      {/* RaporModal */}
+      {showRaporModal && (
+        <RaporModal
+          open={showRaporModal}
+          onClose={() => setShowRaporModal(false)}
+          rapor={null}
+          onSuccess={() => {
+            setShowRaporModal(false);
+            fetchStats();
+          }}
+        />
+      )}
     </Layout>
   );
 };
