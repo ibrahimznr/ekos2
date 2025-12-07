@@ -66,6 +66,57 @@ const Dashboard = () => {
     }
   };
 
+  const fetchExpiredReports = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get(`${API}/raporlar?arama=&kategori=&uygunluk=`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      
+      const today = new Date();
+      const expired = response.data.filter(r => {
+        if (!r.gecerlilik_tarihi) return false;
+        const expiryDate = new Date(r.gecerlilik_tarihi);
+        return expiryDate < today;
+      });
+      
+      setFilteredRaporlar(expired);
+      setFilterType('expired');
+      navigate('/raporlar', { state: { filteredReports: expired, filterType: 'Süresi Geçenler' } });
+    } catch (error) {
+      toast.error('Süresi geçen raporlar yüklenemedi');
+    }
+  };
+
+  const fetchExpiringReports = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get(`${API}/raporlar?arama=&kategori=&uygunluk=`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      
+      const today = new Date();
+      const thirtyDaysLater = new Date();
+      thirtyDaysLater.setDate(today.getDate() + 30);
+      
+      const expiring = response.data.filter(r => {
+        if (!r.gecerlilik_tarihi) return false;
+        const expiryDate = new Date(r.gecerlilik_tarihi);
+        return expiryDate >= today && expiryDate <= thirtyDaysLater;
+      });
+      
+      setFilteredRaporlar(expiring);
+      setFilterType('expiring');
+      navigate('/raporlar', { state: { filteredReports: expiring, filterType: '30 Gün İçinde Süresi Dolacaklar' } });
+    } catch (error) {
+      toast.error('Yaklaşan raporlar yüklenemedi');
+    }
+  };
+
+  const handleProjectClick = (projeId) => {
+    navigate('/raporlar', { state: { filterProjeId: projeId } });
+  };
+
   if (loading) {
     return (
       <Layout>
