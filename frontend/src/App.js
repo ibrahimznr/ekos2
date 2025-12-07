@@ -6,6 +6,7 @@ import Register from '@/pages/Register';
 import Dashboard from '@/pages/Dashboard';
 import Raporlar from '@/pages/Raporlar';
 import AdminPanel from '@/pages/AdminPanel';
+import ErrorBoundary from '@/components/ErrorBoundary';
 import { Toaster } from '@/components/ui/sonner';
 
 const ProtectedRoute = ({ children }) => {
