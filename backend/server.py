@@ -135,6 +135,7 @@ class Rapor(BaseModel):
     gecerlilik_tarihi: Optional[str] = None
     aciklama: Optional[str] = None
     uygunluk: Optional[str] = None  # Uygun/Uygun Değil
+    durum: str = "Aktif"  # Aktif/Pasif
     created_by: str
     created_by_username: str
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
