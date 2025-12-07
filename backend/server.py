@@ -643,6 +643,26 @@ async def delete_rapor(rapor_id: str, current_user: dict = Depends(get_current_u
     
     return {"message": "Rapor silindi"}
 
+@api_router.patch("/raporlar/{rapor_id}/durum")
+async def toggle_rapor_durum(rapor_id: str, current_user: dict = Depends(get_current_user)):
+    """Toggle report status between Aktif and Pasif"""
+    if current_user["role"] not in ["admin", "inspector"]:
+        raise HTTPException(status_code=403, detail="Rapor durumunu değiştirme yetkiniz yok")
+    
+    rapor = await db.raporlar.find_one({"id": rapor_id}, {"_id": 0})
+    if not rapor:
+        raise HTTPException(status_code=404, detail="Rapor bulunamadı")
+    
+    # Toggle durum
+    yeni_durum = "Pasif" if rapor.get("durum", "Aktif") == "Aktif" else "Aktif"
+    
+    await db.raporlar.update_one(
+        {"id": rapor_id},
+        {"$set": {"durum": yeni_durum, "updated_at": datetime.now(timezone.utc).isoformat()}}
+    )
+    
+    return {"message": f"Rapor durumu {yeni_durum} olarak güncellendi", "durum": yeni_durum}
+
 @api_router.post("/raporlar/bulk-delete")
 async def bulk_delete_raporlar(rapor_ids: List[str], current_user: dict = Depends(get_current_user)):
     if current_user["role"] not in ["admin", "inspector"]:
