@@ -1186,6 +1186,21 @@ async def create_proje(proje_create: ProjeCreate, current_user: dict = Depends(g
     await db.projeler.insert_one(doc)
     return proje
 
+@api_router.put("/projeler/{proje_id}")
+async def update_proje(proje_id: str, proje_update: ProjeCreate, current_user: dict = Depends(get_current_user)):
+    if current_user["role"] != "admin":
+        raise HTTPException(status_code=403, detail="Bu işlem için yetkiniz yok")
+    
+    existing = await db.projeler.find_one({"id": proje_id}, {"_id": 0})
+    if not existing:
+        raise HTTPException(status_code=404, detail="Proje bulunamadı")
+    
+    update_data = proje_update.model_dump()
+    await db.projeler.update_one({"id": proje_id}, {"$set": update_data})
+    
+    updated_proje = await db.projeler.find_one({"id": proje_id}, {"_id": 0})
+    return updated_proje
+
 @api_router.delete("/projeler/{proje_id}")
 async def delete_proje(proje_id: str, current_user: dict = Depends(get_current_user)):
     if current_user["role"] != "admin":
