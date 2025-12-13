@@ -999,7 +999,9 @@ async def import_excel(
         headers = [cell.value for cell in ws[1]]
         
         imported_count = 0
+        skipped_count = 0
         errors = []
+        warnings = []
         
         for row_idx, row in enumerate(ws.iter_rows(min_row=2, values_only=True), 2):
             if not any(row):  # Skip empty rows
