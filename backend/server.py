@@ -1130,12 +1130,15 @@ async def get_dashboard_stats(current_user: dict = Depends(get_current_user)):
                 continue
     
     # Category distribution (top 6) - get unique categories from reports
-    pipeline = [
+    pipeline = []
+    if base_query:
+        pipeline.append({"$match": base_query})
+    pipeline.extend([
         {"$group": {"_id": "$kategori", "count": {"$sum": 1}}},
         {"$sort": {"count": -1}},
         {"$limit": 6},
         {"$project": {"kategori": "$_id", "count": 1, "_id": 0}}
-    ]
+    ])
     
     kategori_dagilim = await db.raporlar.aggregate(pipeline).to_list(6)
     
