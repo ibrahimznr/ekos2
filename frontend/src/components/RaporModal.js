@@ -141,17 +141,32 @@ const RaporModal = ({ open, onClose, rapor, onSuccess }) => {
       });
       
       setKategoriler(uniqueKategoriler);
+      
+      // Build category-subcategory map from kategoriler data
+      const categoryMap = {};
+      response.data.forEach(kategori => {
+        if (kategori.alt_kategoriler && kategori.alt_kategoriler.length > 0) {
+          categoryMap[kategori.isim] = kategori.alt_kategoriler;
+        }
+      });
+      setKategoriAltKategoriMap(categoryMap);
     } catch (error) {
       toast.error('Kategoriler yüklenemedi');
     }
   };
 
   const fetchKategoriAltKategoriMap = async () => {
+    // This is now handled in fetchKategoriler
+    // Keep for backward compatibility
     try {
-      const response = await axios.get(`${API}/kategori-alt-kategoriler`);
-      setKategoriAltKategoriMap(response.data);
+      const token = localStorage.getItem('token');
+      const response = await axios.get(`${API}/kategori-alt-kategoriler`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      // Merge with existing map
+      setKategoriAltKategoriMap(prev => ({ ...prev, ...response.data }));
     } catch (error) {
-      console.error('Kategori-alt kategori map yüklenemedi');
+      console.log('Kategori-alt kategori map API not available, using kategoriler data');
     }
   };
 
