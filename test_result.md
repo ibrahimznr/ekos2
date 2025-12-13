@@ -226,6 +226,18 @@ frontend:
       - working: true
         agent: "testing"
         comment: "NEW FEATURES TESTING COMPLETED: ✅ Dashboard Hızlı İşlemler: All 3 buttons found - 'Yeni Rapor Oluştur' (blue), 'Projeler' (NEW indigo/purple), 'Tüm Raporları Görüntüle' (blue outline) ✅ Projeler Navigation: Button correctly navigates to /admin ✅ Report Status Buttons: Aktif/Pasif toggle buttons working with '✓ Aktif' (green) and '⏸ Pasif' (gray), positioned next to Uygun badges, optimistic updates functional ✅ Mobile Responsive: All features work on mobile (375x667), buttons stack vertically, no layout issues ✅ All critical requirements met and verified working with admin credentials."
+
+  - task: "EKOS Firma Filter Feature"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/components/FiltrelemePanel.js, /app/frontend/src/pages/Raporlar.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "EKOS FIRMA FILTER COMPREHENSIVE TESTING COMPLETED: ✅ FOUR DROPDOWNS VERIFIED: Raporlar page Filtreler section contains exactly 4 dropdowns - Kategori, Firma (NEW), Periyot, Uygunluk ✅ GRID LAYOUT: Desktop shows 4-column grid layout (grid-cols-1 sm:grid-cols-2 lg:grid-cols-4) as required ✅ FIRMA DROPDOWN FUNCTIONALITY: Shows 'Tüm firmalar' option at top, populates with actual firma names from existing reports (Test EKOS Company, Dem-Alt, Vidos Mimarlık, Nur İş) ✅ FILTERING WORKS: Firma filter successfully filters reports to show only selected firma's reports ✅ COMBINATION FILTERS: Multiple filters work together with AND logic (firma + kategori) ✅ CLEAR FILTERS: 'Filtreleri Temizle' button resets all filters including firma ✅ RESPONSIVE DESIGN: All 4 filters accessible on mobile viewport (375x667), grid stacks vertically ✅ NO CONSOLE ERRORS: No critical JavaScript errors detected ✅ VISUAL VERIFICATION: Screenshots confirm all requirements met with admin credentials (ibrahimznrmak@gmail.com). Firma filter feature fully functional and ready for production."
         agent: "main"
         comment: "Proje and Şehir dropdowns added and working. Required fields marked with *"
       - working: true
