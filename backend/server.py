@@ -387,6 +387,7 @@ async def register(user_create: UserCreate):
         username=user.username,
         email=user.email,
         role=user.role,
+        firma_adi=user.firma_adi,
         email_verified=user.email_verified,
         created_at=user.created_at
     )
