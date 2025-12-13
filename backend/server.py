@@ -1146,7 +1146,11 @@ async def import_excel(
 # Dashboard Stats
 @api_router.get("/dashboard/stats")
 async def get_dashboard_stats(current_user: dict = Depends(get_current_user)):
-    # Firma-based filter for viewers
+    # Only admin and inspector can access dashboard
+    if current_user.get("role") not in ["admin", "inspector"]:
+        raise HTTPException(status_code=403, detail="Dashboard'a erişim yetkiniz yok")
+    
+    # Firma-based filter for viewers (keeping for future use)
     base_query = {}
     user_firma = current_user.get("firma_adi")
     if user_firma and current_user.get("role") == "viewer":
