@@ -15,8 +15,9 @@ import { toast } from 'sonner';
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
-const FiltrelemePanel = ({ filters, onFilterChange }) => {
+const FiltrelemePanel = ({ filters, onFilterChange, raporlar = [] }) => {
   const [kategoriler, setKategoriler] = useState([]);
+  const [firmalar, setFirmalar] = useState([]);
   const [localFilters, setLocalFilters] = useState(filters);
 
   useEffect(() => {
@@ -26,6 +27,14 @@ const FiltrelemePanel = ({ filters, onFilterChange }) => {
   useEffect(() => {
     setLocalFilters(filters);
   }, [filters]);
+
+  useEffect(() => {
+    // Extract unique firma names from raporlar
+    if (raporlar && raporlar.length > 0) {
+      const uniqueFirmalar = [...new Set(raporlar.map(r => r.firma).filter(Boolean))].sort();
+      setFirmalar(uniqueFirmalar);
+    }
+  }, [raporlar]);
 
   const fetchKategoriler = async () => {
     try {
