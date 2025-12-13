@@ -138,12 +138,12 @@ const AdminPanel = () => {
   const handleCreateUser = async () => {
     try {
       const token = localStorage.getItem('token');
+      // Note: User editing not implemented in backend yet
       await axios.post(`${API}/auth/register`, newUser, {
         headers: { Authorization: `Bearer ${token}` },
       });
       toast.success('Kullanıcı oluşturuldu');
-      setShowUserDialog(false);
-      setNewUser({ username: '', email: '', password: '', password_confirm: '', role: 'viewer' });
+      handleCloseDialog('user');
       fetchUsers();
     } catch (error) {
       toast.error(error.response?.data?.detail || 'Kullanıcı oluşturulamadı');
@@ -153,31 +153,50 @@ const AdminPanel = () => {
   const handleCreateKategori = async () => {
     try {
       const token = localStorage.getItem('token');
-      await axios.post(`${API}/kategoriler`, newKategori, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      toast.success('Kategori oluşturuldu');
-      setShowKategoriDialog(false);
-      setNewKategori({ isim: '', aciklama: '', alt_kategoriler: [] });
-      setAltKategoriInput('');
+      
+      if (editMode && editingItem) {
+        // Update existing
+        await axios.put(`${API}/kategoriler/${editingItem.id}`, newKategori, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        toast.success('Kategori güncellendi');
+      } else {
+        // Create new
+        await axios.post(`${API}/kategoriler`, newKategori, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        toast.success('Kategori oluşturuldu');
+      }
+      
+      handleCloseDialog('kategori');
       fetchKategoriler();
     } catch (error) {
-      toast.error(error.response?.data?.detail || 'Kategori oluşturulamadı');
+      toast.error(error.response?.data?.detail || (editMode ? 'Kategori güncellenemedi' : 'Kategori oluşturulamadı'));
     }
   };
 
   const handleCreateProje = async () => {
     try {
       const token = localStorage.getItem('token');
-      await axios.post(`${API}/projeler`, newProje, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      toast.success('Proje oluşturuldu');
-      setShowProjeDialog(false);
-      setNewProje({ proje_adi: '', proje_kodu: '', lokasyon: '', baslangic_tarihi: '', bitis_tarihi: '', durum: 'Aktif', aciklama: '' });
+      
+      if (editMode && editingItem) {
+        // Update existing
+        await axios.put(`${API}/projeler/${editingItem.id}`, newProje, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        toast.success('Proje güncellendi');
+      } else {
+        // Create new
+        await axios.post(`${API}/projeler`, newProje, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        toast.success('Proje oluşturuldu');
+      }
+      
+      handleCloseDialog('proje');
       fetchProjeler();
     } catch (error) {
-      toast.error(error.response?.data?.detail || 'Proje oluşturulamadı');
+      toast.error(error.response?.data?.detail || (editMode ? 'Proje güncellenemedi' : 'Proje oluşturulamadı'));
     }
   };
 
