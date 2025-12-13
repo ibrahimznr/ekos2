@@ -19,11 +19,17 @@ const Layout = ({ children }) => {
     navigate('/login');
   };
 
-  const navItems = [
-    { path: '/', label: 'Dashboard', icon: LayoutDashboard },
-    { path: '/raporlar', label: 'Raporlar', icon: FileText },
-  ];
+  const navItems = [];
+  
+  // Dashboard only for admin and inspector
+  if (user.role === 'admin' || user.role === 'inspector') {
+    navItems.push({ path: '/', label: 'Dashboard', icon: LayoutDashboard });
+  }
+  
+  // Raporlar for everyone
+  navItems.push({ path: '/raporlar', label: 'Raporlar', icon: FileText });
 
+  // Admin panel only for admin
   if (user.role === 'admin') {
     navItems.push({ path: '/admin', label: 'Yönetim', icon: Shield });
   }
