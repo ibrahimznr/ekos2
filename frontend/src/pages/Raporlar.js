@@ -46,6 +46,8 @@ const Raporlar = () => {
     firma: '',
   });
   const [sortOrder, setSortOrder] = useState('newest'); // 'newest' or 'oldest'
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(20);
   
   const [showRaporModal, setShowRaporModal] = useState(false);
   const [showDetailModal, setShowDetailModal] = useState(false);
