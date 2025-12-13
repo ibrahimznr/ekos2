@@ -265,6 +265,22 @@ const Raporlar = () => {
 
   const canEdit = user?.role === 'admin' || user?.role === 'inspector';
 
+  // Sort reports based on sortOrder
+  const sortedRaporlar = useMemo(() => {
+    const sorted = [...raporlar];
+    sorted.sort((a, b) => {
+      const dateA = new Date(a.created_at || a.tarih || 0);
+      const dateB = new Date(b.created_at || b.tarih || 0);
+      
+      if (sortOrder === 'newest') {
+        return dateB - dateA; // Yeniden eskiye
+      } else {
+        return dateA - dateB; // Eskiden yeniye
+      }
+    });
+    return sorted;
+  }, [raporlar, sortOrder]);
+
   if (loading) {
     return (
       <Layout>
