@@ -81,6 +81,7 @@ const Raporlar = () => {
       if (customFilters.kategori || filters.kategori) params.append('kategori', customFilters.kategori || filters.kategori);
       if (customFilters.periyot || filters.periyot) params.append('periyot', customFilters.periyot || filters.periyot);
       if (customFilters.uygunluk || filters.uygunluk) params.append('uygunluk', customFilters.uygunluk || filters.uygunluk);
+      if (customFilters.firma || filters.firma) params.append('firma', customFilters.firma || filters.firma);
       
       // Add limit for better performance
       params.append('limit', '500');
