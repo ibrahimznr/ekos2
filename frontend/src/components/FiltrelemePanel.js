@@ -80,7 +80,7 @@ const FiltrelemePanel = ({ filters, onFilterChange, raporlar = [] }) => {
         )}
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         {/* Kategori Filter */}
         <div className="space-y-1">
           <Label className="text-xs text-gray-600">Kategori</Label>
@@ -96,6 +96,27 @@ const FiltrelemePanel = ({ filters, onFilterChange, raporlar = [] }) => {
               {kategoriler.map((kat) => (
                 <SelectItem key={kat.id} value={kat.isim}>
                   {kat.isim}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Firma Filter */}
+        <div className="space-y-1">
+          <Label className="text-xs text-gray-600">Firma</Label>
+          <Select
+            value={localFilters.firma || "__all__"}
+            onValueChange={(value) => handleFilterChange('firma', value === "__all__" ? "" : value)}
+          >
+            <SelectTrigger data-testid="filter-firma-select">
+              <SelectValue placeholder="Tüm firmalar" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="__all__">Tüm firmalar</SelectItem>
+              {firmalar.map((firma) => (
+                <SelectItem key={firma} value={firma}>
+                  {firma}
                 </SelectItem>
               ))}
             </SelectContent>
