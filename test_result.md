@@ -238,6 +238,18 @@ frontend:
       - working: true
         agent: "testing"
         comment: "EKOS FIRMA FILTER COMPREHENSIVE TESTING COMPLETED: ✅ FOUR DROPDOWNS VERIFIED: Raporlar page Filtreler section contains exactly 4 dropdowns - Kategori, Firma (NEW), Periyot, Uygunluk ✅ GRID LAYOUT: Desktop shows 4-column grid layout (grid-cols-1 sm:grid-cols-2 lg:grid-cols-4) as required ✅ FIRMA DROPDOWN FUNCTIONALITY: Shows 'Tüm firmalar' option at top, populates with actual firma names from existing reports (Test EKOS Company, Dem-Alt, Vidos Mimarlık, Nur İş) ✅ FILTERING WORKS: Firma filter successfully filters reports to show only selected firma's reports ✅ COMBINATION FILTERS: Multiple filters work together with AND logic (firma + kategori) ✅ CLEAR FILTERS: 'Filtreleri Temizle' button resets all filters including firma ✅ RESPONSIVE DESIGN: All 4 filters accessible on mobile viewport (375x667), grid stacks vertically ✅ NO CONSOLE ERRORS: No critical JavaScript errors detected ✅ VISUAL VERIFICATION: Screenshots confirm all requirements met with admin credentials (ibrahimznrmak@gmail.com). Firma filter feature fully functional and ready for production."
+
+  - task: "EKOS Firma-Based Registration and Access Control"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/pages/Register.js, /app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "EKOS FIRMA-BASED REGISTRATION AND ACCESS CONTROL COMPREHENSIVE TESTING COMPLETED: ✅ REGISTER PAGE VERIFICATION: All form fields present in correct order (Kullanıcı Adı, Email, Firma Adı *, Şifre, Şifre Tekrar), firma field has correct placeholder 'Çalıştığınız firma adını girin', helper text '* Firma adı EKOS sisteminde kayıtlı olmalıdır' displayed correctly ✅ INVALID FIRMA HANDLING: Registration with 'NonExistentCompany999' shows 'Kayıt Yapılamadı' dialog with red X icon, displays firma name and 'EKOS sisteminde kayıtlı değil' message, 'Giriş Sayfasına Dön' button redirects to /login ✅ VALID FIRMA REGISTRATION: Successfully registered with 'Test EKOS Company', email verification dialog appears, registration process completes correctly ✅ FIRMA USER ACCESS CONTROL: Login successful as firma user (firmatest@test.com), viewer role auto-assigned, user.firma_adi set to 'Test EKOS Company', Raporlar page shows only 'Test EKOS Company' reports (1 report found), no cross-firma data leakage detected, dashboard shows firma-specific statistics (1 total report, 1 this month, 0 suitable, 0 unsuitable) ✅ ALL CRITICAL CHECKS PASSED: Firma field required, invalid firma error handling, valid firma acceptance, viewer role assignment, firma-based filtering, no data leakage. EKOS firma-based registration and access control system fully functional and secure."
         agent: "main"
         comment: "Proje and Şehir dropdowns added and working. Required fields marked with *"
       - working: true
