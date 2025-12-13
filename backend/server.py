@@ -1073,19 +1073,24 @@ async def import_excel(
 # Dashboard Stats
 @api_router.get("/dashboard/stats")
 async def get_dashboard_stats(current_user: dict = Depends(get_current_user)):
+    # Firma-based filter for viewers
+    base_query = {}
+    user_firma = current_user.get("firma_adi")
+    if user_firma and current_user.get("role") == "viewer":
+        base_query["firma"] = user_firma
+    
     # Total reports
-    total_raporlar = await db.raporlar.count_documents({})
+    total_raporlar = await db.raporlar.count_documents(base_query)
     
     # This month reports
     now = datetime.now(timezone.utc)
     start_of_month = datetime(now.year, now.month, 1, tzinfo=timezone.utc)
-    monthly_raporlar = await db.raporlar.count_documents({
-        "created_at": {"$gte": start_of_month.isoformat()}
-    })
+    monthly_query = {**base_query, "created_at": {"$gte": start_of_month.isoformat()}}
+    monthly_raporlar = await db.raporlar.count_documents(monthly_query)
     
     # Uygunluk stats
-    uygun_count = await db.raporlar.count_documents({"uygunluk": "Uygun"})
-    uygun_degil_count = await db.raporlar.count_documents({"uygunluk": "Uygun Değil"})
+    uygun_count = await db.raporlar.count_documents({**base_query, "uygunluk": "Uygun"})
+    uygun_degil_count = await db.raporlar.count_documents({**base_query, "uygunluk": "Uygun Değil"})
     
     # Expiring reports (30 days) - optimized query
     now_date = now.date()
