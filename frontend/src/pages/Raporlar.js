@@ -117,10 +117,12 @@ const Raporlar = () => {
   };
 
   const handleSearch = () => {
+    setCurrentPage(1);
     fetchRaporlar();
   };
 
   const handleFilterChange = (newFilters) => {
+    setCurrentPage(1);
     setFilters(newFilters);
     fetchRaporlar(newFilters);
   };
