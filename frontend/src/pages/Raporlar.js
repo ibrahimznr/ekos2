@@ -18,7 +18,7 @@ import RaporDetailModal from '@/components/RaporDetailModal';
 import ExcelImportModal from '@/components/ExcelImportModal';
 import FiltrelemePanel from '@/components/FiltrelemePanel';
 import { toast } from 'sonner';
-import { Plus, Search, Download, Upload, Eye, Edit, Trash2, FileText, AlertCircle, ArrowUpDown } from 'lucide-react';
+import { Plus, Search, Download, Upload, Eye, Edit, Trash2, FileText, AlertCircle, ArrowUpDown, ChevronLeft, ChevronRight } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
