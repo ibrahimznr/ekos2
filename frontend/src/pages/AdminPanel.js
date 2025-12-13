@@ -637,10 +637,13 @@ const AdminPanel = () => {
                         onCheckedChange={() => handleToggleSelect(proje.id, 'proje')}
                         className="mt-1"
                       />
-                      <div className="flex-1">
+                      <div 
+                        className="flex-1 cursor-pointer"
+                        onClick={() => handleEditClick(proje, 'proje')}
+                      >
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
-                            <h3 className="font-semibold text-gray-800 mb-2">{proje.proje_adi}</h3>
+                            <h3 className="font-semibold text-gray-800 mb-2 hover:text-blue-600">{proje.proje_adi}</h3>
                             {proje.proje_kodu && (
                               <p className="text-xs text-blue-600 mb-1 font-mono">{proje.proje_kodu}</p>
                             )}
