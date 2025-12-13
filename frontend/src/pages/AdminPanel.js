@@ -866,7 +866,7 @@ const AdminPanel = () => {
               İptal
             </Button>
             <Button onClick={handleCreateKategori} data-testid="submit-category-button">
-              Oluştur
+              {editMode ? 'Güncelle' : 'Oluştur'}
             </Button>
           </DialogFooter>
         </DialogContent>
