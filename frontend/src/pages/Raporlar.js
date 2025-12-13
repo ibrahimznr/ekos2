@@ -352,7 +352,7 @@ const Raporlar = () => {
               </div>
               
               {/* Filters */}
-              <FiltrelemePanel filters={filters} onFilterChange={handleFilterChange} />
+              <FiltrelemePanel filters={filters} onFilterChange={handleFilterChange} raporlar={raporlar} />
             </div>
           </CardContent>
         </Card>
