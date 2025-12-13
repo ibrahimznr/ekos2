@@ -537,12 +537,32 @@ async def get_raporlar(
 ):
     query = {}
     
+    # Firma-based access control for viewers
+    user_firma = current_user.get("firma_adi")
+    if user_firma and current_user.get("role") == "viewer":
+        # Viewers can only see their own company's reports
+        query["firma"] = user_firma
+    elif firma:
+        # Admin/Inspector can filter by firma
+        query["firma"] = firma
+    
     if arama:
-        query["$or"] = [
-            {"rapor_no": {"$regex": arama, "$options": "i"}},
-            {"ekipman_adi": {"$regex": arama, "$options": "i"}},
-            {"firma": {"$regex": arama, "$options": "i"}}
-        ]
+        # If user has firma restriction, add it to $and
+        if user_firma and current_user.get("role") == "viewer":
+            query["$and"] = [
+                {"firma": user_firma},
+                {"$or": [
+                    {"rapor_no": {"$regex": arama, "$options": "i"}},
+                    {"ekipman_adi": {"$regex": arama, "$options": "i"}},
+                    {"firma": {"$regex": arama, "$options": "i"}}
+                ]}
+            ]
+        else:
+            query["$or"] = [
+                {"rapor_no": {"$regex": arama, "$options": "i"}},
+                {"ekipman_adi": {"$regex": arama, "$options": "i"}},
+                {"firma": {"$regex": arama, "$options": "i"}}
+            ]
     
     if kategori:
         query["kategori"] = kategori
@@ -552,9 +572,6 @@ async def get_raporlar(
     
     if uygunluk:
         query["uygunluk"] = uygunluk
-    
-    if firma:
-        query["firma"] = firma
     
     # Limit to 500 records by default for better performance
     raporlar = await db.raporlar.find(query, {"_id": 0}).sort("created_at", -1).skip(skip).limit(limit).to_list(limit)
