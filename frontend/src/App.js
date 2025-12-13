@@ -17,6 +17,22 @@ const ProtectedRoute = ({ children }) => {
   return children;
 };
 
+const DashboardRoute = () => {
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  
+  // Viewer'lar için raporlar sayfasına yönlendir
+  if (user.role === 'viewer') {
+    return <Navigate to="/raporlar" replace />;
+  }
+  
+  // Admin ve Inspector için Dashboard
+  return (
+    <ProtectedRoute>
+      <Dashboard />
+    </ProtectedRoute>
+  );
+};
+
 function App() {
   return (
     <ErrorBoundary>
