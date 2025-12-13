@@ -128,11 +128,26 @@ const RaporDetailModal = ({ open, onClose, rapor }) => {
         responseType: 'blob',
       });
 
-      const url = window.URL.createObjectURL(new Blob([response.data]));
-      setPreviewFile({ ...dosya, url });
+      // Determine blob type from filename
+      const fileExt = dosya.dosya_adi.split('.').pop().toLowerCase();
+      const mimeTypes = {
+        'pdf': 'application/pdf',
+        'jpg': 'image/jpeg',
+        'jpeg': 'image/jpeg',
+        'png': 'image/png',
+        'gif': 'image/gif',
+        'webp': 'image/webp',
+        'bmp': 'image/bmp',
+      };
+      const mimeType = mimeTypes[fileExt] || 'application/octet-stream';
+
+      const blob = new Blob([response.data], { type: mimeType });
+      const url = window.URL.createObjectURL(blob);
+      setPreviewFile({ ...dosya, url, mimeType });
       setShowPreview(true);
     } catch (error) {
-      toast.error('Dosya önizlenemiyor');
+      console.error('Preview error:', error);
+      toast.error(`Dosya önizlenemiyor: ${error.response?.statusText || error.message}`);
     }
   };
 
