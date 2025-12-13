@@ -14,7 +14,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { toast } from 'sonner';
-import { UserPlus, ArrowLeft, Mail, CheckCircle } from 'lucide-react';
+import { UserPlus, ArrowLeft, Mail, CheckCircle, XCircle } from 'lucide-react';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
