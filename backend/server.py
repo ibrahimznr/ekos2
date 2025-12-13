@@ -916,8 +916,9 @@ async def download_template():
     ws = wb.active
     ws.title = "Rapor Şablonu"
     
+    # Updated headers with Şehir as first column
     headers = [
-        "Ekipman Adı", "Kategori", "Firma", "Lokasyon", "Marka/Model",
+        "Şehir", "Ekipman Adı", "Kategori", "Firma", "Lokasyon", "Marka/Model",
         "Seri No", "Alt Kategori", "Periyot", "Geçerlilik Tarihi",
         "Uygunluk", "Açıklama"
     ]
@@ -931,16 +932,30 @@ async def download_template():
         cell.font = header_font
         cell.alignment = Alignment(horizontal="center", vertical="center")
     
-    # Example row
-    example = [
-        "Asansör A1", "Asansör", "ABC Firma", "İstanbul", "Otis 2000",
-        "SN12345", "Yolcu Asansörü", "6 Aylık", "2025-12-31",
-        "Uygun", "Örnek açıklama"
+    # Example rows with different cities
+    examples = [
+        ["İstanbul", "Asansör A1", "Asansör", "ABC Firma", "İstanbul Ofis", "Otis 2000",
+         "SN12345", "Yolcu Asansörü", "6 Aylık", "2025-12-31", "Uygun", "Örnek açıklama"],
+        ["Ankara", "Hidrofor H2", "Basınçlı Kaplar", "XYZ Ltd", "Ankara Fabrika", "Grundfos",
+         "SN67890", "Hidrofor", "3 Aylık", "2025-09-30", "Uygun Değil", ""],
+        ["İzmir", "Forklift F3", "Forklift", "Test Firma", "İzmir Depo", "Toyota", "", "", "", "", "", ""]
     ]
     
-    for col, value in enumerate(example, 1):
-        ws.cell(row=2, column=col, value=value)
+    for row_idx, example in enumerate(examples, 2):
+        for col, value in enumerate(example, 1):
+            ws.cell(row=row_idx, column=col, value=value)
     
+    # Add city list in a separate sheet
+    ws_cities = wb.create_sheet("Şehir Listesi")
+    ws_cities.cell(row=1, column=1, value="Geçerli Şehirler (Büyük/küçük harf önemli değil)")
+    ws_cities.cell(row=1, column=1).font = Font(bold=True, size=12)
+    
+    for idx, sehir in enumerate(SEHIRLER, 2):
+        ws_cities.cell(row=idx, column=1, value=sehir["isim"])
+    
+    ws_cities.column_dimensions['A'].width = 25
+    
+    # Set column widths for main sheet
     for col in ws.columns:
         column = col[0].column_letter
         ws.column_dimensions[column].width = 20
