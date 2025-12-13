@@ -283,6 +283,15 @@ const Raporlar = () => {
     return sorted;
   }, [raporlar, sortOrder]);
 
+  // Paginate sorted reports
+  const paginatedRaporlar = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    return sortedRaporlar.slice(startIndex, endIndex);
+  }, [sortedRaporlar, currentPage, itemsPerPage]);
+
+  const totalPages = Math.ceil(sortedRaporlar.length / itemsPerPage);
+
   if (loading) {
     return (
       <Layout>
