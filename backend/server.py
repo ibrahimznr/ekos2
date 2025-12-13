@@ -912,27 +912,73 @@ async def import_excel(
                 continue
             
             try:
-                rapor_no = await generate_rapor_no()
+                # Excel format: Proje ID | Şehir | Ekipman Adı | Kategori | Firma | Lokasyon | Marka/Model | Seri No | Alt Kategori | Periyot | Geçerlilik Tarihi | Uygunluk | Açıklama
+                proje_id = str(row[0]) if row[0] else None
+                sehir = str(row[1]) if row[1] else None
+                ekipman_adi = str(row[2]) if row[2] else ""
+                kategori = str(row[3]) if row[3] else ""
+                firma = str(row[4]) if row[4] else ""
+                lokasyon = str(row[5]) if row[5] else None
+                marka_model = str(row[6]) if row[6] else None
+                seri_no = str(row[7]) if row[7] else None
+                alt_kategori = str(row[8]) if row[8] else None
+                periyot = str(row[9]) if row[9] else None
+                gecerlilik_tarihi = str(row[10]) if row[10] else None
+                uygunluk = str(row[11]) if row[11] else None
+                aciklama = str(row[12]) if row[12] else None
+                
+                # Validate required fields
+                if not ekipman_adi or not kategori or not firma:
+                    errors.append(f"Satır {row_idx}: Zorunlu alanlar eksik (Ekipman Adı, Kategori, Firma)")
+                    continue
+                
+                if not sehir:
+                    errors.append(f"Satır {row_idx}: Şehir alanı zorunludur")
+                    continue
+                
+                # Get proje details if proje_id provided
+                proje_adi = ""
+                if proje_id:
+                    proje = await db.projeler.find_one({"id": proje_id}, {"_id": 0})
+                    if proje:
+                        proje_adi = proje.get("proje_adi", "")
+                    else:
+                        errors.append(f"Satır {row_idx}: Proje ID bulunamadı - {proje_id}")
+                        continue
+                else:
+                    errors.append(f"Satır {row_idx}: Proje ID zorunludur")
+                    continue
+                
+                # Get sehir kodu
+                sehir_obj = next((s for s in SEHIRLER if s["isim"] == sehir), None)
+                if not sehir_obj:
+                    errors.append(f"Satır {row_idx}: Geçersiz şehir - {sehir}")
+                    continue
+                
+                # Generate rapor no with city
+                rapor_no = await generate_rapor_no(sehir)
                 
                 rapor_data = {
                     "rapor_no": rapor_no,
-                    "ekipman_adi": str(row[0]) if row[0] else "",
-                    "kategori": str(row[1]) if row[1] else "",
-                    "firma": str(row[2]) if row[2] else "",
-                    "lokasyon": str(row[3]) if row[3] else None,
-                    "marka_model": str(row[4]) if row[4] else None,
-                    "seri_no": str(row[5]) if row[5] else None,
-                    "alt_kategori": str(row[6]) if row[6] else None,
-                    "periyot": str(row[7]) if row[7] else None,
-                    "gecerlilik_tarihi": str(row[8]) if row[8] else None,
-                    "uygunluk": str(row[9]) if row[9] else None,
-                    "aciklama": str(row[10]) if row[10] else None,
-                    "created_by": current_user["id"]
+                    "proje_id": proje_id,
+                    "proje_adi": proje_adi,
+                    "sehir": sehir,
+                    "sehir_kodu": sehir_obj["kod"],
+                    "ekipman_adi": ekipman_adi,
+                    "kategori": kategori,
+                    "alt_kategori": alt_kategori,
+                    "firma": firma,
+                    "lokasyon": lokasyon,
+                    "marka_model": marka_model,
+                    "seri_no": seri_no,
+                    "periyot": periyot,
+                    "gecerlilik_tarihi": gecerlilik_tarihi,
+                    "uygunluk": uygunluk,
+                    "aciklama": aciklama,
+                    "durum": "Aktif",
+                    "created_by": current_user["id"],
+                    "created_by_username": current_user.get("username", current_user.get("email", ""))
                 }
-                
-                if not rapor_data["ekipman_adi"] or not rapor_data["kategori"] or not rapor_data["firma"]:
-                    errors.append(f"Satır {row_idx}: Zorunlu alanlar eksik")
-                    continue
                 
                 rapor = Rapor(**rapor_data)
                 doc = rapor.model_dump()
