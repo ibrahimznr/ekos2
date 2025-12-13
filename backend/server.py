@@ -1098,8 +1098,9 @@ async def get_dashboard_stats(current_user: dict = Depends(get_current_user)):
     seven_days = (now + timedelta(days=7)).date()
     
     # Only fetch gecerlilik_tarihi field for performance
+    date_query = {**base_query, "gecerlilik_tarihi": {"$ne": None, "$ne": ""}}
     raporlar_with_dates = await db.raporlar.find(
-        {"gecerlilik_tarihi": {"$ne": None, "$ne": ""}}, 
+        date_query, 
         {"gecerlilik_tarihi": 1, "_id": 0}
     ).limit(5000).to_list(5000)
     
