@@ -357,7 +357,7 @@ const Raporlar = () => {
         <Card className="shadow-md">
           <CardContent className="pt-6">
             <div className="space-y-4">
-              {/* Search */}
+              {/* Search and Sort */}
               <div className="flex gap-2">
                 <div className="relative flex-1">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -370,6 +370,16 @@ const Raporlar = () => {
                     data-testid="search-input"
                   />
                 </div>
+                <Select value={sortOrder} onValueChange={setSortOrder}>
+                  <SelectTrigger className="w-[180px]">
+                    <ArrowUpDown className="h-4 w-4 mr-2" />
+                    <SelectValue placeholder="Sıralama" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="newest">Yeniden Eskiye</SelectItem>
+                    <SelectItem value="oldest">Eskiden Yeniye</SelectItem>
+                  </SelectContent>
+                </Select>
                 <Button onClick={handleSearch} data-testid="search-button">
                   <Search className="h-4 w-4" />
                 </Button>
