@@ -271,7 +271,7 @@ const ExcelImportModal = ({ open, onClose, onSuccess }) => {
           </Button>
           <Button
             onClick={handleUpload}
-            disabled={!file || uploading}
+            disabled={!selectedProje || !file || uploading}
             data-testid="upload-excel-button"
           >
             {uploading ? 'İçe Aktarılıyor...' : 'İçe Aktar'}
