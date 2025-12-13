@@ -51,6 +51,9 @@ const Dashboard = () => {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
         navigate('/login');
+      } else if (error.response?.status === 403) {
+        toast.error('Dashboard\'a erişim yetkiniz yok');
+        navigate('/raporlar');
       } else if (retryCount < 2) {
         // Retry up to 2 times
         setTimeout(() => fetchStats(retryCount + 1), 1000);
