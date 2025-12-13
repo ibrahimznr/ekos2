@@ -29,6 +29,24 @@ const ExcelImportModal = ({ open, onClose, onSuccess }) => {
   const [projeler, setProjeler] = useState([]);
   const [selectedProje, setSelectedProje] = useState('');
 
+  useEffect(() => {
+    if (open) {
+      fetchProjeler();
+    }
+  }, [open]);
+
+  const fetchProjeler = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get(`${API}/projeler`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setProjeler(response.data);
+    } catch (error) {
+      toast.error('Projeler yüklenemedi');
+    }
+  };
+
   const handleDownloadTemplate = async () => {
     try {
       const response = await axios.get(`${API}/excel/template`, {
