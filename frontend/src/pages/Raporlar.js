@@ -45,6 +45,7 @@ const Raporlar = () => {
     uygunluk: '',
     firma: '',
   });
+  const [sortOrder, setSortOrder] = useState('newest'); // 'newest' or 'oldest'
   
   const [showRaporModal, setShowRaporModal] = useState(false);
   const [showDetailModal, setShowDetailModal] = useState(false);
