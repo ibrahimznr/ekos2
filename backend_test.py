@@ -6,7 +6,7 @@ from datetime import datetime
 from pathlib import Path
 
 class EkipmanAPITester:
-    def __init__(self, base_url="https://control-dash-2.preview.emergentagent.com"):
+    def __init__(self, base_url="https://inspect-report-3.preview.emergentagent.com"):
         self.base_url = base_url
         self.api_url = f"{base_url}/api"
         self.token = None
