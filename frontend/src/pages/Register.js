@@ -297,6 +297,44 @@ const Register = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Firma Not Found Dialog */}
+      <Dialog open={showFirmaNotFoundDialog} onOpenChange={setShowFirmaNotFoundDialog}>
+        <DialogContent className="sm:max-w-md text-center" data-testid="firma-not-found-dialog">
+          <DialogHeader>
+            <DialogTitle className="text-center text-2xl text-red-600">
+              Kayıt Yapılamadı
+            </DialogTitle>
+          </DialogHeader>
+          <div className="py-6">
+            <div className="mb-4">
+              <XCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
+            </div>
+            <p className="text-gray-700 text-lg mb-2">
+              <strong>"{formData.firma_adi}"</strong> adlı firma
+            </p>
+            <p className="text-gray-600">
+              EKOS sisteminde kayıtlı değil.
+            </p>
+            <p className="text-sm text-gray-500 mt-4">
+              Lütfen firma adınızı kontrol edin veya sisteminizin yöneticisi ile iletişime geçin.
+            </p>
+          </div>
+          <DialogFooter className="flex justify-center">
+            <Button
+              onClick={() => {
+                setShowFirmaNotFoundDialog(false);
+                navigate('/login');
+              }}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-8"
+              data-testid="firma-not-found-exit-button"
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Giriş Sayfasına Dön
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
