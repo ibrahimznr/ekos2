@@ -551,10 +551,13 @@ const AdminPanel = () => {
                         onCheckedChange={() => handleToggleSelect(kat.id, 'kategori')}
                         className="mt-1"
                       />
-                      <div className="flex-1">
+                      <div 
+                        className="flex-1 cursor-pointer"
+                        onClick={() => handleEditClick(kat, 'kategori')}
+                      >
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
-                            <h3 className="font-semibold text-gray-800 mb-2">{kat.isim}</h3>
+                            <h3 className="font-semibold text-gray-800 mb-2 hover:text-blue-600">{kat.isim}</h3>
                             {kat.aciklama && (
                               <p className="text-sm text-gray-600 mb-2">{kat.aciklama}</p>
                             )}
