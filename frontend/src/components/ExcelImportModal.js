@@ -138,16 +138,33 @@ const ExcelImportModal = ({ open, onClose, onSuccess }) => {
         </DialogHeader>
 
         <div className="space-y-6 py-4">
+          {/* Project Selection */}
+          <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+            <h4 className="font-semibold text-purple-900 mb-3">1. Proje Seçin</h4>
+            <Select value={selectedProje} onValueChange={setSelectedProje}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Raporları hangi projeye eklensin?" />
+              </SelectTrigger>
+              <SelectContent>
+                {projeler.map((proje) => (
+                  <SelectItem key={proje.id} value={proje.id}>
+                    {proje.proje_adi} {proje.proje_kodu ? `(${proje.proje_kodu})` : ''}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
           {/* Template Download */}
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
             <div className="flex items-start justify-between gap-4">
               <div className="flex-1">
                 <h4 className="font-semibold text-blue-900 mb-1 flex items-center gap-2">
                   <Download className="h-4 w-4" />
-                  1. Şablonu İndirin
+                  2. Şablonu İndirin
                 </h4>
                 <p className="text-sm text-blue-800">
-                  Önce Excel şablonunu indirin ve verilerinizi bu şablona göre hazırlayın.
+                  Excel şablonunu indirin ve verilerinizi bu şablona göre hazırlayın.
                 </p>
               </div>
               <Button
