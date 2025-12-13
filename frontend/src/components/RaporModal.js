@@ -92,6 +92,28 @@ const RaporModal = ({ open, onClose, rapor, onSuccess }) => {
     }
   };
 
+  // When project is selected, auto-fill city (lokasyon)
+  const handleProjeChange = (projeId) => {
+    setFormData(prev => ({ ...prev, proje_id: projeId }));
+    
+    // Find selected project and auto-fill city
+    const selectedProje = projeler.find(p => p.id === projeId);
+    if (selectedProje && selectedProje.lokasyon) {
+      // Try to match project location with city list
+      const matchingCity = sehirler.find(s => 
+        s.isim.toLowerCase().includes(selectedProje.lokasyon.toLowerCase()) ||
+        selectedProje.lokasyon.toLowerCase().includes(s.isim.toLowerCase())
+      );
+      
+      if (matchingCity) {
+        setFormData(prev => ({ ...prev, proje_id: projeId, sehir: matchingCity.isim }));
+        toast.success(`Şehir otomatik dolduruldu: ${matchingCity.isim}`);
+      } else {
+        setFormData(prev => ({ ...prev, proje_id: projeId }));
+      }
+    }
+  };
+
   const fetchSehirler = async () => {
     try {
       const response = await axios.get(`${API}/sehirler`);
