@@ -1063,6 +1063,31 @@ async def import_excel(
                     errors.append(f"Satır {row_idx}: Geçersiz şehir - '{sehir}'. Lütfen geçerli bir Türkiye şehri adı girin (örn: İstanbul, Ankara, İzmir)")
                     continue
                 
+                # Check for duplicates
+                # Strategy: If seri_no exists, check by seri_no in same project
+                #           Otherwise, check by ekipman_adi + kategori + firma in same project
+                duplicate_query = {"proje_id": proje_id}
+                
+                if seri_no and seri_no.strip():
+                    # Check by serial number (most reliable)
+                    duplicate_query["seri_no"] = seri_no.strip()
+                    duplicate_check_field = f"Seri No: {seri_no}"
+                else:
+                    # Check by equipment name + category + company
+                    duplicate_query.update({
+                        "ekipman_adi": ekipman_adi,
+                        "kategori": kategori,
+                        "firma": firma
+                    })
+                    duplicate_check_field = f"{ekipman_adi} ({kategori} - {firma})"
+                
+                existing = await db.raporlar.find_one(duplicate_query, {"_id": 0})
+                
+                if existing:
+                    warnings.append(f"Satır {row_idx}: Atlandi - Bu ekipman zaten kayıtlı: {duplicate_check_field}")
+                    skipped_count += 1
+                    continue
+                
                 # Generate rapor no with city
                 rapor_no = await generate_rapor_no(sehir)
                 
