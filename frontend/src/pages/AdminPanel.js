@@ -876,7 +876,7 @@ const AdminPanel = () => {
       <Dialog open={showProjeDialog} onOpenChange={setShowProjeDialog}>
         <DialogContent className="max-w-3xl" data-testid="create-project-dialog">
           <DialogHeader>
-            <DialogTitle>Yeni Proje Oluştur</DialogTitle>
+            <DialogTitle>{editMode ? 'Proje Düzenle' : 'Yeni Proje Oluştur'}</DialogTitle>
             <DialogDescription>
               Raporlar için yeni bir proje ekleyin
             </DialogDescription>
