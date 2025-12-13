@@ -452,6 +452,7 @@ async def login(user_login: UserLogin):
             username=user["username"],
             email=user["email"],
             role=user["role"],
+            firma_adi=user.get("firma_adi"),
             email_verified=user.get("email_verified", False),
             created_at=datetime.fromisoformat(user["created_at"]) if isinstance(user["created_at"], str) else user["created_at"]
         )
@@ -464,6 +465,7 @@ async def get_me(current_user: dict = Depends(get_current_user)):
         username=current_user["username"],
         email=current_user["email"],
         role=current_user["role"],
+        firma_adi=current_user.get("firma_adi"),
         email_verified=current_user.get("email_verified", False),
         created_at=datetime.fromisoformat(current_user["created_at"]) if isinstance(current_user["created_at"], str) else current_user["created_at"]
     )
