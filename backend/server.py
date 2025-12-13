@@ -50,6 +50,7 @@ class User(BaseModel):
     email: EmailStr
     password: str
     role: str = "viewer"  # admin, inspector, viewer
+    firma_adi: Optional[str] = None  # Firma-based access control
     email_verified: bool = False
     verification_code: Optional[str] = None
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
@@ -59,6 +60,7 @@ class UserCreate(BaseModel):
     email: EmailStr
     password: str
     password_confirm: str
+    firma_adi: str  # Required for registration
     role: str = "viewer"
 
 class UserLogin(BaseModel):
