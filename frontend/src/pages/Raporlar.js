@@ -404,7 +404,7 @@ const Raporlar = () => {
           </Card>
         ) : (
           <div className="grid grid-cols-1 gap-4">
-            {raporlar.map((rapor) => (
+            {sortedRaporlar.map((rapor) => (
               <Card key={rapor.id} className="card-hover shadow-md" data-testid={`report-card-${rapor.id}`}>
                 <CardContent className="p-6">
                   <div className="flex gap-3">
