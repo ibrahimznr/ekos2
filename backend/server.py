@@ -342,6 +342,14 @@ async def register(user_create: UserCreate):
     if len(user_create.password) < 6:
         raise HTTPException(status_code=400, detail="Şifre en az 6 karakter olmalıdır")
     
+    # Validate firma exists in database
+    firma_exists = await db.raporlar.find_one({"firma": user_create.firma_adi}, {"_id": 0, "firma": 1})
+    if not firma_exists:
+        raise HTTPException(
+            status_code=404, 
+            detail="FIRMA_NOT_FOUND"  # Special code for frontend to handle
+        )
+    
     # Check if email exists
     existing_email = await db.users.find_one({"email": user_create.email})
     if existing_email:
@@ -360,7 +368,8 @@ async def register(user_create: UserCreate):
         username=user_create.username,
         email=user_create.email,
         password=get_password_hash(user_create.password),
-        role=user_create.role,
+        role="viewer",  # Always viewer for self-registration
+        firma_adi=user_create.firma_adi,
         email_verified=False,
         verification_code=verification_code
     )
