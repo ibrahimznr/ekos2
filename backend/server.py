@@ -72,6 +72,7 @@ class UserResponse(BaseModel):
     username: str
     email: str
     role: str
+    firma_adi: Optional[str] = None
     email_verified: bool
     created_at: datetime
 
