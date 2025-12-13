@@ -973,7 +973,7 @@ const AdminPanel = () => {
               İptal
             </Button>
             <Button onClick={handleCreateProje} data-testid="submit-project-button">
-              Oluştur
+              {editMode ? 'Güncelle' : 'Oluştur'}
             </Button>
           </DialogFooter>
         </DialogContent>
