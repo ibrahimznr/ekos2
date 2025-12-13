@@ -178,13 +178,13 @@ const Raporlar = () => {
     }
   };
 
-  const handleSelectAll = () => {
+  const handleSelectAll = useCallback(() => {
     if (selectedRaporlar.length === raporlar.length) {
       setSelectedRaporlar([]);
     } else {
       setSelectedRaporlar(raporlar.map(r => r.id));
     }
-  };
+  }, [selectedRaporlar.length, raporlar]);
 
   const handleToggleSelect = (raporId) => {
     setSelectedRaporlar(prev => 
