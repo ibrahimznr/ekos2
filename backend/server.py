@@ -515,6 +515,7 @@ async def get_raporlar(
     kategori: Optional[str] = None,
     periyot: Optional[str] = None,
     uygunluk: Optional[str] = None,
+    firma: Optional[str] = None,
     limit: int = 500,
     skip: int = 0,
     current_user: dict = Depends(get_current_user)
@@ -536,6 +537,9 @@ async def get_raporlar(
     
     if uygunluk:
         query["uygunluk"] = uygunluk
+    
+    if firma:
+        query["firma"] = firma
     
     # Limit to 500 records by default for better performance
     raporlar = await db.raporlar.find(query, {"_id": 0}).sort("created_at", -1).skip(skip).limit(limit).to_list(limit)
