@@ -1018,10 +1018,23 @@ async def import_excel(
                     errors.append(f"Satır {row_idx}: Şehir alanı zorunludur")
                     continue
                 
-                # Get sehir kodu
-                sehir_obj = next((s for s in SEHIRLER if s["isim"] == sehir), None)
+                # Get sehir kodu with case-insensitive and Turkish character normalization
+                sehir_normalized = sehir.strip().lower()
+                # Turkish character mapping for normalization
+                turkish_map = str.maketrans('ıİğĞüÜşŞöÖçÇ', 'iigguussoocc')
+                sehir_normalized = sehir_normalized.translate(turkish_map)
+                
+                sehir_obj = None
+                for s in SEHIRLER:
+                    s_normalized = s["isim"].lower().translate(turkish_map)
+                    if s_normalized == sehir_normalized:
+                        sehir_obj = s
+                        sehir = s["isim"]  # Use the correct city name
+                        break
+                
                 if not sehir_obj:
-                    errors.append(f"Satır {row_idx}: Geçersiz şehir - {sehir}")
+                    # Provide helpful error message with available cities
+                    errors.append(f"Satır {row_idx}: Geçersiz şehir - '{sehir}'. Lütfen geçerli bir Türkiye şehri adı girin (örn: İstanbul, Ankara, İzmir)")
                     continue
                 
                 # Generate rapor no with city
