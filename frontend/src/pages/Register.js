@@ -54,7 +54,11 @@ const Register = () => {
       toast.success('Kayıt başarılı! Lütfen email adresinizi doğrulayın.');
       setShowVerificationDialog(true);
     } catch (error) {
-      toast.error(error.response?.data?.detail || 'Kayıt başarısız');
+      if (error.response?.data?.detail === 'FIRMA_NOT_FOUND') {
+        setShowFirmaNotFoundDialog(true);
+      } else {
+        toast.error(error.response?.data?.detail || 'Kayıt başarısız');
+      }
     } finally {
       setLoading(false);
     }
