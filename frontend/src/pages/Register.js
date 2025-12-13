@@ -27,9 +27,11 @@ const Register = () => {
     email: '',
     password: '',
     password_confirm: '',
+    firma_adi: '',
   });
   const [loading, setLoading] = useState(false);
   const [showVerificationDialog, setShowVerificationDialog] = useState(false);
+  const [showFirmaNotFoundDialog, setShowFirmaNotFoundDialog] = useState(false);
   const [verificationCode, setVerificationCode] = useState('');
   const [verifyingCode, setVerifyingCode] = useState(false);
   const [registeredEmail, setRegisteredEmail] = useState('');
