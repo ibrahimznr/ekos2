@@ -748,10 +748,30 @@ async def download_dosya(dosya_id: str, current_user: dict = Depends(get_current
         raise HTTPException(status_code=404, detail="Dosya sistemde bulunamadı")
     
     from fastapi.responses import FileResponse
+    
+    # Determine correct media type
+    file_ext = dosya["dosya_adi"].lower().split('.')[-1]
+    media_type_map = {
+        'pdf': 'application/pdf',
+        'jpg': 'image/jpeg',
+        'jpeg': 'image/jpeg',
+        'png': 'image/png',
+        'gif': 'image/gif',
+        'webp': 'image/webp',
+        'bmp': 'image/bmp',
+        'svg': 'image/svg+xml',
+    }
+    
+    media_type = media_type_map.get(file_ext, dosya.get("dosya_tipi", "application/octet-stream"))
+    
     return FileResponse(
         path=str(dosya_path),
         filename=dosya["dosya_adi"],
-        media_type=dosya.get("dosya_tipi", "application/octet-stream")
+        media_type=media_type,
+        headers={
+            "Content-Disposition": f'inline; filename="{dosya["dosya_adi"]}"',
+            "Cache-Control": "public, max-age=3600"
+        }
     )
 
 @api_router.delete("/dosyalar/{dosya_id}")
