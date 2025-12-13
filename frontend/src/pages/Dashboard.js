@@ -21,9 +21,17 @@ const Dashboard = () => {
   const [filterType, setFilterType] = useState(null);
 
   useEffect(() => {
+    // Check if user has access to dashboard
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    if (user.role !== 'admin' && user.role !== 'inspector') {
+      toast.error('Dashboard\'a erişim yetkiniz yok');
+      navigate('/raporlar');
+      return;
+    }
+    
     fetchStats();
     fetchProjeler();
-  }, []);
+  }, [navigate]);
 
   const fetchStats = async (retryCount = 0) => {
     try {
