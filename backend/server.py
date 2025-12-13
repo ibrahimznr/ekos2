@@ -1034,15 +1034,24 @@ async def import_excel(
                     continue
                 
                 # Get sehir kodu with case-insensitive and Turkish character normalization
-                sehir_normalized = sehir.strip().lower()
-                # Turkish character mapping for normalization
-                turkish_map = str.maketrans('ıİğĞüÜşŞöÖçÇ', 'iigguussoocc')
-                sehir_normalized = sehir_normalized.translate(turkish_map)
+                # Turkish locale-aware lowercase conversion
+                def turkish_lower(text):
+                    text = text.strip()
+                    # First handle Turkish specific characters
+                    text = text.replace('İ', 'i').replace('I', 'ı')
+                    # Then apply standard lower
+                    return text.lower()
+                
+                def normalize_turkish(text):
+                    # Normalize Turkish characters to ASCII for comparison
+                    turkish_map = str.maketrans('ıİiIğĞüÜşŞöÖçÇ', 'iiiigguussoocc')
+                    return turkish_lower(text).translate(turkish_map)
+                
+                sehir_normalized = normalize_turkish(sehir)
                 
                 sehir_obj = None
                 for s in SEHIRLER:
-                    s_normalized = s["isim"].lower().translate(turkish_map)
-                    if s_normalized == sehir_normalized:
+                    if normalize_turkish(s["isim"]) == sehir_normalized:
                         sehir_obj = s
                         sehir = s["isim"]  # Use the correct city name
                         break
