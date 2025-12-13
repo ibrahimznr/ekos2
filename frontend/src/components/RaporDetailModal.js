@@ -397,13 +397,31 @@ const RaporDetailModal = ({ open, onClose, rapor }) => {
                     src={previewFile.url} 
                     alt={previewFile.dosya_adi}
                     className="max-w-full max-h-full object-contain"
+                    onError={(e) => {
+                      console.error('Image load error');
+                      toast.error('Resim yüklenemedi');
+                    }}
                   />
                 ) : isPdfFile(previewFile.dosya_adi) ? (
-                  <iframe
-                    src={previewFile.url}
-                    className="w-full h-[60vh]"
-                    title={previewFile.dosya_adi}
-                  />
+                  <div className="w-full h-[65vh]">
+                    <embed
+                      src={`${previewFile.url}#toolbar=1&navpanes=0&scrollbar=1`}
+                      type="application/pdf"
+                      className="w-full h-full rounded"
+                      onError={(e) => {
+                        console.error('PDF load error');
+                      }}
+                    />
+                    <p className="text-xs text-gray-600 mt-2 text-center">
+                      PDF görünmüyorsa{' '}
+                      <button
+                        onClick={() => handleDownloadFile(previewFile)}
+                        className="text-blue-600 hover:underline"
+                      >
+                        buradan indirebilirsiniz
+                      </button>
+                    </p>
+                  </div>
                 ) : (
                   <div className="text-center text-gray-500 py-8">
                     <FileText className="h-16 w-16 mx-auto mb-4 text-gray-400" />
