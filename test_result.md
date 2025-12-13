@@ -97,6 +97,18 @@ backend:
         agent: "testing"
         comment: "E2E tested: Successfully created report 'Test Forklift Playwright' with all fields including project, city, category, subcategory. Report appears in list with correct data display."
 
+  - task: "Firma-Based User Registration and Access Control"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "FIRMA-BASED REGISTRATION AND ACCESS CONTROL BACKEND TESTING COMPLETED: ✅ FIRMA VALIDATION: Backend validates firma exists in raporlar collection before allowing registration, returns 'FIRMA_NOT_FOUND' error for invalid firmas ✅ USER REGISTRATION: Successfully registers users with valid firma names (Test EKOS Company), assigns viewer role automatically, stores firma_adi in user document ✅ ACCESS CONTROL: Backend filters reports by user's firma_adi for viewer role users, ensures no cross-firma data access, admin/inspector roles can see all reports ✅ JWT TOKEN: User token includes firma_adi for client-side access control ✅ API ENDPOINTS: /auth/register validates firma, /raporlar applies firma filtering, /dashboard/stats shows firma-specific statistics. All firma-based security measures working correctly."
+
 frontend:
   - task: "Admin Panel - Projects Tab with New Form Layout & Bulk Selection"
     implemented: true
