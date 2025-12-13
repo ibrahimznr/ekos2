@@ -414,9 +414,10 @@ const Raporlar = () => {
             </CardContent>
           </Card>
         ) : (
-          <div className="grid grid-cols-1 gap-4">
-            {sortedRaporlar.map((rapor) => (
-              <Card key={rapor.id} className="card-hover shadow-md" data-testid={`report-card-${rapor.id}`}>
+          <>
+            <div className="grid grid-cols-1 gap-4">
+              {paginatedRaporlar.map((rapor) => (
+                <Card key={rapor.id} className="card-hover shadow-md" data-testid={`report-card-${rapor.id}`}>
                 <CardContent className="p-6">
                   <div className="flex gap-3">
                     <Checkbox
