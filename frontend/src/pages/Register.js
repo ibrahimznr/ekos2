@@ -158,6 +158,22 @@ const Register = () => {
                 />
               </div>
               <div className="space-y-2">
+                <Label htmlFor="firma_adi" className="text-gray-700 font-medium">Firma Adı *</Label>
+                <Input
+                  id="firma_adi"
+                  type="text"
+                  placeholder="Çalıştığınız firma adını girin"
+                  value={formData.firma_adi}
+                  onChange={(e) => handleChange('firma_adi', e.target.value)}
+                  required
+                  className="h-11 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                  data-testid="firma-input"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  * Firma adı EKOS sisteminde kayıtlı olmalıdır
+                </p>
+              </div>
+              <div className="space-y-2">
                 <Label htmlFor="password" className="text-gray-700 font-medium">Şifre</Label>
                 <Input
                   id="password"
