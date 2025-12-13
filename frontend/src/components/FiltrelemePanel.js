@@ -55,12 +55,12 @@ const FiltrelemePanel = ({ filters, onFilterChange, raporlar = [] }) => {
   };
 
   const handleClearFilters = () => {
-    const clearedFilters = { kategori: '', periyot: '', uygunluk: '' };
+    const clearedFilters = { kategori: '', periyot: '', uygunluk: '', firma: '' };
     setLocalFilters(clearedFilters);
     onFilterChange(clearedFilters);
   };
 
-  const hasActiveFilters = localFilters.kategori || localFilters.periyot || localFilters.uygunluk;
+  const hasActiveFilters = localFilters.kategori || localFilters.periyot || localFilters.uygunluk || localFilters.firma;
 
   return (
     <div className="space-y-3">
