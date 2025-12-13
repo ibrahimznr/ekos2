@@ -299,6 +299,60 @@ const AdminPanel = () => {
     }
   };
 
+  // Edit handlers
+  const handleEditClick = (item, type) => {
+    setEditingItem(item);
+    setEditType(type);
+    setEditMode(true);
+    
+    if (type === 'user') {
+      setNewUser({
+        username: item.username || '',
+        email: item.email || '',
+        password: '',
+        password_confirm: '',
+        role: item.role || 'viewer'
+      });
+      setShowUserDialog(true);
+    } else if (type === 'kategori') {
+      setNewKategori({
+        isim: item.isim || '',
+        aciklama: item.aciklama || '',
+        alt_kategoriler: item.alt_kategoriler || []
+      });
+      setShowKategoriDialog(true);
+    } else if (type === 'proje') {
+      setNewProje({
+        proje_adi: item.proje_adi || '',
+        proje_kodu: item.proje_kodu || '',
+        lokasyon: item.lokasyon || '',
+        baslangic_tarihi: item.baslangic_tarihi || '',
+        bitis_tarihi: item.bitis_tarihi || '',
+        durum: item.durum || 'Aktif',
+        aciklama: item.aciklama || ''
+      });
+      setShowProjeDialog(true);
+    }
+  };
+
+  const handleCloseDialog = (type) => {
+    setEditMode(false);
+    setEditingItem(null);
+    setEditType('');
+    
+    if (type === 'user') {
+      setShowUserDialog(false);
+      setNewUser({ username: '', email: '', password: '', password_confirm: '', role: 'viewer' });
+    } else if (type === 'kategori') {
+      setShowKategoriDialog(false);
+      setNewKategori({ isim: '', aciklama: '', alt_kategoriler: [] });
+      setAltKategoriInput('');
+    } else if (type === 'proje') {
+      setShowProjeDialog(false);
+      setNewProje({ proje_adi: '', proje_kodu: '', lokasyon: '', baslangic_tarihi: '', bitis_tarihi: '', durum: 'Aktif', aciklama: '' });
+    }
+  };
+
   const getRoleBadgeColor = (role) => {
     switch (role) {
       case 'admin':
