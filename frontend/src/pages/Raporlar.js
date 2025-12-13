@@ -36,6 +36,7 @@ const Raporlar = () => {
     kategori: '',
     periyot: '',
     uygunluk: '',
+    firma: '',
   });
   
   const [showRaporModal, setShowRaporModal] = useState(false);
