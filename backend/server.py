@@ -984,19 +984,23 @@ async def import_excel(
             
             try:
                 # Excel format: Proje ID | Şehir | Ekipman Adı | Kategori | Firma | Lokasyon | Marka/Model | Seri No | Alt Kategori | Periyot | Geçerlilik Tarihi | Uygunluk | Açıklama
-                proje_id = str(row[0]) if row[0] else None
-                sehir = str(row[1]) if row[1] else None
-                ekipman_adi = str(row[2]) if row[2] else ""
-                kategori = str(row[3]) if row[3] else ""
-                firma = str(row[4]) if row[4] else ""
-                lokasyon = str(row[5]) if row[5] else None
-                marka_model = str(row[6]) if row[6] else None
-                seri_no = str(row[7]) if row[7] else None
-                alt_kategori = str(row[8]) if row[8] else None
-                periyot = str(row[9]) if row[9] else None
-                gecerlilik_tarihi = str(row[10]) if row[10] else None
-                uygunluk = str(row[11]) if row[11] else None
-                aciklama = str(row[12]) if row[12] else None
+                # Safely get values with default None if index doesn't exist
+                def get_cell(index):
+                    return row[index] if index < len(row) and row[index] is not None else None
+                
+                proje_id = str(get_cell(0)) if get_cell(0) else None
+                sehir = str(get_cell(1)) if get_cell(1) else None
+                ekipman_adi = str(get_cell(2)) if get_cell(2) else ""
+                kategori = str(get_cell(3)) if get_cell(3) else ""
+                firma = str(get_cell(4)) if get_cell(4) else ""
+                lokasyon = str(get_cell(5)) if get_cell(5) else None
+                marka_model = str(get_cell(6)) if get_cell(6) else None
+                seri_no = str(get_cell(7)) if get_cell(7) else None
+                alt_kategori = str(get_cell(8)) if get_cell(8) else None
+                periyot = str(get_cell(9)) if get_cell(9) else None
+                gecerlilik_tarihi = str(get_cell(10)) if get_cell(10) else None
+                uygunluk = str(get_cell(11)) if get_cell(11) else None
+                aciklama = str(get_cell(12)) if get_cell(12) else None
                 
                 # Validate required fields
                 if not ekipman_adi or not kategori or not firma:
