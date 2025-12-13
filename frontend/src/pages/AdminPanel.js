@@ -770,7 +770,7 @@ const AdminPanel = () => {
       <Dialog open={showKategoriDialog} onOpenChange={setShowKategoriDialog}>
         <DialogContent data-testid="create-category-dialog">
           <DialogHeader>
-            <DialogTitle>Yeni Kategori Oluştur</DialogTitle>
+            <DialogTitle>{editMode ? 'Kategori Düzenle' : 'Yeni Kategori Oluştur'}</DialogTitle>
             <DialogDescription>
               Raporlar için yeni bir kategori ekleyin
             </DialogDescription>
