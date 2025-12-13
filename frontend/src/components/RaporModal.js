@@ -278,7 +278,7 @@ const RaporModal = ({ open, onClose, rapor, onSuccess }) => {
             {/* Proje */}
             <div className="space-y-2">
               <Label htmlFor="proje_id">Proje *</Label>
-              <Select value={formData.proje_id} onValueChange={(value) => handleChange('proje_id', value)} required>
+              <Select value={formData.proje_id} onValueChange={handleProjeChange} required>
                 <SelectTrigger data-testid="proje-select">
                   <SelectValue placeholder="Proje seçin" />
                 </SelectTrigger>
