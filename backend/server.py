@@ -475,6 +475,21 @@ async def create_kategori(kategori_create: KategoriCreate, current_user: dict = 
     await db.kategoriler.insert_one(doc)
     return kategori
 
+@api_router.put("/kategoriler/{kategori_id}")
+async def update_kategori(kategori_id: str, kategori_update: KategoriCreate, current_user: dict = Depends(get_current_user)):
+    if current_user["role"] != "admin":
+        raise HTTPException(status_code=403, detail="Bu işlem için yetkiniz yok")
+    
+    existing = await db.kategoriler.find_one({"id": kategori_id}, {"_id": 0})
+    if not existing:
+        raise HTTPException(status_code=404, detail="Kategori bulunamadı")
+    
+    update_data = kategori_update.model_dump()
+    await db.kategoriler.update_one({"id": kategori_id}, {"$set": update_data})
+    
+    updated_kategori = await db.kategoriler.find_one({"id": kategori_id}, {"_id": 0})
+    return updated_kategori
+
 @api_router.delete("/kategoriler/{kategori_id}")
 async def delete_kategori(kategori_id: str, current_user: dict = Depends(get_current_user)):
     if current_user["role"] != "admin":
