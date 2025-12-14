@@ -19,6 +19,8 @@ const IskeleBileseniExcelImportModal = ({ open, onClose, onSuccess }) => {
   const [file, setFile] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [result, setResult] = useState(null);
+  const [projeler, setProjeler] = useState([]);
+  const [selectedProje, setSelectedProje] = useState('');
 
   const handleDownloadTemplate = async () => {
     try {
