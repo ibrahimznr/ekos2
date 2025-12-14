@@ -79,6 +79,11 @@ const IskeleBilesenleri = () => {
     setCurrentPage(1);
   };
 
+  const handleFilterChange = (newFilters) => {
+    setCurrentPage(1);
+    setFilters(newFilters);
+  };
+
   const handleDeleteClick = (bilesenId) => {
     setDeleteBilesenId(bilesenId);
     setShowDeleteDialog(true);
