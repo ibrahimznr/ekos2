@@ -180,7 +180,7 @@ const IskeleBileseniExcelImportModal = ({ open, onClose, onSuccess }) => {
           <div className="bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg p-6">
             <div className="text-center">
               <Upload className="h-12 w-12 mx-auto mb-4 text-gray-400" />
-              <h4 className="font-semibold text-gray-800 mb-2">2. Excel Dosyasını Yükleyin</h4>
+              <h4 className="font-semibold text-gray-800 mb-2">3. Excel Dosyasını Yükleyin</h4>
               <p className="text-sm text-gray-600 mb-4">
                 Hazırladığınız Excel dosyasını yükleyin
               </p>
