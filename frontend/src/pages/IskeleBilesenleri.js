@@ -138,17 +138,32 @@ const IskeleBilesenleri = () => {
     );
   };
 
-  // Filter by search term
+  // Filter by search term and filters
   const filteredBilesenleri = useMemo(() => {
-    if (!searchTerm) return bilesenleri;
+    let filtered = bilesenleri;
     
-    const search = searchTerm.toLowerCase();
-    return bilesenleri.filter(b => 
-      b.bileşen_adi?.toLowerCase().includes(search) ||
-      b.malzeme_kodu?.toLowerCase().includes(search) ||
-      b.firma_adi?.toLowerCase().includes(search)
-    );
-  }, [bilesenleri, searchTerm]);
+    // Search filter
+    if (searchTerm) {
+      const search = searchTerm.toLowerCase();
+      filtered = filtered.filter(b => 
+        b.bileşen_adi?.toLowerCase().includes(search) ||
+        b.malzeme_kodu?.toLowerCase().includes(search) ||
+        b.firma_adi?.toLowerCase().includes(search)
+      );
+    }
+    
+    // Firma filter
+    if (filters.firma_adi) {
+      filtered = filtered.filter(b => b.firma_adi === filters.firma_adi);
+    }
+    
+    // Uygunluk filter
+    if (filters.uygunluk) {
+      filtered = filtered.filter(b => b.uygunluk === filters.uygunluk);
+    }
+    
+    return filtered;
+  }, [bilesenleri, searchTerm, filters]);
 
   // Paginate filtered results
   const paginatedBilesenleri = useMemo(() => {
