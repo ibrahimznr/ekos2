@@ -32,6 +32,12 @@ const IskeleBilesenleri = () => {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [deleteBilesenId, setDeleteBilesenId] = useState(null);
   
+  // Filters
+  const [filters, setFilters] = useState({
+    firma_adi: '',
+    uygunluk: '',
+  });
+  
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(20);
