@@ -158,7 +158,7 @@ const IskeleBileseniExcelImportModal = ({ open, onClose, onSuccess }) => {
               <div className="flex-1">
                 <h4 className="font-semibold text-blue-900 mb-1 flex items-center gap-2">
                   <Download className="h-4 w-4" />
-                  1. Şablonu İndirin
+                  2. Şablonu İndirin
                 </h4>
                 <p className="text-sm text-blue-800">
                   Excel şablonunu indirin ve verilerinizi bu şablona göre hazırlayın.
