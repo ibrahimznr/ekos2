@@ -413,6 +413,14 @@ const Raporlar = () => {
               <Download className="h-4 w-4 mr-2" />
               Excel İndir
             </Button>
+            <Button
+              onClick={() => navigate('/iskele-bilesenleri')}
+              variant="outline"
+              className="border-blue-600 text-blue-700 hover:bg-blue-50"
+            >
+              <Building2 className="h-4 w-4 mr-2" />
+              İskele Bileşenlerini Gör
+            </Button>
           </div>
         </div>
 
