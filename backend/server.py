@@ -1423,6 +1423,141 @@ async def bulk_delete_iskele_bilesenleri(
     result = await db.iskele_bilesenleri.delete_many({"id": {"$in": bileşen_ids}})
     return {"message": f"{result.deleted_count} iskele bileşeni silindi", "deleted_count": result.deleted_count}
 
+@api_router.get("/iskele-bilesenleri/excel/template")
+async def download_iskele_template():
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "İskele Bileşenleri Şablonu"
+    
+    # Headers
+    headers = [
+        "Bileşen Adı", "Malzeme Kodu", "Bileşen Adedi", "Firma Adı",
+        "Geçerlilik Tarihi", "Uygunluk", "Açıklama"
+    ]
+    
+    header_fill = PatternFill(start_color="1e40af", end_color="1e40af", fill_type="solid")
+    header_font = Font(color="FFFFFF", bold=True)
+    
+    for col, header in enumerate(headers, 1):
+        cell = ws.cell(row=1, column=col, value=header)
+        cell.fill = header_fill
+        cell.font = header_font
+        cell.alignment = Alignment(horizontal="center", vertical="center")
+    
+    # Example rows
+    examples = [
+        ["Çelik Direk", "CD-001", 10, "ABC İnşaat", "2025-12-31", "Uygun", "Standart çelik direk"],
+        ["Bağlantı Elemanı", "BE-002", 50, "XYZ Yapı", "2025-06-30", "Uygun", ""],
+        ["Destek Parçası", "DP-003", 25, "Test Firma", "", "Uygun Değil", "Kontrol gerekli"]
+    ]
+    
+    for row_idx, example in enumerate(examples, 2):
+        for col, value in enumerate(example, 1):
+            ws.cell(row=row_idx, column=col, value=value)
+    
+    for col in ws.columns:
+        column = col[0].column_letter
+        ws.column_dimensions[column].width = 20
+    
+    excel_file = io.BytesIO()
+    wb.save(excel_file)
+    excel_file.seek(0)
+    
+    return StreamingResponse(
+        excel_file,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": "attachment; filename=iskele_bilesenleri_sablonu.xlsx"}
+    )
+
+@api_router.post("/iskele-bilesenleri/excel/import")
+async def import_iskele_excel(
+    file: UploadFile = File(...),
+    current_user: dict = Depends(get_current_user)
+):
+    if current_user["role"] not in ["admin", "inspector"]:
+        raise HTTPException(status_code=403, detail="İskele bileşeni içe aktarma yetkiniz yok")
+    
+    if not file.filename.endswith(('.xlsx', '.xls')):
+        raise HTTPException(status_code=400, detail="Sadece Excel dosyaları yüklenebilir")
+    
+    content = await file.read()
+    excel_file = io.BytesIO(content)
+    
+    try:
+        wb = load_workbook(excel_file)
+        ws = wb.active
+        
+        imported_count = 0
+        errors = []
+        
+        for row_idx, row in enumerate(ws.iter_rows(min_row=2, values_only=True), 2):
+            if not any(row):  # Skip empty rows
+                continue
+            
+            try:
+                # Excel format: Bileşen Adı | Malzeme Kodu | Bileşen Adedi | Firma Adı | Geçerlilik Tarihi | Uygunluk | Açıklama
+                def get_cell(index):
+                    return row[index] if index < len(row) and row[index] is not None else None
+                
+                bileşen_adi = str(get_cell(0)) if get_cell(0) else ""
+                malzeme_kodu = str(get_cell(1)) if get_cell(1) else ""
+                bileşen_adedi_raw = get_cell(2)
+                firma_adi = str(get_cell(3)) if get_cell(3) else ""
+                gecerlilik_tarihi = str(get_cell(4)) if get_cell(4) else None
+                uygunluk = str(get_cell(5)) if get_cell(5) else "Uygun"
+                aciklama = str(get_cell(6)) if get_cell(6) else None
+                
+                # Validate required fields
+                if not bileşen_adi or not malzeme_kodu or not firma_adi:
+                    errors.append(f"Satır {row_idx}: Zorunlu alanlar eksik (Bileşen Adı, Malzeme Kodu, Firma Adı)")
+                    continue
+                
+                # Parse bileşen_adedi
+                try:
+                    bileşen_adedi = int(bileşen_adedi_raw) if bileşen_adedi_raw else 1
+                    if bileşen_adedi < 1:
+                        errors.append(f"Satır {row_idx}: Bileşen adedi en az 1 olmalıdır")
+                        continue
+                except (ValueError, TypeError):
+                    errors.append(f"Satır {row_idx}: Bileşen adedi geçersiz")
+                    continue
+                
+                # Create bileşen
+                bileşen_id = str(uuid.uuid4())
+                bileşen_data = {
+                    "id": bileşen_id,
+                    "bileşen_adi": bileşen_adi,
+                    "malzeme_kodu": malzeme_kodu,
+                    "bileşen_adedi": bileşen_adedi,
+                    "firma_adi": firma_adi,
+                    "iskele_periyodu": "6 Aylık",
+                    "gecerlilik_tarihi": gecerlilik_tarihi,
+                    "uygunluk": uygunluk,
+                    "aciklama": aciklama,
+                    "gorseller": [],
+                    "created_by": current_user["id"],
+                    "created_by_username": current_user.get("username", current_user.get("email", "")),
+                    "created_at": datetime.now(timezone.utc).isoformat(),
+                    "updated_at": datetime.now(timezone.utc).isoformat()
+                }
+                
+                await db.iskele_bilesenleri.insert_one(bileşen_data)
+                imported_count += 1
+                
+            except Exception as e:
+                errors.append(f"Satır {row_idx}: {str(e)}")
+                continue
+        
+        return {
+            "message": f"{imported_count} iskele bileşeni başarıyla içe aktarıldı",
+            "imported_count": imported_count,
+            "errors": errors
+        }
+    
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Excel dosyası işlenemedi: {str(e)}")
+
+
 
 @api_router.post("/projeler/bulk-delete")
 async def bulk_delete_projeler(proje_ids: List[str], current_user: dict = Depends(get_current_user)):
