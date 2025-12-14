@@ -63,32 +63,8 @@ const IskeleBileseniModal = ({ open, onClose, onSuccess }) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleImageUpload = (e) => {
-    const files = Array.from(e.target.files);
-    
-    if (formData.gorseller.length + files.length > 3) {
-      toast.error('Maksimum 3 görsel yükleyebilirsiniz');
-      return;
-    }
-
-    // Convert to base64 for preview (in production, upload to server)
-    files.forEach(file => {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setFormData(prev => ({
-          ...prev,
-          gorseller: [...prev.gorseller, reader.result]
-        }));
-      };
-      reader.readAsDataURL(file);
-    });
-  };
-
-  const handleRemoveImage = (index) => {
-    setFormData(prev => ({
-      ...prev,
-      gorseller: prev.gorseller.filter((_, i) => i !== index)
-    }));
+  const handleImagesChange = (newImages) => {
+    setFormData(prev => ({ ...prev, gorseller: newImages }));
   };
 
   const handleSubmit = async (e) => {
