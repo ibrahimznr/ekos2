@@ -232,24 +232,6 @@ const ExcelImportModal = ({ open, onClose, onSuccess }) => {
                 </div>
               </div>
 
-              {result.warnings && result.warnings.length > 0 && (
-                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                  <div className="flex items-start gap-3">
-                    <AlertCircle className="h-5 w-5 text-yellow-600 mt-0.5" />
-                    <div className="flex-1">
-                      <h4 className="font-semibold text-yellow-900 mb-2">Uyarılar ({result.warnings.length})</h4>
-                      <div className="max-h-32 overflow-y-auto space-y-1">
-                        {result.warnings.map((warning, index) => (
-                          <p key={index} className="text-xs text-yellow-800">
-                            {warning}
-                          </p>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-
               {result.errors && result.errors.length > 0 && (
                 <div className="bg-red-50 border border-red-200 rounded-lg p-4">
                   <div className="flex items-start gap-3">
