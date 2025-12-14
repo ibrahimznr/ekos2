@@ -1323,6 +1323,103 @@ async def delete_proje(proje_id: str, current_user: dict = Depends(get_current_u
         raise HTTPException(status_code=404, detail="Proje bulunamadı")
     return {"message": "Proje silindi"}
 
+# ==================== İSKELE BİLEŞENLERİ ENDPOINTS ====================
+
+@api_router.get("/iskele-bilesenleri")
+async def get_iskele_bilesenleri(
+    current_user: dict = Depends(get_current_user),
+    limit: int = 500
+):
+    # Role-based filtering
+    query = {}
+    if current_user.get("role") == "viewer" and current_user.get("firma_adi"):
+        query["firma_adi"] = current_user.get("firma_adi")
+    
+    bilesenleri = await db.iskele_bilesenleri.find(query, {"_id": 0}).to_list(limit)
+    return bilesenleri
+
+@api_router.post("/iskele-bilesenleri")
+async def create_iskele_bileseni(
+    bileşen: IskeleBileseniCreate,
+    current_user: dict = Depends(get_current_user)
+):
+    if current_user["role"] not in ["admin", "inspector"]:
+        raise HTTPException(status_code=403, detail="İskele bileşeni ekleme yetkiniz yok")
+    
+    bileşen_data = {
+        **bileşen.model_dump(),
+        "id": str(uuid.uuid4()),
+        "iskele_periyodu": "6 Aylık",
+        "created_by": current_user["id"],
+        "created_by_username": current_user.get("username", current_user.get("email", "")),
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "updated_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    await db.iskele_bilesenleri.insert_one(bileşen_data)
+    return bileşen_data
+
+@api_router.get("/iskele-bilesenleri/{bileşen_id}")
+async def get_iskele_bileseni(
+    bileşen_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    bileşen = await db.iskele_bilesenleri.find_one({"id": bileşen_id}, {"_id": 0})
+    if not bileşen:
+        raise HTTPException(status_code=404, detail="İskele bileşeni bulunamadı")
+    return bileşen
+
+@api_router.put("/iskele-bilesenleri/{bileşen_id}")
+async def update_iskele_bileseni(
+    bileşen_id: str,
+    bileşen_update: IskeleBileseniCreate,
+    current_user: dict = Depends(get_current_user)
+):
+    if current_user["role"] not in ["admin", "inspector"]:
+        raise HTTPException(status_code=403, detail="İskele bileşeni güncelleme yetkiniz yok")
+    
+    existing = await db.iskele_bilesenleri.find_one({"id": bileşen_id}, {"_id": 0})
+    if not existing:
+        raise HTTPException(status_code=404, detail="İskele bileşeni bulunamadı")
+    
+    update_data = bileşen_update.model_dump()
+    update_data["updated_at"] = datetime.now(timezone.utc).isoformat()
+    update_data["iskele_periyodu"] = "6 Aylık"  # Always 6 months
+    
+    await db.iskele_bilesenleri.update_one(
+        {"id": bileşen_id},
+        {"$set": update_data}
+    )
+    
+    updated = await db.iskele_bilesenleri.find_one({"id": bileşen_id}, {"_id": 0})
+    return updated
+
+@api_router.delete("/iskele-bilesenleri/{bileşen_id}")
+async def delete_iskele_bileseni(
+    bileşen_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    if current_user["role"] not in ["admin", "inspector"]:
+        raise HTTPException(status_code=403, detail="İskele bileşeni silme yetkiniz yok")
+    
+    result = await db.iskele_bilesenleri.delete_one({"id": bileşen_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="İskele bileşeni bulunamadı")
+    
+    return {"message": "İskele bileşeni silindi"}
+
+@api_router.post("/iskele-bilesenleri/bulk-delete")
+async def bulk_delete_iskele_bilesenleri(
+    bileşen_ids: List[str],
+    current_user: dict = Depends(get_current_user)
+):
+    if current_user["role"] not in ["admin", "inspector"]:
+        raise HTTPException(status_code=403, detail="İskele bileşeni silme yetkiniz yok")
+    
+    result = await db.iskele_bilesenleri.delete_many({"id": {"$in": bileşen_ids}})
+    return {"message": f"{result.deleted_count} iskele bileşeni silindi", "deleted_count": result.deleted_count}
+
+
 @api_router.post("/projeler/bulk-delete")
 async def bulk_delete_projeler(proje_ids: List[str], current_user: dict = Depends(get_current_user)):
     if current_user["role"] != "admin":
