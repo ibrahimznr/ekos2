@@ -182,9 +182,13 @@ const RaporModal = ({ open, onClose, rapor, onSuccess }) => {
         continue;
       }
       
-      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf'];
+      const allowedTypes = [
+        'application/pdf',
+        'application/msword',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+      ];
       if (!allowedTypes.includes(file.type)) {
-        toast.error(`${file.name}: Sadece JPG, PNG ve PDF formatları desteklenir`);
+        toast.error(`${file.name}: Sadece PDF, DOC ve DOCX formatları desteklenir`);
         continue;
       }
       
