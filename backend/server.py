@@ -1349,10 +1349,16 @@ async def create_iskele_bileseni(
     if current_user["role"] not in ["admin", "inspector"]:
         raise HTTPException(status_code=403, detail="İskele bileşeni ekleme yetkiniz yok")
     
+    # Validate and get project
+    proje = await db.projeler.find_one({"id": bileşen.proje_id}, {"_id": 0})
+    if not proje:
+        raise HTTPException(status_code=404, detail="Proje bulunamadı")
+    
     bileşen_id = str(uuid.uuid4())
     bileşen_data = {
         **bileşen.model_dump(),
         "id": bileşen_id,
+        "proje_adi": proje.get("proje_adi", ""),
         "iskele_periyodu": "6 Aylık",
         "created_by": current_user["id"],
         "created_by_username": current_user.get("username", current_user.get("email", "")),
