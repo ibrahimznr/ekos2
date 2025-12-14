@@ -1543,6 +1543,8 @@ async def import_iskele_excel(
                 bileşen_id = str(uuid.uuid4())
                 bileşen_data = {
                     "id": bileşen_id,
+                    "proje_id": proje_id,
+                    "proje_adi": proje_adi,
                     "bileşen_adi": bileşen_adi,
                     "malzeme_kodu": malzeme_kodu,
                     "bileşen_adedi": bileşen_adedi,
