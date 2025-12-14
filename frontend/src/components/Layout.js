@@ -28,6 +28,9 @@ const Layout = ({ children }) => {
   
   // Raporlar for everyone
   navItems.push({ path: '/raporlar', label: 'Raporlar', icon: FileText });
+  
+  // İskele Bileşenleri for everyone
+  navItems.push({ path: '/iskele-bilesenleri', label: 'İskele Bileşenleri', icon: Building2 });
 
   // Admin panel only for admin
   if (user.role === 'admin') {
