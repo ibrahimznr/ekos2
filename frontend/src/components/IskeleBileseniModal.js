@@ -95,6 +95,11 @@ const IskeleBileseniModal = ({ open, onClose, onSuccess }) => {
     e.preventDefault();
 
     // Validation
+    if (!formData.proje_id) {
+      toast.error('Lütfen bir proje seçin');
+      return;
+    }
+
     if (!formData.bileşen_adi || !formData.malzeme_kodu || !formData.firma_adi) {
       toast.error('Lütfen zorunlu alanları doldurun');
       return;
