@@ -41,6 +41,24 @@ const IskeleBileseniModal = ({ open, onClose, onSuccess }) => {
     gorseller: []
   });
 
+  useEffect(() => {
+    if (open) {
+      fetchProjeler();
+    }
+  }, [open]);
+
+  const fetchProjeler = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get(`${API}/projeler`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setProjeler(response.data);
+    } catch (error) {
+      toast.error('Projeler yüklenemedi');
+    }
+  };
+
   const handleChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
