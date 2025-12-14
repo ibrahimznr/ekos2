@@ -373,15 +373,35 @@ const Raporlar = () => {
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
-                <Button
-                  onClick={() => setShowImportModal(true)}
-                  variant="outline"
-                  className="border-blue-600 text-blue-700 hover:bg-blue-50"
-                  data-testid="import-excel-button"
-                >
-                  <Upload className="h-4 w-4 mr-2" />
-                  Excel İçe Aktar
-                </Button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className="border-blue-600 text-blue-700 hover:bg-blue-50"
+                      data-testid="import-excel-button"
+                    >
+                      <Upload className="h-4 w-4 mr-2" />
+                      Excel İçe Aktar
+                      <ChevronDown className="h-4 w-4 ml-2" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-56">
+                    <DropdownMenuItem
+                      onClick={() => setShowImportModal(true)}
+                      className="cursor-pointer"
+                    >
+                      <FileText className="h-4 w-4 mr-2" />
+                      Normal Rapor İçe Aktar
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => setShowIskeleBileseniExcelModal(true)}
+                      className="cursor-pointer"
+                    >
+                      <Building2 className="h-4 w-4 mr-2" />
+                      İskele Bileşenleri İçe Aktar
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </>
             )}
             <Button
