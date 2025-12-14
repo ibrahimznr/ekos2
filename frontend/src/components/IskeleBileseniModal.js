@@ -20,7 +20,8 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { toast } from 'sonner';
-import { Building2, X, Upload } from 'lucide-react';
+import { Building2 } from 'lucide-react';
+import DragDropImageUpload from './DragDropImageUpload';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
