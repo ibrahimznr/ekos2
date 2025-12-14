@@ -251,7 +251,7 @@ const IskeleBileseniExcelImportModal = ({ open, onClose, onSuccess }) => {
           </Button>
           <Button
             onClick={handleUpload}
-            disabled={!file || uploading}
+            disabled={!selectedProje || !file || uploading}
           >
             {uploading ? 'İçe Aktarılıyor...' : 'İçe Aktar'}
           </Button>
