@@ -263,57 +263,13 @@ const IskeleBileseniModal = ({ open, onClose, onSuccess }) => {
             />
           </div>
 
-          {/* Görsel Upload */}
-          <div className="space-y-2">
-            <Label>Bileşen Görselleri (Maksimum 3 adet)</Label>
-            
-            {/* Image Preview */}
-            {formData.gorseller.length > 0 && (
-              <div className="grid grid-cols-3 gap-2 mb-2">
-                {formData.gorseller.map((img, index) => (
-                  <div key={index} className="relative group">
-                    <img 
-                      src={img} 
-                      alt={`Görsel ${index + 1}`}
-                      className="w-full h-24 object-cover rounded border"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveImage(index)}
-                      className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                    >
-                      <X className="h-3 w-3" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {/* Upload Button */}
-            {formData.gorseller.length < 3 && (
-              <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-blue-500 transition-colors">
-                <input
-                  type="file"
-                  accept="image/*"
-                  multiple
-                  onChange={handleImageUpload}
-                  className="hidden"
-                  id="image-upload"
-                />
-                <label htmlFor="image-upload" className="cursor-pointer">
-                  <div className="flex flex-col items-center gap-2">
-                    <Upload className="h-8 w-8 text-gray-400" />
-                    <p className="text-sm text-gray-600">
-                      Görsel yüklemek için tıklayın
-                    </p>
-                    <p className="text-xs text-gray-500">
-                      {formData.gorseller.length}/3 görsel yüklendi
-                    </p>
-                  </div>
-                </label>
-              </div>
-            )}
-          </div>
+          {/* Görsel Upload - Drag & Drop + Paste */}
+          <DragDropImageUpload
+            images={formData.gorseller}
+            onChange={handleImagesChange}
+            maxImages={3}
+            label="Bileşen Görselleri"
+          />
 
           <DialogFooter>
             <Button type="button" variant="outline" onClick={onClose}>
