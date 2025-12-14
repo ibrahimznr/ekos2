@@ -27,7 +27,9 @@ const API = `${BACKEND_URL}/api`;
 
 const IskeleBileseniModal = ({ open, onClose, onSuccess }) => {
   const [loading, setLoading] = useState(false);
+  const [projeler, setProjeler] = useState([]);
   const [formData, setFormData] = useState({
+    proje_id: '',
     bileşen_adi: '',
     malzeme_kodu: '',
     bileşen_adedi: 1,
