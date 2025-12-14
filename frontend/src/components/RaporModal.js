@@ -34,6 +34,7 @@ const RaporModal = ({ open, onClose, rapor, onSuccess }) => {
   const [altKategoriler, setAltKategoriler] = useState([]);
   const [kategoriAltKategoriMap, setKategoriAltKategoriMap] = useState({});
   const [selectedFiles, setSelectedFiles] = useState([]);
+  const [selectedImages, setSelectedImages] = useState([]);
   const [formData, setFormData] = useState({
     proje_id: '',
     sehir: '',
