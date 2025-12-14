@@ -407,19 +407,20 @@ const Raporlar = () => {
             <Button
               onClick={handleExportExcel}
               variant="outline"
-              className="border-green-600 text-green-700 hover:bg-green-50"
+              className="border-green-600 text-green-700 hover:bg-green-50 text-sm sm:text-base"
               data-testid="export-excel-button"
             >
-              <Download className="h-4 w-4 mr-2" />
-              Excel İndir
+              <Download className="h-4 w-4 mr-1 sm:mr-2" />
+              <span className="hidden sm:inline">Excel </span>İndir
             </Button>
             <Button
               onClick={() => navigate('/iskele-bilesenleri')}
               variant="outline"
-              className="border-blue-600 text-blue-700 hover:bg-blue-50"
+              className="border-blue-600 text-blue-700 hover:bg-blue-50 text-sm sm:text-base"
             >
-              <Building2 className="h-4 w-4 mr-2" />
-              İskele Bileşenlerini Gör
+              <Building2 className="h-4 w-4 mr-1 sm:mr-2" />
+              <span className="hidden xs:inline">İskele Bileşenleri</span>
+              <span className="xs:hidden">Bileşenler</span>
             </Button>
           </div>
         </div>
