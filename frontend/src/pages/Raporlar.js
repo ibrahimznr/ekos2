@@ -17,6 +17,7 @@ import RaporModal from '@/components/RaporModal';
 import RaporDetailModal from '@/components/RaporDetailModal';
 import ExcelImportModal from '@/components/ExcelImportModal';
 import IskeleBileseniModal from '@/components/IskeleBileseniModal';
+import IskeleBileseniExcelImportModal from '@/components/IskeleBileseniExcelImportModal';
 import FiltrelemePanel from '@/components/FiltrelemePanel';
 import {
   DropdownMenu,
