@@ -135,6 +135,23 @@ const IskeleBileseniExcelImportModal = ({ open, onClose, onSuccess }) => {
         </DialogHeader>
 
         <div className="space-y-6 py-4">
+          {/* Project Selection */}
+          <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+            <h4 className="font-semibold text-purple-900 mb-3">1. Proje Seçin</h4>
+            <Select value={selectedProje} onValueChange={setSelectedProje}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Bileşenler hangi projeye eklensin?" />
+              </SelectTrigger>
+              <SelectContent>
+                {projeler.map((proje) => (
+                  <SelectItem key={proje.id} value={proje.id}>
+                    {proje.proje_adi} {proje.proje_kodu ? `(${proje.proje_kodu})` : ''}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
           {/* Template Download */}
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
             <div className="flex items-start justify-between gap-4">
