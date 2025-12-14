@@ -387,7 +387,7 @@ const Raporlar = () => {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-56">
                     <DropdownMenuItem
-                      onClick={() => setShowImportModal(true)}
+                      onClick={() => setShowExcelModal(true)}
                       className="cursor-pointer"
                     >
                       <FileText className="h-4 w-4 mr-2" />
