@@ -52,6 +52,14 @@ function App() {
               }
             />
             <Route
+              path="/iskele-bilesenleri"
+              element={
+                <ProtectedRoute>
+                  <IskeleBilesenleri />
+                </ProtectedRoute>
+              }
+            />
+            <Route
               path="/admin"
               element={
                 <ProtectedRoute>
