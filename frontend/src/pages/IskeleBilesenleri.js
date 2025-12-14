@@ -234,23 +234,70 @@ const IskeleBilesenleri = () => {
           </div>
         </div>
 
-        {/* Search */}
+        {/* Search and Filters */}
         <Card className="shadow-md">
           <CardContent className="pt-6">
-            <div className="flex gap-2">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                <Input
-                  placeholder="Bileşen adı, malzeme kodu veya firma ara..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-                  className="pl-10"
-                />
+            <div className="space-y-4">
+              {/* Search */}
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <Input
+                    placeholder="Bileşen adı, malzeme kodu veya firma ara..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+                    className="pl-10"
+                  />
+                </div>
+                <Button onClick={handleSearch}>
+                  <Search className="h-4 w-4" />
+                </Button>
               </div>
-              <Button onClick={handleSearch}>
-                <Search className="h-4 w-4" />
-              </Button>
+              
+              {/* Filters */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium">Firma Filtresi</Label>
+                  <Select value={filters.firma_adi} onValueChange={(value) => handleFilterChange({...filters, firma_adi: value})}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Tüm Firmalar" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">Tüm Firmalar</SelectItem>
+                      {[...new Set(bilesenleri.map(b => b.firma_adi))].map(firma => (
+                        <SelectItem key={firma} value={firma}>{firma}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium">Uygunluk Filtresi</Label>
+                  <Select value={filters.uygunluk} onValueChange={(value) => handleFilterChange({...filters, uygunluk: value})}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Tümü" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">Tümü</SelectItem>
+                      <SelectItem value="Uygun">Uygun</SelectItem>
+                      <SelectItem value="Uygun Değil">Uygun Değil</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {(filters.firma_adi || filters.uygunluk) && (
+                  <div className="flex items-end">
+                    <Button
+                      variant="outline"
+                      onClick={() => setFilters({ firma_adi: '', uygunluk: '' })}
+                      className="w-full"
+                    >
+                      Filtreleri Temizle
+                    </Button>
+                  </div>
+                )}
+              </div>
             </div>
           </CardContent>
         </Card>
