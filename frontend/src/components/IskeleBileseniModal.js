@@ -129,6 +129,7 @@ const IskeleBileseniModal = ({ open, onClose, onSuccess }) => {
       
       // Reset form
       setFormData({
+        proje_id: '',
         bileşen_adi: '',
         malzeme_kodu: '',
         bileşen_adedi: 1,
