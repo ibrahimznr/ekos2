@@ -343,14 +343,34 @@ const Raporlar = () => {
             )}
             {canEdit && (
               <>
-                <Button
-                  onClick={handleCreateRapor}
-                  className="bg-gradient-to-r from-blue-700 to-blue-600 hover:from-blue-800 hover:to-blue-700 text-white shadow-sm"
-                  data-testid="create-report-button"
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Yeni Rapor
-                </Button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      className="bg-gradient-to-r from-blue-700 to-blue-600 hover:from-blue-800 hover:to-blue-700 text-white shadow-sm"
+                      data-testid="new-report-button"
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Yeni Rapor
+                      <ChevronDown className="h-4 w-4 ml-2" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-56">
+                    <DropdownMenuItem
+                      onClick={() => setShowRaporModal(true)}
+                      className="cursor-pointer"
+                    >
+                      <FileText className="h-4 w-4 mr-2" />
+                      Normal Rapor Oluştur
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => setShowIskeleBileseniModal(true)}
+                      className="cursor-pointer"
+                    >
+                      <Building2 className="h-4 w-4 mr-2" />
+                      İskele Bileşeni Ekle
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
                 <Button
                   onClick={() => setShowImportModal(true)}
                   variant="outline"
