@@ -1346,9 +1346,10 @@ async def create_iskele_bileseni(
     if current_user["role"] not in ["admin", "inspector"]:
         raise HTTPException(status_code=403, detail="İskele bileşeni ekleme yetkiniz yok")
     
+    bileşen_id = str(uuid.uuid4())
     bileşen_data = {
         **bileşen.model_dump(),
-        "id": str(uuid.uuid4()),
+        "id": bileşen_id,
         "iskele_periyodu": "6 Aylık",
         "created_by": current_user["id"],
         "created_by_username": current_user.get("username", current_user.get("email", "")),
@@ -1357,7 +1358,10 @@ async def create_iskele_bileseni(
     }
     
     await db.iskele_bilesenleri.insert_one(bileşen_data)
-    return bileşen_data
+    
+    # Return without _id
+    created = await db.iskele_bilesenleri.find_one({"id": bileşen_id}, {"_id": 0})
+    return created
 
 @api_router.get("/iskele-bilesenleri/{bileşen_id}")
 async def get_iskele_bileseni(
