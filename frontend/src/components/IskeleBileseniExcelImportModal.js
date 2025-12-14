@@ -77,6 +77,11 @@ const IskeleBileseniExcelImportModal = ({ open, onClose, onSuccess }) => {
   };
 
   const handleUpload = async () => {
+    if (!selectedProje) {
+      toast.error('Lütfen bir proje seçin');
+      return;
+    }
+
     if (!file) {
       toast.error('Lütfen bir dosya seçin');
       return;
@@ -87,6 +92,7 @@ const IskeleBileseniExcelImportModal = ({ open, onClose, onSuccess }) => {
       const token = localStorage.getItem('token');
       const formData = new FormData();
       formData.append('file', file);
+      formData.append('proje_id', selectedProje);
 
       const response = await axios.post(`${API}/iskele-bilesenleri/excel/import`, formData, {
         headers: {
