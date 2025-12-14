@@ -5,9 +5,10 @@ import Login from '@/pages/Login';
 import Register from '@/pages/Register';
 import Dashboard from '@/pages/Dashboard';
 import Raporlar from '@/pages/Raporlar';
+import IskeleBilesenleri from '@/pages/IskeleBilesenleri';
 import AdminPanel from '@/pages/AdminPanel';
 import ErrorBoundary from '@/components/ErrorBoundary';
-import { Toaster } from '@/components/ui/sonner';
+import { Toaster} from '@/components/ui/sonner';
 
 const ProtectedRoute = ({ children }) => {
   const token = localStorage.getItem('token');
