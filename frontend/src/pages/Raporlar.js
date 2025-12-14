@@ -649,6 +649,14 @@ const Raporlar = () => {
         />
       )}
 
+      {showIskeleBileseniModal && (
+        <IskeleBileseniModal
+          open={showIskeleBileseniModal}
+          onClose={() => setShowIskeleBileseniModal(false)}
+          onSuccess={fetchRaporlar}
+        />
+      )}
+
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent>
