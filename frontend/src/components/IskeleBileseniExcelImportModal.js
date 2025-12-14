@@ -117,6 +117,7 @@ const IskeleBileseniExcelImportModal = ({ open, onClose, onSuccess }) => {
   const handleClose = () => {
     setFile(null);
     setResult(null);
+    setSelectedProje('');
     onClose();
   };
 
