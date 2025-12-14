@@ -1481,6 +1481,7 @@ async def download_iskele_template():
 @api_router.post("/iskele-bilesenleri/excel/import")
 async def import_iskele_excel(
     file: UploadFile = File(...),
+    proje_id: str = Form(...),
     current_user: dict = Depends(get_current_user)
 ):
     if current_user["role"] not in ["admin", "inspector"]:
@@ -1488,6 +1489,13 @@ async def import_iskele_excel(
     
     if not file.filename.endswith(('.xlsx', '.xls')):
         raise HTTPException(status_code=400, detail="Sadece Excel dosyaları yüklenebilir")
+    
+    # Validate and get project
+    proje = await db.projeler.find_one({"id": proje_id}, {"_id": 0})
+    if not proje:
+        raise HTTPException(status_code=404, detail="Proje bulunamadı")
+    
+    proje_adi = proje.get("proje_adi", "")
     
     content = await file.read()
     excel_file = io.BytesIO(content)
