@@ -671,6 +671,14 @@ const Raporlar = () => {
         />
       )}
 
+      {showIskeleBileseniExcelModal && (
+        <IskeleBileseniExcelImportModal
+          open={showIskeleBileseniExcelModal}
+          onClose={() => setShowIskeleBileseniExcelModal(false)}
+          onSuccess={fetchRaporlar}
+        />
+      )}
+
       {showIskeleBileseniModal && (
         <IskeleBileseniModal
           open={showIskeleBileseniModal}
