@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -20,8 +20,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { toast } from 'sonner';
-import { Building2, X, Upload, Image as ImageIcon } from 'lucide-react';
-import { useEffect } from 'react';
+import { Building2, X, Upload } from 'lucide-react';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
