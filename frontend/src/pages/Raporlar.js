@@ -61,6 +61,7 @@ const Raporlar = () => {
   const [showIskeleBileseniModal, setShowIskeleBileseniModal] = useState(false);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
+  const [showIskeleBileseniExcelModal, setShowIskeleBileseniExcelModal] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   
   const [selectedRapor, setSelectedRapor] = useState(null);
