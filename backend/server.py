@@ -1096,21 +1096,10 @@ async def import_excel(
             except Exception as e:
                 errors.append(f"Satır {row_idx}: {str(e)}")
         
-        # Build summary message
-        summary_parts = []
-        if imported_count > 0:
-            summary_parts.append(f"{imported_count} rapor başarıyla içe aktarıldı")
-        if skipped_count > 0:
-            summary_parts.append(f"{skipped_count} tekrar eden rapor atlandı")
-        
-        message = ", ".join(summary_parts) if summary_parts else "Hiçbir rapor içe aktarılamadı"
-        
         return {
-            "message": message,
+            "message": f"{imported_count} rapor başarıyla içe aktarıldı",
             "imported_count": imported_count,
-            "skipped_count": skipped_count,
-            "errors": errors,
-            "warnings": warnings
+            "errors": errors
         }
         
     except Exception as e:
