@@ -160,6 +160,25 @@ const IskeleBileseniModal = ({ open, onClose, onSuccess }) => {
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Proje Seçimi */}
+          <div className="space-y-2">
+            <Label htmlFor="proje">
+              Proje <span className="text-red-500">*</span>
+            </Label>
+            <Select value={formData.proje_id} onValueChange={(value) => handleChange('proje_id', value)}>
+              <SelectTrigger>
+                <SelectValue placeholder="Bileşenin bağlı olacağı projeyi seçin" />
+              </SelectTrigger>
+              <SelectContent>
+                {projeler.map((proje) => (
+                  <SelectItem key={proje.id} value={proje.id}>
+                    {proje.proje_adi} {proje.proje_kodu ? `(${proje.proje_kodu})` : ''}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
           {/* Bileşen Adı */}
           <div className="space-y-2">
             <Label htmlFor="bilesen-adi">
