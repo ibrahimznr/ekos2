@@ -702,6 +702,13 @@ const Raporlar = () => {
         onSuccess={fetchRaporlar}
       />
 
+      {/* İskele Bileşeni Excel Import Modal */}
+      <IskeleBileseniExcelImportModal
+        open={showIskeleBileseniExcelModal}
+        onClose={() => setShowIskeleBileseniExcelModal(false)}
+        onSuccess={fetchRaporlar}
+      />
+
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent>
