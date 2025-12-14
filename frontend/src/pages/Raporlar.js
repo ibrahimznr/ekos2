@@ -57,6 +57,7 @@ const Raporlar = () => {
   const [itemsPerPage] = useState(20);
   
   const [showRaporModal, setShowRaporModal] = useState(false);
+  const [showIskeleBileseniModal, setShowIskeleBileseniModal] = useState(false);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
