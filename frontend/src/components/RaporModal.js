@@ -225,6 +225,25 @@ const RaporModal = ({ open, onClose, rapor, onSuccess }) => {
         toast.success('Rapor oluşturuldu');
       }
       
+      // Upload images if any
+      if (selectedImages.length > 0 && raporId) {
+        for (const image of selectedImages) {
+          const imageFormData = new FormData();
+          imageFormData.append('file', image);
+          
+          try {
+            await axios.post(`${API}/upload/${raporId}`, imageFormData, {
+              headers: {
+                Authorization: `Bearer ${token}`,
+                'Content-Type': 'multipart/form-data',
+              },
+            });
+          } catch (imageError) {
+            toast.error(`${image.name} yüklenemedi`);
+          }
+        }
+      }
+
       // Upload files if any
       if (selectedFiles.length > 0 && raporId) {
         for (const file of selectedFiles) {
@@ -242,15 +261,17 @@ const RaporModal = ({ open, onClose, rapor, onSuccess }) => {
             toast.error(`${file.name} yüklenemedi`);
           }
         }
-        
-        if (selectedFiles.length > 0) {
-          toast.success(`${selectedFiles.length} dosya yüklendi`);
-        }
+      }
+      
+      const totalUploaded = selectedImages.length + selectedFiles.length;
+      if (totalUploaded > 0) {
+        toast.success(`${totalUploaded} dosya yüklendi`);
       }
       
       onSuccess();
       onClose();
       setSelectedFiles([]);
+      setSelectedImages([]);
     } catch (error) {
       toast.error(error.response?.data?.detail || 'Rapor kaydedilemedi');
     } finally {
