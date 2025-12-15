@@ -97,7 +97,15 @@ const IskeleBilesenleri = () => {
       const response = await axios.get(`${API}/iskele-bilesenleri`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setBilesenleri(response.data);
+      
+      // Sort by created_at descending (newest first)
+      const sortedData = response.data.sort((a, b) => {
+        const dateA = new Date(a.created_at);
+        const dateB = new Date(b.created_at);
+        return dateB - dateA; // Descending order (newest first)
+      });
+      
+      setBilesenleri(sortedData);
     } catch (error) {
       if (error.response?.status === 401) {
         localStorage.removeItem('token');
