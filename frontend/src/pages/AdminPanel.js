@@ -760,6 +760,56 @@ const AdminPanel = () => {
               ))}
             </div>
           </TabsContent>
+
+          {/* İskele Bileşen Adları Tab */}
+          <TabsContent value="bilesen-adlari" className="space-y-4">
+            <div className="flex justify-between items-center">
+              <h2 className="text-xl font-semibold">İskele Bileşen Adları</h2>
+              <Button onClick={() => {
+                setEditMode(false);
+                setEditingItem(null);
+                setShowBilesenAdiDialog(true);
+              }}>
+                <Plus className="h-4 w-4 mr-2" />
+                Yeni Bileşen Adı Ekle
+              </Button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {iskeleBilesenAdlari.map((item) => (
+                <Card key={item.id} className="hover:shadow-lg transition-shadow">
+                  <CardContent className="pt-6">
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex-1">
+                        <h3 className="font-semibold text-lg text-gray-800">{item.bilesen_adi}</h3>
+                        {item.aciklama && (
+                          <p className="text-sm text-gray-600 mt-1">{item.aciklama}</p>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex gap-2 justify-end">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleEditClick(item, 'bilesen_adi')}
+                        className="text-blue-600 hover:bg-blue-50"
+                      >
+                        Düzenle
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleDeleteClick(item, 'bilesen_adi')}
+                        className="text-red-600 hover:bg-red-50"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </TabsContent>
         </Tabs>
       </div>
 
