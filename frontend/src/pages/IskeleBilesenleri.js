@@ -289,7 +289,7 @@ const IskeleBilesenleri = () => {
                   </Select>
                 </div>
 
-                {(filters.proje_id || filters.firma_adi || filters.uygunluk) && (
+                {(filters.proje_id !== 'all' && filters.proje_id) || (filters.firma_adi !== 'all' && filters.firma_adi) || (filters.uygunluk !== 'all' && filters.uygunluk) ? (
                   <div className="flex items-end">
                     <Button
                       variant="outline"
