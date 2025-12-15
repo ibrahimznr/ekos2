@@ -438,6 +438,9 @@ const AdminPanel = () => {
     } else if (type === 'proje') {
       setShowProjeDialog(false);
       setNewProje({ proje_adi: '', proje_kodu: '', lokasyon: '', baslangic_tarihi: '', bitis_tarihi: '', durum: 'Aktif', aciklama: '' });
+    } else if (type === 'bilesen_adi') {
+      setShowBilesenAdiDialog(false);
+      setNewBilesenAdi({ bilesen_adi: '', aciklama: '' });
     }
   };
 
