@@ -40,9 +40,9 @@ const IskeleBilesenleri = () => {
   
   // Filters
   const [filters, setFilters] = useState({
-    firma_adi: '',
-    uygunluk: '',
-    proje_id: '',
+    firma_adi: 'all',
+    uygunluk: 'all',
+    proje_id: 'all',
   });
   
   // Pagination
