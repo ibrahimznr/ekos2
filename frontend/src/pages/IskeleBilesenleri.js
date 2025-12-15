@@ -168,6 +168,37 @@ const IskeleBilesenleri = () => {
     }
   };
 
+  const handleBulkDelete = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      await axios.post(`${API}/iskele-bilesenleri/bulk-delete`, selectedIds, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      toast.success(`${selectedIds.length} iskele bileşeni silindi`);
+      setSelectedIds([]);
+      fetchBilesenleri();
+      setBulkDeleteDialog(false);
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'İskele bileşenleri silinemedi');
+    }
+  };
+
+  const handleSelectAll = () => {
+    if (selectedIds.length === paginatedBilesenleri.length) {
+      setSelectedIds([]);
+    } else {
+      setSelectedIds(paginatedBilesenleri.map(b => b.id));
+    }
+  };
+
+  const handleSelectOne = (id) => {
+    if (selectedIds.includes(id)) {
+      setSelectedIds(selectedIds.filter(selectedId => selectedId !== id));
+    } else {
+      setSelectedIds([...selectedIds, id]);
+    }
+  };
+
   const handleEdit = (bilesen) => {
     setEditBilesen(bilesen);
     setShowBilesenModal(true);
