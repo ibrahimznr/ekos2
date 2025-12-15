@@ -452,36 +452,35 @@ const IskeleBilesenleri = () => {
                 }`}
               >
                 <CardContent className="p-6 space-y-4">
-                  {/* Checkbox */}
-                  {canEdit && (
-                    <div className="flex items-start justify-between">
+                  {/* Header with Checkbox */}
+                  <div className="flex items-start gap-3">
+                    {canEdit && (
                       <input
                         type="checkbox"
                         checked={selectedIds.includes(bilesen.id)}
                         onChange={() => handleSelectOne(bilesen.id)}
                         className="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer mt-1"
                       />
+                    )}
+                    <div className="flex-1 flex items-start justify-between">
+                      <h3 className="text-lg font-bold text-gray-800 line-clamp-2">
+                        {bilesen.bileşen_adi}
+                      </h3>
+                      <Badge
+                        className={`ml-2 ${
+                          bilesen.uygunluk === 'Uygun'
+                            ? 'bg-green-100 text-green-800 hover:bg-green-200'
+                            : 'bg-red-100 text-red-800 hover:bg-red-200'
+                        }`}
+                      >
+                        {bilesen.uygunluk === 'Uygun' ? (
+                          <CheckCircle className="h-3 w-3 mr-1" />
+                        ) : (
+                          <XCircle className="h-3 w-3 mr-1" />
+                        )}
+                        {bilesen.uygunluk}
+                      </Badge>
                     </div>
-                  )}
-                  {/* Bileşen Adı */}
-                  <div className="flex items-start justify-between">
-                    <h3 className="text-lg font-bold text-gray-800 line-clamp-2">
-                      {bilesen.bileşen_adi}
-                    </h3>
-                    <Badge
-                      className={`ml-2 ${
-                        bilesen.uygunluk === 'Uygun'
-                          ? 'bg-green-100 text-green-800 hover:bg-green-200'
-                          : 'bg-red-100 text-red-800 hover:bg-red-200'
-                      }`}
-                    >
-                      {bilesen.uygunluk === 'Uygun' ? (
-                        <CheckCircle className="h-3 w-3 mr-1" />
-                      ) : (
-                        <XCircle className="h-3 w-3 mr-1" />
-                      )}
-                      {bilesen.uygunluk}
-                    </Badge>
                   </div>
 
                   {/* Malzeme Kodu */}
