@@ -1357,6 +1357,76 @@ async def delete_proje(proje_id: str, current_user: dict = Depends(get_current_u
         raise HTTPException(status_code=404, detail="Proje bulunamadı")
     return {"message": "Proje silindi"}
 
+# ==================== İSKELE BİLEŞEN ADLARI ENDPOINTS ====================
+
+@api_router.get("/iskele-bilesen-adlari")
+async def get_iskele_bilesen_adlari(current_user: dict = Depends(get_current_user)):
+    bilesen_adlari = await db.iskele_bilesen_adlari.find({}, {"_id": 0}).to_list(1000)
+    return bilesen_adlari
+
+@api_router.post("/iskele-bilesen-adlari")
+async def create_iskele_bilesen_adi(
+    bilesen_adi: str,
+    aciklama: Optional[str] = None,
+    current_user: dict = Depends(get_current_user) = None
+):
+    if current_user["role"] != "admin":
+        raise HTTPException(status_code=403, detail="Bu işlem için yetkiniz yok")
+    
+    # Check if already exists
+    existing = await db.iskele_bilesen_adlari.find_one({"bilesen_adi": bilesen_adi}, {"_id": 0})
+    if existing:
+        raise HTTPException(status_code=400, detail="Bu bileşen adı zaten mevcut")
+    
+    bilesen_id = str(uuid.uuid4())
+    bilesen_data = {
+        "id": bilesen_id,
+        "bilesen_adi": bilesen_adi,
+        "aciklama": aciklama,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    await db.iskele_bilesen_adlari.insert_one(bilesen_data)
+    created = await db.iskele_bilesen_adlari.find_one({"id": bilesen_id}, {"_id": 0})
+    return created
+
+@api_router.put("/iskele-bilesen-adlari/{bilesen_id}")
+async def update_iskele_bilesen_adi(
+    bilesen_id: str,
+    bilesen_adi: str,
+    aciklama: Optional[str] = None,
+    current_user: dict = Depends(get_current_user) = None
+):
+    if current_user["role"] != "admin":
+        raise HTTPException(status_code=403, detail="Bu işlem için yetkiniz yok")
+    
+    existing = await db.iskele_bilesen_adlari.find_one({"id": bilesen_id}, {"_id": 0})
+    if not existing:
+        raise HTTPException(status_code=404, detail="Bileşen adı bulunamadı")
+    
+    update_data = {
+        "bilesen_adi": bilesen_adi,
+        "aciklama": aciklama
+    }
+    
+    await db.iskele_bilesen_adlari.update_one({"id": bilesen_id}, {"$set": update_data})
+    updated = await db.iskele_bilesen_adlari.find_one({"id": bilesen_id}, {"_id": 0})
+    return updated
+
+@api_router.delete("/iskele-bilesen-adlari/{bilesen_id}")
+async def delete_iskele_bilesen_adi(
+    bilesen_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    if current_user["role"] != "admin":
+        raise HTTPException(status_code=403, detail="Bu işlem için yetkiniz yok")
+    
+    result = await db.iskele_bilesen_adlari.delete_one({"id": bilesen_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Bileşen adı bulunamadı")
+    
+    return {"message": "Bileşen adı silindi"}
+
 # ==================== İSKELE BİLEŞENLERİ ENDPOINTS ====================
 
 @api_router.get("/iskele-bilesenleri")
