@@ -414,6 +414,12 @@ const AdminPanel = () => {
         aciklama: item.aciklama || ''
       });
       setShowProjeDialog(true);
+    } else if (type === 'bilesen_adi') {
+      setNewBilesenAdi({
+        bilesen_adi: item.bilesen_adi || '',
+        aciklama: item.aciklama || ''
+      });
+      setShowBilesenAdiDialog(true);
     }
   };
 
