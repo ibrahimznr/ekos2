@@ -74,11 +74,13 @@ const AdminPanel = () => {
     durum: 'Aktif', 
     aciklama: '' 
   });
+  const [newBilesenAdi, setNewBilesenAdi] = useState({ bilesen_adi: '', aciklama: '' });
   
   // Bulk delete state
   const [selectedUsers, setSelectedUsers] = useState([]);
   const [selectedKategoriler, setSelectedKategoriler] = useState([]);
   const [selectedProjeler, setSelectedProjeler] = useState([]);
+  const [selectedBilesenAdlari, setSelectedBilesenAdlari] = useState([]);
 
   useEffect(() => {
     const userData = localStorage.getItem('user');
