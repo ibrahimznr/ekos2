@@ -122,11 +122,20 @@ const IskeleBileseniModal = ({ open, onClose, onSuccess, editData = null }) => {
         bileşen_adedi: parseInt(formData.bileşen_adedi)
       };
 
-      await axios.post(`${API}/iskele-bilesenleri`, payload, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      if (editData) {
+        // Update existing
+        await axios.put(`${API}/iskele-bilesenleri/${editData.id}`, payload, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        toast.success('İskele bileşeni başarıyla güncellendi');
+      } else {
+        // Create new
+        await axios.post(`${API}/iskele-bilesenleri`, payload, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        toast.success('İskele bileşeni başarıyla eklendi');
+      }
 
-      toast.success('İskele bileşeni başarıyla eklendi');
       onSuccess();
       onClose();
       
@@ -143,7 +152,7 @@ const IskeleBileseniModal = ({ open, onClose, onSuccess, editData = null }) => {
         gorseller: []
       });
     } catch (error) {
-      toast.error(error.response?.data?.detail || 'İskele bileşeni eklenemedi');
+      toast.error(error.response?.data?.detail || `İskele bileşeni ${editData ? 'güncellenemedi' : 'eklenemedi'}`);
     } finally {
       setLoading(false);
     }
