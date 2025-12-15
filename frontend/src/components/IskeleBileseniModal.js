@@ -29,6 +29,7 @@ const API = `${BACKEND_URL}/api`;
 const IskeleBileseniModal = ({ open, onClose, onSuccess, editData = null }) => {
   const [loading, setLoading] = useState(false);
   const [projeler, setProjeler] = useState([]);
+  const [bilesenAdlari, setBilesenAdlari] = useState([]);
   const [formData, setFormData] = useState({
     proje_id: '',
     bileşen_adi: '',
@@ -44,6 +45,7 @@ const IskeleBileseniModal = ({ open, onClose, onSuccess, editData = null }) => {
   useEffect(() => {
     if (open) {
       fetchProjeler();
+      fetchBilesenAdlari();
       // If editing, populate form with existing data
       if (editData) {
         setFormData({
