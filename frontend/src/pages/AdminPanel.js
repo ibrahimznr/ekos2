@@ -285,13 +285,19 @@ const AdminPanel = () => {
         });
         toast.success('Proje silindi');
         fetchProjeler();
+      } else if (deleteType === 'bilesen_adi') {
+        await axios.delete(`${API}/iskele-bilesen-adlari/${deleteItem.id}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        toast.success('Bileşen adı silindi');
+        fetchIskeleBilesenAdlari();
       }
-    } catch (error) {
-      toast.error(error.response?.data?.detail || 'Silme işlemi başarısız');
-    } finally {
+      
       setShowDeleteDialog(false);
       setDeleteItem(null);
       setDeleteType('');
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Silme işlemi başarısız');
     }
   };
 
