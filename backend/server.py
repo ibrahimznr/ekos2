@@ -1431,22 +1431,22 @@ async def update_iskele_bileseni(
     update_data["iskele_periyodu"] = "6 Aylık"  # Always 6 months
     
     await db.iskele_bilesenleri.update_one(
-        {"id": bileşen_id},
+        {"id": bilesen_id},
         {"$set": update_data}
     )
     
-    updated = await db.iskele_bilesenleri.find_one({"id": bileşen_id}, {"_id": 0})
+    updated = await db.iskele_bilesenleri.find_one({"id": bilesen_id}, {"_id": 0})
     return updated
 
-@api_router.delete("/iskele-bilesenleri/{bileşen_id}")
+@api_router.delete("/iskele-bilesenleri/{bilesen_id}")
 async def delete_iskele_bileseni(
-    bileşen_id: str,
+    bilesen_id: str,
     current_user: dict = Depends(get_current_user)
 ):
     if current_user["role"] not in ["admin", "inspector"]:
         raise HTTPException(status_code=403, detail="İskele bileşeni silme yetkiniz yok")
     
-    result = await db.iskele_bilesenleri.delete_one({"id": bileşen_id})
+    result = await db.iskele_bilesenleri.delete_one({"id": bilesen_id})
     if result.deleted_count == 0:
         raise HTTPException(status_code=404, detail="İskele bileşeni bulunamadı")
     
