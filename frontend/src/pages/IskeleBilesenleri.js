@@ -293,7 +293,7 @@ const IskeleBilesenleri = () => {
                   <div className="flex items-end">
                     <Button
                       variant="outline"
-                      onClick={() => setFilters({ proje_id: '', firma_adi: '', uygunluk: '' })}
+                      onClick={() => setFilters({ proje_id: 'all', firma_adi: 'all', uygunluk: 'all' })}
                       className="w-full"
                     >
                       Filtreleri Temizle
