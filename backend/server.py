@@ -1422,6 +1422,62 @@ async def delete_iskele_bileseni(
     return {"message": "İskele bileşeni silindi"}
 
 @api_router.post("/iskele-bilesenleri/bulk-delete")
+
+@api_router.get("/iskele-bilesenleri/excel/export")
+async def export_iskele_excel(current_user: dict = Depends(get_current_user)):
+    # Role-based filtering
+    query = {}
+    if current_user.get("role") == "viewer" and current_user.get("firma_adi"):
+        query["firma_adi"] = current_user.get("firma_adi")
+    
+    bilesenleri = await db.iskele_bilesenleri.find(query, {"_id": 0}).to_list(1000)
+    
+    # Create Excel workbook
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "İskele Bileşenleri"
+    
+    # Headers
+    headers = [
+        "Bileşen Adı", "Malzeme Kodu", "Bileşen Adedi", "Firma Adı",
+        "Geçerlilik Tarihi", "Uygunluk", "Açıklama", "Proje Adı"
+    ]
+    
+    header_fill = PatternFill(start_color="1e40af", end_color="1e40af", fill_type="solid")
+    header_font = Font(color="FFFFFF", bold=True)
+    
+    for col, header in enumerate(headers, 1):
+        cell = ws.cell(row=1, column=col, value=header)
+        cell.fill = header_fill
+        cell.font = header_font
+        cell.alignment = Alignment(horizontal="center", vertical="center")
+    
+    # Data rows
+    for row_idx, bilesen in enumerate(bilesenleri, 2):
+        ws.cell(row=row_idx, column=1, value=bilesen.get("bileşen_adi", ""))
+        ws.cell(row=row_idx, column=2, value=bilesen.get("malzeme_kodu", ""))
+        ws.cell(row=row_idx, column=3, value=bilesen.get("bileşen_adedi", 0))
+        ws.cell(row=row_idx, column=4, value=bilesen.get("firma_adi", ""))
+        ws.cell(row=row_idx, column=5, value=bilesen.get("gecerlilik_tarihi", ""))
+        ws.cell(row=row_idx, column=6, value=bilesen.get("uygunluk", ""))
+        ws.cell(row=row_idx, column=7, value=bilesen.get("aciklama", ""))
+        ws.cell(row=row_idx, column=8, value=bilesen.get("proje_adi", ""))
+    
+    # Set column widths
+    for col in ws.columns:
+        column = col[0].column_letter
+        ws.column_dimensions[column].width = 20
+    
+    excel_file = io.BytesIO()
+    wb.save(excel_file)
+    excel_file.seek(0)
+    
+    return StreamingResponse(
+        excel_file,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": f"attachment; filename=iskele_bilesenleri_{datetime.now().strftime('%Y%m%d')}.xlsx"}
+    )
+
 async def bulk_delete_iskele_bilesenleri(
     bileşen_ids: List[str],
     current_user: dict = Depends(get_current_user)
