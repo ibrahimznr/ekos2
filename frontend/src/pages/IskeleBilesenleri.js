@@ -285,10 +285,21 @@ const IskeleBilesenleri = () => {
               <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">İskele Bileşenleri</h1>
               <p className="text-sm sm:text-base text-gray-600 mt-1">
                 {filteredBilesenleri.length} bileşen bulundu
+                {selectedIds.length > 0 && <span className="ml-2 text-blue-600 font-semibold">({selectedIds.length} seçili)</span>}
               </p>
             </div>
           </div>
           <div className="flex flex-wrap gap-2">
+            {selectedIds.length > 0 && canEdit && (
+              <Button
+                onClick={() => setBulkDeleteDialog(true)}
+                variant="outline"
+                className="border-red-600 text-red-700 hover:bg-red-50"
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                Seçilenleri Sil ({selectedIds.length})
+              </Button>
+            )}
             {canEdit && (
               <>
                 <Button
