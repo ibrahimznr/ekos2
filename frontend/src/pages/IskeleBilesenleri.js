@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
 import {
   Select,
   SelectContent,
@@ -13,18 +14,37 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import Layout from '@/components/Layout';
 import IskeleBileseniModal from '@/components/IskeleBileseniModal';
+import IskeleBileseniOnizlemeModal from '@/components/IskeleBileseniOnizlemeModal';
 import IskeleBileseniExcelImportModal from '@/components/IskeleBileseniExcelImportModal';
 import { toast } from 'sonner';
-import { Plus, Search, Download, Upload, ChevronLeft, ChevronRight } from 'lucide-react';
+import { 
+  Plus, 
+  Search, 
+  Download, 
+  Upload, 
+  ChevronLeft, 
+  ChevronRight, 
+  ArrowLeft,
+  Eye,
+  Edit,
+  Trash2,
+  Building2,
+  Hash,
+  Calendar,
+  CheckCircle,
+  XCircle
+} from 'lucide-react';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -36,7 +56,11 @@ const IskeleBilesenleri = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [user, setUser] = useState(null);
   const [showBilesenModal, setShowBilesenModal] = useState(false);
+  const [showOnizlemeModal, setShowOnizlemeModal] = useState(false);
   const [showExcelModal, setShowExcelModal] = useState(false);
+  const [selectedBilesen, setSelectedBilesen] = useState(null);
+  const [editBilesen, setEditBilesen] = useState(null);
+  const [deleteDialog, setDeleteDialog] = useState({ open: false, bilesen: null });
   
   // Filters
   const [filters, setFilters] = useState({
@@ -47,7 +71,7 @@ const IskeleBilesenleri = () => {
   
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(20);
+  const [itemsPerPage] = useState(12);
   
   const [projeler, setProjeler] = useState([]);
 
@@ -128,6 +152,35 @@ const IskeleBilesenleri = () => {
     }
   };
 
+  const handleDelete = async (bilesen) => {
+    try {
+      const token = localStorage.getItem('token');
+      await axios.delete(`${API}/iskele-bilesenleri/${bilesen.id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      toast.success('İskele bileşeni silindi');
+      fetchBilesenleri();
+      setDeleteDialog({ open: false, bilesen: null });
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'İskele bileşeni silinemedi');
+    }
+  };
+
+  const handleEdit = (bilesen) => {
+    setEditBilesen(bilesen);
+    setShowBilesenModal(true);
+  };
+
+  const handleOnizleme = (bilesen) => {
+    setSelectedBilesen(bilesen);
+    setShowOnizlemeModal(true);
+  };
+
+  const handleModalClose = () => {
+    setShowBilesenModal(false);
+    setEditBilesen(null);
+  };
+
   // Filter by search term and filters
   const filteredBilesenleri = useMemo(() => {
     let filtered = bilesenleri;
@@ -183,19 +236,33 @@ const IskeleBilesenleri = () => {
   return (
     <Layout>
       <div className="space-y-6 animate-fade-in">
-        {/* Header */}
+        {/* Header with Back Button */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">İskele Bileşenleri</h1>
-            <p className="text-sm sm:text-base text-gray-600 mt-1">
-              {filteredBilesenleri.length} bileşen bulundu
-            </p>
+          <div className="flex items-center gap-3">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => navigate('/raporlar')}
+              className="text-gray-600 hover:text-gray-800"
+            >
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Geri
+            </Button>
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">İskele Bileşenleri</h1>
+              <p className="text-sm sm:text-base text-gray-600 mt-1">
+                {filteredBilesenleri.length} bileşen bulundu
+              </p>
+            </div>
           </div>
           <div className="flex flex-wrap gap-2">
             {canEdit && (
               <>
                 <Button
-                  onClick={() => setShowBilesenModal(true)}
+                  onClick={() => {
+                    setEditBilesen(null);
+                    setShowBilesenModal(true);
+                  }}
                   className="bg-gradient-to-r from-blue-700 to-blue-600 hover:from-blue-800 hover:to-blue-700 text-white"
                 >
                   <Plus className="h-4 w-4 mr-2" />
@@ -305,59 +372,107 @@ const IskeleBilesenleri = () => {
           </CardContent>
         </Card>
 
-        {/* Table */}
-        <Card className="shadow-md">
-          <CardContent className="p-0">
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow className="bg-gray-50">
-                    <TableHead className="font-semibold">Bileşen Adı</TableHead>
-                    <TableHead className="font-semibold">Malzeme Kodu</TableHead>
-                    <TableHead className="font-semibold">Bileşen Adedi</TableHead>
-                    <TableHead className="font-semibold">Firma Adı</TableHead>
-                    <TableHead className="font-semibold">Geçerlilik Tarihi</TableHead>
-                    <TableHead className="font-semibold">Uygunluk</TableHead>
-                    <TableHead className="font-semibold">Not</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {paginatedBilesenleri.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={7} className="text-center py-8 text-gray-500">
-                        İskele bileşeni bulunamadı
-                      </TableCell>
-                    </TableRow>
-                  ) : (
-                    paginatedBilesenleri.map((bilesen) => (
-                      <TableRow key={bilesen.id} className="hover:bg-gray-50">
-                        <TableCell className="font-medium">{bilesen.bileşen_adi}</TableCell>
-                        <TableCell>{bilesen.malzeme_kodu}</TableCell>
-                        <TableCell>{bilesen.bileşen_adedi}</TableCell>
-                        <TableCell>{bilesen.firma_adi}</TableCell>
-                        <TableCell>{bilesen.gecerlilik_tarihi || '-'}</TableCell>
-                        <TableCell>
-                          <span
-                            className={`px-2 py-1 rounded-full text-xs font-medium ${
-                              bilesen.uygunluk === 'Uygun'
-                                ? 'bg-green-100 text-green-800'
-                                : 'bg-red-100 text-red-800'
-                            }`}
-                          >
-                            {bilesen.uygunluk}
-                          </span>
-                        </TableCell>
-                        <TableCell className="max-w-xs truncate">
-                          {bilesen.aciklama || '-'}
-                        </TableCell>
-                      </TableRow>
-                    ))
+        {/* Cards Grid */}
+        {paginatedBilesenleri.length === 0 ? (
+          <Card className="shadow-md">
+            <CardContent className="py-12 text-center">
+              <p className="text-gray-500">İskele bileşeni bulunamadı</p>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {paginatedBilesenleri.map((bilesen) => (
+              <Card key={bilesen.id} className="shadow-md hover:shadow-xl transition-shadow border-l-4 border-l-blue-500">
+                <CardContent className="p-6 space-y-4">
+                  {/* Bileşen Adı */}
+                  <div className="flex items-start justify-between">
+                    <h3 className="text-lg font-bold text-gray-800 line-clamp-2">
+                      {bilesen.bileşen_adi}
+                    </h3>
+                    <Badge
+                      className={`ml-2 ${
+                        bilesen.uygunluk === 'Uygun'
+                          ? 'bg-green-100 text-green-800 hover:bg-green-200'
+                          : 'bg-red-100 text-red-800 hover:bg-red-200'
+                      }`}
+                    >
+                      {bilesen.uygunluk === 'Uygun' ? (
+                        <CheckCircle className="h-3 w-3 mr-1" />
+                      ) : (
+                        <XCircle className="h-3 w-3 mr-1" />
+                      )}
+                      {bilesen.uygunluk}
+                    </Badge>
+                  </div>
+
+                  {/* Malzeme Kodu */}
+                  <div className="flex items-center gap-2 text-sm">
+                    <Hash className="h-4 w-4 text-gray-500" />
+                    <span className="font-medium text-gray-600">Malzeme Kodu:</span>
+                    <span className="text-gray-800">{bilesen.malzeme_kodu}</span>
+                  </div>
+
+                  {/* Firma */}
+                  <div className="flex items-center gap-2 text-sm">
+                    <Building2 className="h-4 w-4 text-gray-500" />
+                    <span className="font-medium text-gray-600">Firma:</span>
+                    <span className="text-gray-800">{bilesen.firma_adi}</span>
+                  </div>
+
+                  {/* Geçerlilik Tarihi */}
+                  {bilesen.gecerlilik_tarihi && (
+                    <div className="flex items-center gap-2 text-sm">
+                      <Calendar className="h-4 w-4 text-gray-500" />
+                      <span className="font-medium text-gray-600">Geçerlilik:</span>
+                      <span className="text-gray-800">{bilesen.gecerlilik_tarihi}</span>
+                    </div>
                   )}
-                </TableBody>
-              </Table>
-            </div>
-          </CardContent>
-        </Card>
+
+                  {/* Açıklama */}
+                  {bilesen.aciklama && (
+                    <div className="bg-gray-50 p-3 rounded-md border">
+                      <p className="text-xs text-gray-600 line-clamp-2">{bilesen.aciklama}</p>
+                    </div>
+                  )}
+
+                  {/* Action Buttons */}
+                  <div className="flex gap-2 pt-2 border-t">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleOnizleme(bilesen)}
+                      className="flex-1 text-blue-600 hover:bg-blue-50"
+                    >
+                      <Eye className="h-4 w-4 mr-1" />
+                      Önizleme
+                    </Button>
+                    {canEdit && (
+                      <>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleEdit(bilesen)}
+                          className="flex-1 text-green-600 hover:bg-green-50"
+                        >
+                          <Edit className="h-4 w-4 mr-1" />
+                          Düzenle
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => setDeleteDialog({ open: true, bilesen })}
+                          className="text-red-600 hover:bg-red-50"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
 
         {/* Pagination */}
         {totalPages > 1 && (
@@ -397,8 +512,15 @@ const IskeleBilesenleri = () => {
       {/* Modals */}
       <IskeleBileseniModal
         open={showBilesenModal}
-        onClose={() => setShowBilesenModal(false)}
+        onClose={handleModalClose}
         onSuccess={fetchBilesenleri}
+        editData={editBilesen}
+      />
+
+      <IskeleBileseniOnizlemeModal
+        open={showOnizlemeModal}
+        onClose={() => setShowOnizlemeModal(false)}
+        bilesen={selectedBilesen}
       />
 
       <IskeleBileseniExcelImportModal
@@ -406,6 +528,27 @@ const IskeleBilesenleri = () => {
         onClose={() => setShowExcelModal(false)}
         onSuccess={fetchBilesenleri}
       />
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteDialog.open} onOpenChange={(open) => setDeleteDialog({ open, bilesen: null })}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>İskele Bileşenini Sil</AlertDialogTitle>
+            <AlertDialogDescription>
+              <strong>{deleteDialog.bilesen?.bileşen_adi}</strong> isimli iskele bileşenini silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>İptal</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => handleDelete(deleteDialog.bilesen)}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              Sil
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Layout>
   );
 };
