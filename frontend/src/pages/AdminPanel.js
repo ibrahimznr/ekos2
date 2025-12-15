@@ -1105,6 +1105,47 @@ const AdminPanel = () => {
         </DialogContent>
       </Dialog>
 
+      {/* İskele Bileşen Adı Dialog */}
+      <Dialog open={showBilesenAdiDialog} onOpenChange={() => handleCloseDialog('bilesen_adi')}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{editMode ? 'Bileşen Adı Düzenle' : 'Yeni Bileşen Adı Ekle'}</DialogTitle>
+            <DialogDescription>
+              {editMode ? 'İskele bileşen adını güncelleyin.' : 'Yeni bir iskele bileşen adı oluşturun.'}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="bilesen_adi">Bileşen Adı *</Label>
+              <Input
+                id="bilesen_adi"
+                placeholder="Örn: Çelik Direk, İskele Borusu, vb."
+                value={newBilesenAdi.bilesen_adi}
+                onChange={(e) => setNewBilesenAdi({ ...newBilesenAdi, bilesen_adi: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="aciklama">Açıklama</Label>
+              <Textarea
+                id="aciklama"
+                placeholder="Bileşen hakkında açıklama (opsiyonel)"
+                value={newBilesenAdi.aciklama}
+                onChange={(e) => setNewBilesenAdi({ ...newBilesenAdi, aciklama: e.target.value })}
+                rows={3}
+              />
+            </div>
+          </DialogFooter>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => handleCloseDialog('bilesen_adi')}>
+              İptal
+            </Button>
+            <Button onClick={handleCreateBilesenAdi}>
+              {editMode ? 'Güncelle' : 'Oluştur'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent>
