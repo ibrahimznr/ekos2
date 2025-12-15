@@ -143,17 +143,17 @@ const IskeleBilesenleri = () => {
     }
     
     // Firma filter
-    if (filters.firma_adi) {
+    if (filters.firma_adi && filters.firma_adi !== 'all') {
       filtered = filtered.filter(b => b.firma_adi === filters.firma_adi);
     }
     
     // Uygunluk filter
-    if (filters.uygunluk) {
+    if (filters.uygunluk && filters.uygunluk !== 'all') {
       filtered = filtered.filter(b => b.uygunluk === filters.uygunluk);
     }
     
     // Proje filter
-    if (filters.proje_id) {
+    if (filters.proje_id && filters.proje_id !== 'all') {
       filtered = filtered.filter(b => b.proje_id === filters.proje_id);
     }
     
