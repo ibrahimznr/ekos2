@@ -1134,7 +1134,7 @@ const AdminPanel = () => {
                 rows={3}
               />
             </div>
-          </DialogFooter>
+          </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => handleCloseDialog('bilesen_adi')}>
               İptal
