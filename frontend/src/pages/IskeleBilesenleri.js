@@ -61,6 +61,8 @@ const IskeleBilesenleri = () => {
   const [selectedBilesen, setSelectedBilesen] = useState(null);
   const [editBilesen, setEditBilesen] = useState(null);
   const [deleteDialog, setDeleteDialog] = useState({ open: false, bilesen: null });
+  const [selectedIds, setSelectedIds] = useState([]);
+  const [bulkDeleteDialog, setBulkDeleteDialog] = useState(false);
   
   // Filters
   const [filters, setFilters] = useState({
