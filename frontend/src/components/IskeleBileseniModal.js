@@ -210,13 +210,23 @@ const IskeleBileseniModal = ({ open, onClose, onSuccess, editData = null }) => {
             <Label htmlFor="bilesen-adi">
               Bileşen Adı <span className="text-red-500">*</span>
             </Label>
-            <Input
-              id="bilesen-adi"
-              value={formData.bileşen_adi}
-              onChange={(e) => handleChange('bileşen_adi', e.target.value)}
-              placeholder="Örn: Çelik Direk, Bağlantı Elemanı"
-              required
-            />
+            <Select value={formData.bileşen_adi} onValueChange={(value) => handleChange('bileşen_adi', value)}>
+              <SelectTrigger>
+                <SelectValue placeholder="Bileşen adını seçin" />
+              </SelectTrigger>
+              <SelectContent>
+                {bilesenAdlari.map((item) => (
+                  <SelectItem key={item.id} value={item.bilesen_adi}>
+                    {item.bilesen_adi}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {bilesenAdlari.length === 0 && (
+              <p className="text-xs text-amber-600">
+                ⚠️ Henüz bileşen adı tanımlanmamış. Admin panelinden ekleyebilirsiniz.
+              </p>
+            )}
           </div>
 
           {/* Malzeme Kodu ve Bileşen Adedi */}
