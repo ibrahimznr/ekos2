@@ -164,10 +164,10 @@ const IskeleBileseniModal = ({ open, onClose, onSuccess, editData = null }) => {
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Building2 className="h-6 w-6 text-blue-600" />
-            İskele Bileşeni Ekle
+            {editData ? 'İskele Bileşeni Düzenle' : 'İskele Bileşeni Ekle'}
           </DialogTitle>
           <DialogDescription>
-            Yeni iskele bileşeni ekleyin. Tüm zorunlu alanları doldurun.
+            {editData ? 'İskele bileşeni bilgilerini güncelleyin.' : 'Yeni iskele bileşeni ekleyin. Tüm zorunlu alanları doldurun.'}
           </DialogDescription>
         </DialogHeader>
 
