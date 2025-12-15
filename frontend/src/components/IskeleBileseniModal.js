@@ -88,6 +88,18 @@ const IskeleBileseniModal = ({ open, onClose, onSuccess, editData = null }) => {
     }
   };
 
+  const fetchBilesenAdlari = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get(`${API}/iskele-bilesen-adlari`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setBilesenAdlari(response.data);
+    } catch (error) {
+      console.error('Bileşen adları yüklenemedi:', error);
+    }
+  };
+
   const handleChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
