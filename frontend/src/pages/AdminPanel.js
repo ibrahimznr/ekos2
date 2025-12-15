@@ -216,6 +216,47 @@ const AdminPanel = () => {
     }
   };
 
+  const handleCreateBilesenAdi = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      
+      if (editMode && editingItem) {
+        // Update existing
+        await axios.put(
+          `${API}/iskele-bilesen-adlari/${editingItem.id}`, 
+          null,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+            params: {
+              bilesen_adi: newBilesenAdi.bilesen_adi,
+              aciklama: newBilesenAdi.aciklama || null
+            }
+          }
+        );
+        toast.success('Bileşen adı güncellendi');
+      } else {
+        // Create new
+        await axios.post(
+          `${API}/iskele-bilesen-adlari`,
+          null,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+            params: {
+              bilesen_adi: newBilesenAdi.bilesen_adi,
+              aciklama: newBilesenAdi.aciklama || null
+            }
+          }
+        );
+        toast.success('Bileşen adı oluşturuldu');
+      }
+      
+      handleCloseDialog('bilesen_adi');
+      fetchIskeleBilesenAdlari();
+    } catch (error) {
+      toast.error(error.response?.data?.detail || (editMode ? 'Bileşen adı güncellenemedi' : 'Bileşen adı oluşturulamadı'));
+    }
+  };
+
   const handleDeleteClick = (item, type) => {
     setDeleteItem(item);
     setDeleteType(type);
