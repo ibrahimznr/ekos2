@@ -312,7 +312,7 @@ const IskeleBileseniModal = ({ open, onClose, onSuccess, editData = null }) => {
               İptal
             </Button>
             <Button type="submit" disabled={loading}>
-              {loading ? 'Ekleniyor...' : 'Ekle'}
+              {loading ? (editData ? 'Güncelleniyor...' : 'Ekleniyor...') : (editData ? 'Güncelle' : 'Ekle')}
             </Button>
           </DialogFooter>
         </form>
