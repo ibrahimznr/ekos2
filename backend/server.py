@@ -1217,18 +1217,45 @@ async def get_dashboard_stats(current_user: dict = Depends(get_current_user)):
     if current_user.get("role") == "viewer" and current_user.get("firma_adi"):
         iskele_query["firma_adi"] = current_user.get("firma_adi")
     
-    total_iskele = await db.iskele_bilesenleri.count_documents(iskele_query)
+    # Toplam bileşen adedi (bileşen_adedi alanlarının toplamı)
+    total_pipeline = []
+    if iskele_query:
+        total_pipeline.append({"$match": iskele_query})
+    total_pipeline.append({"$group": {"_id": None, "total": {"$sum": "$bileşen_adedi"}}})
     
-    # Uygunluk durumuna göre sayılar
-    iskele_uygun = await db.iskele_bilesenleri.count_documents({**iskele_query, "uygunluk": "Uygun"})
-    iskele_uygun_degil = await db.iskele_bilesenleri.count_documents({**iskele_query, "uygunluk": "Uygun Değil"})
+    total_result = await db.iskele_bilesenleri.aggregate(total_pipeline).to_list(1)
+    total_iskele = total_result[0]["total"] if total_result else 0
     
-    # Bileşen adlarına göre dağılım
+    # Uygun olanların bileşen adedi toplamı
+    uygun_pipeline = []
+    if iskele_query:
+        uygun_pipeline.append({"$match": iskele_query})
+    uygun_pipeline.extend([
+        {"$match": {"uygunluk": "Uygun"}},
+        {"$group": {"_id": None, "total": {"$sum": "$bileşen_adedi"}}}
+    ])
+    
+    uygun_result = await db.iskele_bilesenleri.aggregate(uygun_pipeline).to_list(1)
+    iskele_uygun = uygun_result[0]["total"] if uygun_result else 0
+    
+    # Uygun olmayanların bileşen adedi toplamı
+    uygun_degil_pipeline = []
+    if iskele_query:
+        uygun_degil_pipeline.append({"$match": iskele_query})
+    uygun_degil_pipeline.extend([
+        {"$match": {"uygunluk": "Uygun Değil"}},
+        {"$group": {"_id": None, "total": {"$sum": "$bileşen_adedi"}}}
+    ])
+    
+    uygun_degil_result = await db.iskele_bilesenleri.aggregate(uygun_degil_pipeline).to_list(1)
+    iskele_uygun_degil = uygun_degil_result[0]["total"] if uygun_degil_result else 0
+    
+    # Bileşen adlarına göre dağılım (bileşen adetlerinin toplamı)
     iskele_pipeline = []
     if iskele_query:
         iskele_pipeline.append({"$match": iskele_query})
     iskele_pipeline.extend([
-        {"$group": {"_id": "$bileşen_adi", "count": {"$sum": 1}}},
+        {"$group": {"_id": "$bileşen_adi", "count": {"$sum": "$bileşen_adedi"}}},
         {"$sort": {"count": -1}},
         {"$limit": 6},
         {"$project": {"bileşen_adi": "$_id", "count": 1, "_id": 0}}
