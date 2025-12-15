@@ -99,7 +99,7 @@ const AdminPanel = () => {
   }, [navigate]);
 
   const fetchData = async () => {
-    await Promise.all([fetchUsers(), fetchKategoriler(), fetchProjeler()]);
+    await Promise.all([fetchUsers(), fetchKategoriler(), fetchProjeler(), fetchIskeleBilesenAdlari()]);
     setLoading(false);
   };
 
