@@ -1368,7 +1368,7 @@ async def get_iskele_bilesen_adlari(current_user: dict = Depends(get_current_use
 async def create_iskele_bilesen_adi(
     bilesen_adi: str,
     aciklama: Optional[str] = None,
-    current_user: dict = Depends(get_current_user) = None
+    current_user: dict = Depends(get_current_user)
 ):
     if current_user["role"] != "admin":
         raise HTTPException(status_code=403, detail="Bu işlem için yetkiniz yok")
