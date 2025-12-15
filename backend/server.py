@@ -1453,6 +1453,18 @@ async def delete_iskele_bileseni(
     return {"message": "İskele bileşeni silindi"}
 
 @api_router.post("/iskele-bilesenleri/bulk-delete")
+async def bulk_delete_iskele_bilesenleri_route(
+    bilesen_ids: List[str],
+    current_user: dict = Depends(get_current_user)
+):
+    if current_user["role"] not in ["admin", "inspector"]:
+        raise HTTPException(status_code=403, detail="İskele bileşeni silme yetkiniz yok")
+    
+    if not bilesen_ids:
+        raise HTTPException(status_code=400, detail="Silinecek bileşen ID'leri belirtilmedi")
+    
+    result = await db.iskele_bilesenleri.delete_many({"id": {"$in": bilesen_ids}})
+    return {"message": f"{result.deleted_count} iskele bileşeni silindi", "deleted_count": result.deleted_count}
 
 @api_router.get("/iskele-bilesenleri/excel/export")
 async def export_iskele_excel(current_user: dict = Depends(get_current_user)):
