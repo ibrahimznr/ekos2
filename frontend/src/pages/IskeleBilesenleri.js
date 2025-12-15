@@ -252,7 +252,7 @@ const IskeleBilesenleri = () => {
                       <SelectValue placeholder="Tüm Projeler" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">Tüm Projeler</SelectItem>
+                      <SelectItem value="all">Tüm Projeler</SelectItem>
                       {projeler.map(proje => (
                         <SelectItem key={proje.id} value={proje.id}>{proje.proje_adi}</SelectItem>
                       ))}
