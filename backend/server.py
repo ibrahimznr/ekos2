@@ -1395,7 +1395,7 @@ async def update_iskele_bilesen_adi(
     bilesen_id: str,
     bilesen_adi: str,
     aciklama: Optional[str] = None,
-    current_user: dict = Depends(get_current_user) = None
+    current_user: dict = Depends(get_current_user)
 ):
     if current_user["role"] != "admin":
         raise HTTPException(status_code=403, detail="Bu işlem için yetkiniz yok")
