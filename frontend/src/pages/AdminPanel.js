@@ -46,11 +46,13 @@ const AdminPanel = () => {
   const [users, setUsers] = useState([]);
   const [kategoriler, setKategoriler] = useState([]);
   const [projeler, setProjeler] = useState([]);
+  const [iskeleBilesenAdlari, setIskeleBilesenAdlari] = useState([]);
   const [loading, setLoading] = useState(true);
   
   const [showUserDialog, setShowUserDialog] = useState(false);
   const [showKategoriDialog, setShowKategoriDialog] = useState(false);
   const [showProjeDialog, setShowProjeDialog] = useState(false);
+  const [showBilesenAdiDialog, setShowBilesenAdiDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [deleteItem, setDeleteItem] = useState(null);
   const [deleteType, setDeleteType] = useState(''); // 'user', 'kategori', or 'proje'
