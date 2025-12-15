@@ -1403,26 +1403,26 @@ async def create_iskele_bileseni(
     created = await db.iskele_bilesenleri.find_one({"id": bileşen_id}, {"_id": 0})
     return created
 
-@api_router.get("/iskele-bilesenleri/{bileşen_id}")
+@api_router.get("/iskele-bilesenleri/{bilesen_id}")
 async def get_iskele_bileseni(
-    bileşen_id: str,
+    bilesen_id: str,
     current_user: dict = Depends(get_current_user)
 ):
-    bileşen = await db.iskele_bilesenleri.find_one({"id": bileşen_id}, {"_id": 0})
+    bileşen = await db.iskele_bilesenleri.find_one({"id": bilesen_id}, {"_id": 0})
     if not bileşen:
         raise HTTPException(status_code=404, detail="İskele bileşeni bulunamadı")
     return bileşen
 
-@api_router.put("/iskele-bilesenleri/{bileşen_id}")
+@api_router.put("/iskele-bilesenleri/{bilesen_id}")
 async def update_iskele_bileseni(
-    bileşen_id: str,
+    bilesen_id: str,
     bileşen_update: IskeleBileseniCreate,
     current_user: dict = Depends(get_current_user)
 ):
     if current_user["role"] not in ["admin", "inspector"]:
         raise HTTPException(status_code=403, detail="İskele bileşeni güncelleme yetkiniz yok")
     
-    existing = await db.iskele_bilesenleri.find_one({"id": bileşen_id}, {"_id": 0})
+    existing = await db.iskele_bilesenleri.find_one({"id": bilesen_id}, {"_id": 0})
     if not existing:
         raise HTTPException(status_code=404, detail="İskele bileşeni bulunamadı")
     
