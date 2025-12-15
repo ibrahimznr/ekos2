@@ -416,6 +416,25 @@ const IskeleBilesenleri = () => {
           </CardContent>
         </Card>
 
+        {/* Select All Checkbox */}
+        {paginatedBilesenleri.length > 0 && canEdit && (
+          <Card className="shadow-md">
+            <CardContent className="py-3">
+              <div className="flex items-center gap-3">
+                <input
+                  type="checkbox"
+                  checked={selectedIds.length === paginatedBilesenleri.length && paginatedBilesenleri.length > 0}
+                  onChange={handleSelectAll}
+                  className="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                />
+                <label className="text-sm font-medium text-gray-700 cursor-pointer" onClick={handleSelectAll}>
+                  Tümünü Seç ({paginatedBilesenleri.length} bileşen)
+                </label>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Cards Grid */}
         {paginatedBilesenleri.length === 0 ? (
           <Card className="shadow-md">
@@ -426,8 +445,24 @@ const IskeleBilesenleri = () => {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {paginatedBilesenleri.map((bilesen) => (
-              <Card key={bilesen.id} className="shadow-md hover:shadow-xl transition-shadow border-l-4 border-l-blue-500">
+              <Card 
+                key={bilesen.id} 
+                className={`shadow-md hover:shadow-xl transition-shadow border-l-4 ${
+                  selectedIds.includes(bilesen.id) ? 'border-l-blue-700 bg-blue-50' : 'border-l-blue-500'
+                }`}
+              >
                 <CardContent className="p-6 space-y-4">
+                  {/* Checkbox */}
+                  {canEdit && (
+                    <div className="flex items-start justify-between">
+                      <input
+                        type="checkbox"
+                        checked={selectedIds.includes(bilesen.id)}
+                        onChange={() => handleSelectOne(bilesen.id)}
+                        className="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer mt-1"
+                      />
+                    </div>
+                  )}
                   {/* Bileşen Adı */}
                   <div className="flex items-start justify-between">
                     <h3 className="text-lg font-bold text-gray-800 line-clamp-2">
