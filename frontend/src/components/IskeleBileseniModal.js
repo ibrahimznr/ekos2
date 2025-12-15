@@ -26,7 +26,7 @@ import DragDropImageUpload from './DragDropImageUpload';
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
-const IskeleBileseniModal = ({ open, onClose, onSuccess }) => {
+const IskeleBileseniModal = ({ open, onClose, onSuccess, editData = null }) => {
   const [loading, setLoading] = useState(false);
   const [projeler, setProjeler] = useState([]);
   const [formData, setFormData] = useState({
@@ -44,8 +44,35 @@ const IskeleBileseniModal = ({ open, onClose, onSuccess }) => {
   useEffect(() => {
     if (open) {
       fetchProjeler();
+      // If editing, populate form with existing data
+      if (editData) {
+        setFormData({
+          proje_id: editData.proje_id || '',
+          bileşen_adi: editData.bileşen_adi || '',
+          malzeme_kodu: editData.malzeme_kodu || '',
+          bileşen_adedi: editData.bileşen_adedi || 1,
+          firma_adi: editData.firma_adi || '',
+          gecerlilik_tarihi: editData.gecerlilik_tarihi || '',
+          uygunluk: editData.uygunluk || 'Uygun',
+          aciklama: editData.aciklama || '',
+          gorseller: editData.gorseller || []
+        });
+      } else {
+        // Reset form for new entry
+        setFormData({
+          proje_id: '',
+          bileşen_adi: '',
+          malzeme_kodu: '',
+          bileşen_adedi: 1,
+          firma_adi: '',
+          gecerlilik_tarihi: '',
+          uygunluk: 'Uygun',
+          aciklama: '',
+          gorseller: []
+        });
+      }
     }
-  }, [open]);
+  }, [open, editData]);
 
   const fetchProjeler = async () => {
     try {
