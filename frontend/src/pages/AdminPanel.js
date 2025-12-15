@@ -139,6 +139,18 @@ const AdminPanel = () => {
     }
   };
 
+  const fetchIskeleBilesenAdlari = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get(`${API}/iskele-bilesen-adlari`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setIskeleBilesenAdlari(response.data);
+    } catch (error) {
+      toast.error('İskele bileşen adları yüklenemedi');
+    }
+  };
+
   const handleCreateUser = async () => {
     try {
       const token = localStorage.getItem('token');
