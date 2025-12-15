@@ -267,7 +267,7 @@ const IskeleBilesenleri = () => {
                       <SelectValue placeholder="Tüm Firmalar" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">Tüm Firmalar</SelectItem>
+                      <SelectItem value="all">Tüm Firmalar</SelectItem>
                       {[...new Set(bilesenleri.map(b => b.firma_adi))].map(firma => (
                         <SelectItem key={firma} value={firma}>{firma}</SelectItem>
                       ))}
