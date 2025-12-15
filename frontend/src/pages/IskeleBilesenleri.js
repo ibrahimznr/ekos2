@@ -282,7 +282,7 @@ const IskeleBilesenleri = () => {
                       <SelectValue placeholder="Tümü" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">Tümü</SelectItem>
+                      <SelectItem value="all">Tümü</SelectItem>
                       <SelectItem value="Uygun">Uygun</SelectItem>
                       <SelectItem value="Uygun Değil">Uygun Değil</SelectItem>
                     </SelectContent>
