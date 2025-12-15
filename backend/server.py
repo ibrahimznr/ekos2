@@ -1212,6 +1212,30 @@ async def get_dashboard_stats(current_user: dict = Depends(get_current_user)):
     
     kategori_dagilim = await db.raporlar.aggregate(pipeline).to_list(6)
     
+    # İskele Bileşenleri İstatistikleri
+    iskele_query = {}
+    if current_user.get("role") == "viewer" and current_user.get("firma_adi"):
+        iskele_query["firma_adi"] = current_user.get("firma_adi")
+    
+    total_iskele = await db.iskele_bilesenleri.count_documents(iskele_query)
+    
+    # Uygunluk durumuna göre sayılar
+    iskele_uygun = await db.iskele_bilesenleri.count_documents({**iskele_query, "uygunluk": "Uygun"})
+    iskele_uygun_degil = await db.iskele_bilesenleri.count_documents({**iskele_query, "uygunluk": "Uygun Değil"})
+    
+    # Bileşen adlarına göre dağılım
+    iskele_pipeline = []
+    if iskele_query:
+        iskele_pipeline.append({"$match": iskele_query})
+    iskele_pipeline.extend([
+        {"$group": {"_id": "$bileşen_adi", "count": {"$sum": 1}}},
+        {"$sort": {"count": -1}},
+        {"$limit": 6},
+        {"$project": {"bileşen_adi": "$_id", "count": 1, "_id": 0}}
+    ])
+    
+    bilesen_dagilim = await db.iskele_bilesenleri.aggregate(iskele_pipeline).to_list(6)
+    
     return {
         "total_raporlar": total_raporlar,
         "monthly_raporlar": monthly_raporlar,
@@ -1219,7 +1243,14 @@ async def get_dashboard_stats(current_user: dict = Depends(get_current_user)):
         "uygun_degil_count": uygun_degil_count,
         "expiring_30_days": expiring_30_days,
         "expiring_7_days": expiring_7_days,
-        "kategori_dagilim": kategori_dagilim
+        "kategori_dagilim": kategori_dagilim,
+        "iskele_stats": {
+            "total": total_iskele,
+            "uygun": iskele_uygun,
+            "uygun_degil": iskele_uygun_degil,
+            "uygunluk_orani": round((iskele_uygun / total_iskele * 100), 1) if total_iskele > 0 else 0,
+            "bilesen_dagilim": bilesen_dagilim
+        }
     }
 
 # Users Management (Admin only)
