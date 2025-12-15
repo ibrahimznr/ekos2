@@ -1521,16 +1521,6 @@ async def export_iskele_excel(current_user: dict = Depends(get_current_user)):
         headers={"Content-Disposition": f"attachment; filename=iskele_bilesenleri_{datetime.now().strftime('%Y%m%d')}.xlsx"}
     )
 
-async def bulk_delete_iskele_bilesenleri(
-    bileşen_ids: List[str],
-    current_user: dict = Depends(get_current_user)
-):
-    if current_user["role"] not in ["admin", "inspector"]:
-        raise HTTPException(status_code=403, detail="İskele bileşeni silme yetkiniz yok")
-    
-    result = await db.iskele_bilesenleri.delete_many({"id": {"$in": bileşen_ids}})
-    return {"message": f"{result.deleted_count} iskele bileşeni silindi", "deleted_count": result.deleted_count}
-
 @api_router.get("/iskele-bilesenleri/excel/template")
 async def download_iskele_template():
     wb = Workbook()
