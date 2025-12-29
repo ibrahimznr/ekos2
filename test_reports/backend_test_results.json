@@ -1,11 +1,13 @@
 {
-  "timestamp": "2025-12-29T19:13:36.088731",
+  "timestamp": "2025-12-29T19:34:19.803943",
   "test_focus": "EKOS Review Request - P0 Bug Fix & P1 Features",
-  "total_tests": 50,
-  "passed_tests": 46,
-  "failed_tests": 4,
-  "success_rate": 92.0,
-  "critical_failures": [],
+  "total_tests": 60,
+  "passed_tests": 55,
+  "failed_tests": 5,
+  "success_rate": 91.66666666666666,
+  "critical_failures": [
+    "ZIP Export - Unauthorized Access: Status: 403, Error: {'detail': 'Not authenticated'}"
+  ],
   "test_results": [
     {
       "test": "Login with ibrahimznrmak@gmail.com",
@@ -160,19 +162,19 @@
     {
       "test": "Dashboard Field 'total_raporlar'",
       "status": "PASS",
-      "details": "Value: 1148",
+      "details": "Value: 1149",
       "critical": false
     },
     {
       "test": "Dashboard Field 'monthly_raporlar'",
       "status": "PASS",
-      "details": "Value: 312",
+      "details": "Value: 313",
       "critical": false
     },
     {
       "test": "Dashboard Field 'uygun_count'",
       "status": "PASS",
-      "details": "Value: 1053",
+      "details": "Value: 1054",
       "critical": false
     },
     {
@@ -197,6 +199,66 @@
       "test": "Dashboard Field 'kategori_dagilim'",
       "status": "PASS",
       "details": "Value: [{'count': 324, 'kategori': 'Kaldırma-İletme'}, {'count': 242, 'kategori': 'İskele (Sıva)'}, {'count': 198, 'kategori': 'Endüstriyel Raflar ve Kapılar'}, {'count': 118, 'kategori': 'Tezgah'}, {'count': 114, 'kategori': 'İş Makinesi'}, {'count': 30, 'kategori': 'Depolama Raf'}]",
+      "critical": false
+    },
+    {
+      "test": "Get Reports for ZIP Export",
+      "status": "PASS",
+      "details": "Status: 200, Response keys: Array",
+      "critical": true
+    },
+    {
+      "test": "ZIP Export - 3 Reports Success",
+      "status": "PASS",
+      "details": "Status: 200",
+      "critical": true
+    },
+    {
+      "test": "ZIP Content Type",
+      "status": "PASS",
+      "details": "Response received for ZIP export",
+      "critical": false
+    },
+    {
+      "test": "ZIP Export - Empty IDs Error",
+      "status": "PASS",
+      "details": "Status: 400, Response keys: ['detail']",
+      "critical": true
+    },
+    {
+      "test": "Empty IDs Error Message",
+      "status": "PASS",
+      "details": "Correctly rejected empty rapor_ids",
+      "critical": false
+    },
+    {
+      "test": "ZIP Export - 100+ Reports Limit",
+      "status": "PASS",
+      "details": "Status: 400, Response keys: ['detail']",
+      "critical": true
+    },
+    {
+      "test": "100+ Reports Limit Error",
+      "status": "PASS",
+      "details": "Correctly rejected 100+ reports",
+      "critical": false
+    },
+    {
+      "test": "ZIP Export - Unauthorized Access",
+      "status": "FAIL",
+      "details": "Status: 403, Error: {'detail': 'Not authenticated'}",
+      "critical": true
+    },
+    {
+      "test": "ZIP Export - Invalid Report IDs",
+      "status": "PASS",
+      "details": "Status: 404, Response keys: ['detail']",
+      "critical": false
+    },
+    {
+      "test": "Invalid IDs Handling",
+      "status": "PASS",
+      "details": "Correctly handled invalid report IDs",
       "critical": false
     },
     {
@@ -268,7 +330,7 @@
     {
       "test": "Create Report",
       "status": "FAIL",
-      "details": "Status: 422, Error: {'detail': [{'type': 'missing', 'loc': ['body', 'proje_id'], 'msg': 'Field required', 'input': {'ekipman_adi': 'Test Ekipman 191335', 'kategori': 'Asansör', 'firma': 'Test Firma', 'lokasyon': 'Test Lokasyon', 'marka_model': 'Test Model', 'seri_no': 'TEST123', 'alt_kategori': 'Test Alt Kategori', 'periyot': '6 Aylık', 'gecerlilik_tarihi': '2025-12-31', 'uygunluk': 'Uygun', 'aciklama': 'Test raporu'}, 'url': 'https://errors.pydantic.dev/2.12/v/missing'}, {'type': 'missing', 'loc': ['body', 'sehir'], 'msg': 'Field required', 'input': {'ekipman_adi': 'Test Ekipman 191335', 'kategori': 'Asansör', 'firma': 'Test Firma', 'lokasyon': 'Test Lokasyon', 'marka_model': 'Test Model', 'seri_no': 'TEST123', 'alt_kategori': 'Test Alt Kategori', 'periyot': '6 Aylık', 'gecerlilik_tarihi': '2025-12-31', 'uygunluk': 'Uygun', 'aciklama': 'Test raporu'}, 'url': 'https://errors.pydantic.dev/2.12/v/missing'}]}",
+      "details": "Status: 422, Error: {'detail': [{'type': 'missing', 'loc': ['body', 'proje_id'], 'msg': 'Field required', 'input': {'ekipman_adi': 'Test Ekipman 193419', 'kategori': 'Asansör', 'firma': 'Test Firma', 'lokasyon': 'Test Lokasyon', 'marka_model': 'Test Model', 'seri_no': 'TEST123', 'alt_kategori': 'Test Alt Kategori', 'periyot': '6 Aylık', 'gecerlilik_tarihi': '2025-12-31', 'uygunluk': 'Uygun', 'aciklama': 'Test raporu'}, 'url': 'https://errors.pydantic.dev/2.12/v/missing'}, {'type': 'missing', 'loc': ['body', 'sehir'], 'msg': 'Field required', 'input': {'ekipman_adi': 'Test Ekipman 193419', 'kategori': 'Asansör', 'firma': 'Test Firma', 'lokasyon': 'Test Lokasyon', 'marka_model': 'Test Model', 'seri_no': 'TEST123', 'alt_kategori': 'Test Alt Kategori', 'periyot': '6 Aylık', 'gecerlilik_tarihi': '2025-12-31', 'uygunluk': 'Uygun', 'aciklama': 'Test raporu'}, 'url': 'https://errors.pydantic.dev/2.12/v/missing'}]}",
       "critical": false
     },
     {
@@ -304,7 +366,7 @@
     {
       "test": "Create User",
       "status": "FAIL",
-      "details": "Status: 422, Error: {'detail': [{'type': 'missing', 'loc': ['body', 'username'], 'msg': 'Field required', 'input': {'email': 'test191336@test.com', 'password': 'testpass123', 'role': 'viewer'}, 'url': 'https://errors.pydantic.dev/2.12/v/missing'}, {'type': 'missing', 'loc': ['body', 'password_confirm'], 'msg': 'Field required', 'input': {'email': 'test191336@test.com', 'password': 'testpass123', 'role': 'viewer'}, 'url': 'https://errors.pydantic.dev/2.12/v/missing'}, {'type': 'missing', 'loc': ['body', 'firma_adi'], 'msg': 'Field required', 'input': {'email': 'test191336@test.com', 'password': 'testpass123', 'role': 'viewer'}, 'url': 'https://errors.pydantic.dev/2.12/v/missing'}]}",
+      "details": "Status: 422, Error: {'detail': [{'type': 'missing', 'loc': ['body', 'username'], 'msg': 'Field required', 'input': {'email': 'test193419@test.com', 'password': 'testpass123', 'role': 'viewer'}, 'url': 'https://errors.pydantic.dev/2.12/v/missing'}, {'type': 'missing', 'loc': ['body', 'password_confirm'], 'msg': 'Field required', 'input': {'email': 'test193419@test.com', 'password': 'testpass123', 'role': 'viewer'}, 'url': 'https://errors.pydantic.dev/2.12/v/missing'}, {'type': 'missing', 'loc': ['body', 'firma_adi'], 'msg': 'Field required', 'input': {'email': 'test193419@test.com', 'password': 'testpass123', 'role': 'viewer'}, 'url': 'https://errors.pydantic.dev/2.12/v/missing'}]}",
       "critical": false
     }
   ]
