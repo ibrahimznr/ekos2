@@ -315,7 +315,7 @@ metadata:
 
 test_plan:
   current_focus:
-    - "ZIP Export Feature - Backend API"
+    - "ZIP Export Feature - Backend API (COMPLETED)"
     - "P0 Bug Fix - RaporModal Crash (COMPLETED)"
     - "P1 Feature - Two-Stage Bulk Report Creation (COMPLETED)"
     - "Backend API Testing for Review Request (COMPLETED)"
