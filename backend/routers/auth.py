@@ -35,7 +35,6 @@ def create_access_token(data: dict):
     return encoded_jwt
 
 async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)):
-    from server import db
     try:
         token = credentials.credentials
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
@@ -58,7 +57,6 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
 
 @router.post("/register", response_model=UserResponse)
 async def register(user_create: UserCreate):
-    from server import db
     
     if user_create.password != user_create.password_confirm:
         raise HTTPException(status_code=400, detail="Şifreler eşleşmiyor")
