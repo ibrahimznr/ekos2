@@ -4,13 +4,12 @@ from datetime import datetime
 
 from models import Proje, ProjeCreate
 from routers.auth import get_current_user
+from database import db
 
 router = APIRouter(prefix="/projeler", tags=["Projeler"])
 
 @router.get("", response_model=List[Proje])
 async def get_projeler(current_user: dict = Depends(get_current_user)):
-    from server import db
-    
     projeler = await db.projeler.find({}, {"_id": 0}).to_list(1000)
     for proje in projeler:
         if isinstance(proje['created_at'], str):
@@ -19,8 +18,6 @@ async def get_projeler(current_user: dict = Depends(get_current_user)):
 
 @router.post("", response_model=Proje)
 async def create_proje(proje_create: ProjeCreate, current_user: dict = Depends(get_current_user)):
-    from server import db
-    
     if current_user["role"] != "admin":
         raise HTTPException(status_code=403, detail="Bu işlem için yetkiniz yok")
     
@@ -32,8 +29,6 @@ async def create_proje(proje_create: ProjeCreate, current_user: dict = Depends(g
 
 @router.put("/{proje_id}")
 async def update_proje(proje_id: str, proje_update: ProjeCreate, current_user: dict = Depends(get_current_user)):
-    from server import db
-    
     if current_user["role"] != "admin":
         raise HTTPException(status_code=403, detail="Bu işlem için yetkiniz yok")
     
@@ -49,8 +44,6 @@ async def update_proje(proje_id: str, proje_update: ProjeCreate, current_user: d
 
 @router.delete("/{proje_id}")
 async def delete_proje(proje_id: str, current_user: dict = Depends(get_current_user)):
-    from server import db
-    
     if current_user["role"] != "admin":
         raise HTTPException(status_code=403, detail="Bu işlem için yetkiniz yok")
     
@@ -61,8 +54,6 @@ async def delete_proje(proje_id: str, current_user: dict = Depends(get_current_u
 
 @router.post("/bulk-delete")
 async def bulk_delete_projeler(proje_ids: List[str], current_user: dict = Depends(get_current_user)):
-    from server import db
-    
     if current_user["role"] != "admin":
         raise HTTPException(status_code=403, detail="Bu işlem için yetkiniz yok")
     

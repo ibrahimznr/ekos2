@@ -6,14 +6,12 @@ from datetime import datetime, timezone
 import uuid
 
 from routers.auth import get_current_user
+from database import db
 
 router = APIRouter(tags=["Files"])
 
 UPLOAD_DIR = Path("/app/uploads")
 UPLOAD_DIR.mkdir(exist_ok=True)
-
-class MedyaDosyasi:
-    pass
 
 @router.post("/upload/{rapor_id}")
 async def upload_file(
@@ -21,8 +19,6 @@ async def upload_file(
     file: UploadFile = File(...),
     current_user: dict = Depends(get_current_user)
 ):
-    from server import db
-    
     if current_user["role"] not in ["admin", "inspector"]:
         raise HTTPException(status_code=403, detail="Dosya yükleme yetkiniz yok")
     
@@ -62,8 +58,6 @@ async def upload_file(
 
 @router.get("/dosyalar/{rapor_id}")
 async def get_dosyalar(rapor_id: str, current_user: dict = Depends(get_current_user)):
-    from server import db
-    
     dosyalar = await db.medya_dosyalari.find({"rapor_id": rapor_id}, {"_id": 0}).to_list(100)
     for dosya in dosyalar:
         if isinstance(dosya['created_at'], str):
@@ -72,8 +66,6 @@ async def get_dosyalar(rapor_id: str, current_user: dict = Depends(get_current_u
 
 @router.get("/dosyalar/{dosya_id}/indir")
 async def download_dosya(dosya_id: str, current_user: dict = Depends(get_current_user)):
-    from server import db
-    
     dosya = await db.medya_dosyalari.find_one({"id": dosya_id}, {"_id": 0})
     if not dosya:
         raise HTTPException(status_code=404, detail="Dosya bulunamadı")
@@ -108,8 +100,6 @@ async def download_dosya(dosya_id: str, current_user: dict = Depends(get_current
 
 @router.delete("/dosyalar/{dosya_id}")
 async def delete_dosya(dosya_id: str, current_user: dict = Depends(get_current_user)):
-    from server import db
-    
     if current_user["role"] not in ["admin", "inspector"]:
         raise HTTPException(status_code=403, detail="Dosya silme yetkiniz yok")
     

@@ -3,26 +3,13 @@ from typing import List, Optional
 from datetime import datetime, timezone
 from pathlib import Path
 
-from models import Rapor, RaporCreate
+from models import Rapor, RaporCreate, RaporUpdate
 from routers.auth import get_current_user
-from pydantic import BaseModel
+from database import db
+from utils import generate_rapor_no
+from constants import SEHIRLER
 
 router = APIRouter(prefix="/raporlar", tags=["Raporlar"])
-
-class RaporUpdate(BaseModel):
-    proje_id: Optional[str] = None
-    sehir: Optional[str] = None
-    ekipman_adi: Optional[str] = None
-    kategori: Optional[str] = None
-    alt_kategori: Optional[str] = None
-    firma: Optional[str] = None
-    lokasyon: Optional[str] = None
-    marka_model: Optional[str] = None
-    seri_no: Optional[str] = None
-    periyot: Optional[str] = None
-    gecerlilik_tarihi: Optional[str] = None
-    aciklama: Optional[str] = None
-    uygunluk: Optional[str] = None
 
 @router.get("", response_model=List[Rapor])
 async def get_raporlar(
@@ -35,8 +22,6 @@ async def get_raporlar(
     skip: int = 0,
     current_user: dict = Depends(get_current_user)
 ):
-    from server import db
-    
     query = {}
     
     user_firma = current_user.get("firma_adi")
@@ -85,8 +70,6 @@ async def get_raporlar(
 
 @router.get("/{rapor_id}", response_model=Rapor)
 async def get_rapor(rapor_id: str, current_user: dict = Depends(get_current_user)):
-    from server import db
-    
     rapor = await db.raporlar.find_one({"id": rapor_id}, {"_id": 0})
     if not rapor:
         raise HTTPException(status_code=404, detail="Rapor bulunamadı")
@@ -102,9 +85,6 @@ async def get_rapor(rapor_id: str, current_user: dict = Depends(get_current_user
 
 @router.post("", response_model=Rapor)
 async def create_rapor(rapor_create: RaporCreate, current_user: dict = Depends(get_current_user)):
-    from server import db, generate_rapor_no
-    from constants import SEHIRLER
-    
     if current_user["role"] not in ["admin", "inspector"]:
         raise HTTPException(status_code=403, detail="Rapor oluşturma yetkiniz yok")
     
@@ -152,8 +132,6 @@ async def update_rapor(
     rapor_update: RaporUpdate,
     current_user: dict = Depends(get_current_user)
 ):
-    from server import db
-    
     if current_user["role"] not in ["admin", "inspector"]:
         raise HTTPException(status_code=403, detail="Rapor düzenleme yetkiniz yok")
     
@@ -176,8 +154,6 @@ async def update_rapor(
 
 @router.delete("/{rapor_id}")
 async def delete_rapor(rapor_id: str, current_user: dict = Depends(get_current_user)):
-    from server import db
-    
     if current_user["role"] not in ["admin", "inspector"]:
         raise HTTPException(status_code=403, detail="Rapor silme yetkiniz yok")
     
@@ -197,8 +173,6 @@ async def delete_rapor(rapor_id: str, current_user: dict = Depends(get_current_u
 
 @router.patch("/{rapor_id}/durum")
 async def toggle_rapor_durum(rapor_id: str, current_user: dict = Depends(get_current_user)):
-    from server import db
-    
     if current_user["role"] not in ["admin", "inspector"]:
         raise HTTPException(status_code=403, detail="Rapor durumunu değiştirme yetkiniz yok")
     
@@ -217,8 +191,6 @@ async def toggle_rapor_durum(rapor_id: str, current_user: dict = Depends(get_cur
 
 @router.post("/bulk-delete")
 async def bulk_delete_raporlar(rapor_ids: List[str], current_user: dict = Depends(get_current_user)):
-    from server import db
-    
     if current_user["role"] not in ["admin", "inspector"]:
         raise HTTPException(status_code=403, detail="Rapor silme yetkiniz yok")
     

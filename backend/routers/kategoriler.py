@@ -4,13 +4,12 @@ from datetime import datetime
 
 from models import Kategori, KategoriCreate
 from routers.auth import get_current_user
+from database import db
 
 router = APIRouter(prefix="/kategoriler", tags=["Kategoriler"])
 
 @router.get("", response_model=List[Kategori])
 async def get_kategoriler(current_user: dict = Depends(get_current_user)):
-    from server import db
-    
     kategoriler = await db.kategoriler.find({}, {"_id": 0}).to_list(1000)
     for kat in kategoriler:
         if isinstance(kat['created_at'], str):
@@ -19,8 +18,6 @@ async def get_kategoriler(current_user: dict = Depends(get_current_user)):
 
 @router.post("", response_model=Kategori)
 async def create_kategori(kategori_create: KategoriCreate, current_user: dict = Depends(get_current_user)):
-    from server import db
-    
     if current_user["role"] != "admin":
         raise HTTPException(status_code=403, detail="Bu işlem için yetkiniz yok")
     
@@ -32,8 +29,6 @@ async def create_kategori(kategori_create: KategoriCreate, current_user: dict = 
 
 @router.put("/{kategori_id}")
 async def update_kategori(kategori_id: str, kategori_update: KategoriCreate, current_user: dict = Depends(get_current_user)):
-    from server import db
-    
     if current_user["role"] != "admin":
         raise HTTPException(status_code=403, detail="Bu işlem için yetkiniz yok")
     
@@ -49,8 +44,6 @@ async def update_kategori(kategori_id: str, kategori_update: KategoriCreate, cur
 
 @router.delete("/{kategori_id}")
 async def delete_kategori(kategori_id: str, current_user: dict = Depends(get_current_user)):
-    from server import db
-    
     if current_user["role"] != "admin":
         raise HTTPException(status_code=403, detail="Bu işlem için yetkiniz yok")
     
@@ -61,8 +54,6 @@ async def delete_kategori(kategori_id: str, current_user: dict = Depends(get_cur
 
 @router.post("/bulk-delete")
 async def bulk_delete_kategoriler(kategori_ids: List[str], current_user: dict = Depends(get_current_user)):
-    from server import db
-    
     if current_user["role"] != "admin":
         raise HTTPException(status_code=403, detail="Bu işlem için yetkiniz yok")
     

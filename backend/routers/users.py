@@ -4,13 +4,12 @@ from datetime import datetime
 
 from models import UserResponse
 from routers.auth import get_current_user
+from database import db
 
 router = APIRouter(prefix="/users", tags=["Users"])
 
 @router.get("", response_model=List[UserResponse])
 async def get_users(current_user: dict = Depends(get_current_user)):
-    from server import db
-    
     if current_user["role"] != "admin":
         raise HTTPException(status_code=403, detail="Bu işlem için yetkiniz yok")
     
@@ -31,8 +30,6 @@ async def get_users(current_user: dict = Depends(get_current_user)):
 
 @router.delete("/{user_id}")
 async def delete_user(user_id: str, current_user: dict = Depends(get_current_user)):
-    from server import db
-    
     if current_user["role"] != "admin":
         raise HTTPException(status_code=403, detail="Bu işlem için yetkiniz yok")
     
@@ -47,8 +44,6 @@ async def delete_user(user_id: str, current_user: dict = Depends(get_current_use
 
 @router.post("/bulk-delete")
 async def bulk_delete_users(user_ids: List[str], current_user: dict = Depends(get_current_user)):
-    from server import db
-    
     if current_user["role"] != "admin":
         raise HTTPException(status_code=403, detail="Bu işlem için yetkiniz yok")
     

@@ -2,13 +2,12 @@ from fastapi import APIRouter, HTTPException, Depends
 from datetime import datetime, timezone, timedelta
 
 from routers.auth import get_current_user
+from database import db
 
 router = APIRouter(prefix="/dashboard", tags=["Dashboard"])
 
 @router.get("/stats")
 async def get_dashboard_stats(current_user: dict = Depends(get_current_user)):
-    from server import db
-    
     if current_user.get("role") not in ["admin", "inspector"]:
         raise HTTPException(status_code=403, detail="Dashboard'a erişim yetkiniz yok")
     
