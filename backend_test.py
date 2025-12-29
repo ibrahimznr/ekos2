@@ -16,7 +16,7 @@ class EkipmanAPITester:
         self.test_results = []
         self.critical_failures = []
 
-    def log_test(self, name, success, details=""):
+    def log_test(self, name, success, details="", critical=False):
         """Log test result"""
         self.tests_run += 1
         if success:
@@ -24,11 +24,14 @@ class EkipmanAPITester:
             status = "✅ PASS"
         else:
             status = "❌ FAIL"
+            if critical:
+                self.critical_failures.append(f"{name}: {details}")
         
         result = {
             "test": name,
             "status": "PASS" if success else "FAIL",
-            "details": details
+            "details": details,
+            "critical": critical
         }
         self.test_results.append(result)
         print(f"{status} - {name}: {details}")
