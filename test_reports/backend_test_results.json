@@ -1,158 +1,311 @@
 {
-  "timestamp": "2025-11-23T18:00:45.908635",
-  "total_tests": 30,
-  "passed_tests": 30,
-  "success_rate": 100.0,
+  "timestamp": "2025-12-29T19:13:36.088731",
+  "test_focus": "EKOS Review Request - P0 Bug Fix & P1 Features",
+  "total_tests": 50,
+  "passed_tests": 46,
+  "failed_tests": 4,
+  "success_rate": 92.0,
+  "critical_failures": [],
   "test_results": [
     {
-      "test": "Admin Login",
+      "test": "Login with ibrahimznrmak@gmail.com",
       "status": "PASS",
-      "details": "Status: 200, Response: {\n  \"access_token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJmODNkZDhmOS0zYWI0LTRhMzEtOTYwMS00ODcwMzFjYTZiOGEiLCJleHAiOjE3NjQwMDcyNDR9.DSUEX9KdS05bsXXVDtgchtR5Dv5ftQ6eR4mOYI6rAYg\",\n  \"token_ty..."
+      "details": "Status: 200, Response keys: ['access_token', 'token_type', 'user']",
+      "critical": true
     },
     {
-      "test": "Get Current User",
+      "test": "User Role Check",
       "status": "PASS",
-      "details": "Status: 200, Response: {\n  \"id\": \"f83dd8f9-3ab4-4a31-9601-487031ca6b8a\",\n  \"email\": \"admin@ekipman.com\",\n  \"role\": \"admin\",\n  \"created_at\": \"2025-11-23T17:58:51.754151Z\"\n}..."
+      "details": "User role: admin",
+      "critical": false
     },
     {
-      "test": "Invalid Login",
+      "test": "GET /api/raporlar",
       "status": "PASS",
-      "details": "Status: 401, Response: {\n  \"detail\": \"Email veya \\u015fifre hatal\\u0131\"\n}..."
+      "details": "Status: 200, Response keys: Array",
+      "critical": true
+    },
+    {
+      "test": "GET /api/kategoriler",
+      "status": "PASS",
+      "details": "Status: 200, Response keys: Array",
+      "critical": true
+    },
+    {
+      "test": "GET /api/projeler",
+      "status": "PASS",
+      "details": "Status: 200, Response keys: Array",
+      "critical": true
+    },
+    {
+      "test": "GET /api/dashboard/stats",
+      "status": "PASS",
+      "details": "Status: 200, Response keys: ['total_raporlar', 'monthly_raporlar', 'uygun_count', 'uygun_degil_count', 'expiring_30_days', 'expiring_7_days', 'kategori_dagilim', 'iskele_stats']",
+      "critical": true
+    },
+    {
+      "test": "Get Projects for Report",
+      "status": "PASS",
+      "details": "Status: 200, Response keys: Array",
+      "critical": true
+    },
+    {
+      "test": "Get Categories for Report",
+      "status": "PASS",
+      "details": "Status: 200, Response keys: Array",
+      "critical": true
+    },
+    {
+      "test": "Create New Report (Two-Stage Modal Test)",
+      "status": "PASS",
+      "details": "Status: 200, Response keys: ['id', 'rapor_no', 'proje_id', 'proje_adi', 'sehir', 'sehir_kodu', 'ekipman_adi', 'kategori', 'alt_kategori', 'firma', 'lokasyon', 'marka_model', 'seri_no', 'periyot', 'gecerlilik_tarihi', 'aciklama', 'uygunluk', 'durum', 'created_by', 'created_by_username', 'created_at', 'updated_at']",
+      "critical": true
+    },
+    {
+      "test": "Report Number Format",
+      "status": "PASS",
+      "details": "Generated report number: PK2025-IST001",
+      "critical": false
+    },
+    {
+      "test": "Get Created Report",
+      "status": "PASS",
+      "details": "Status: 200, Response keys: ['id', 'rapor_no', 'proje_id', 'proje_adi', 'sehir', 'sehir_kodu', 'ekipman_adi', 'kategori', 'alt_kategori', 'firma', 'lokasyon', 'marka_model', 'seri_no', 'periyot', 'gecerlilik_tarihi', 'aciklama', 'uygunluk', 'durum', 'created_by', 'created_by_username', 'created_at', 'updated_at']",
+      "critical": true
+    },
+    {
+      "test": "Update Report (Second Stage)",
+      "status": "PASS",
+      "details": "Status: 200, Response keys: ['id', 'rapor_no', 'proje_id', 'proje_adi', 'sehir', 'sehir_kodu', 'ekipman_adi', 'kategori', 'alt_kategori', 'firma', 'lokasyon', 'marka_model', 'seri_no', 'periyot', 'gecerlilik_tarihi', 'aciklama', 'uygunluk', 'durum', 'created_by', 'created_by_username', 'created_at', 'updated_at']",
+      "critical": true
+    },
+    {
+      "test": "Cleanup Test Report",
+      "status": "PASS",
+      "details": "Status: 200, Response keys: ['message']",
+      "critical": false
+    },
+    {
+      "test": "Get Category-Subcategory Map",
+      "status": "PASS",
+      "details": "Status: 200, Response keys: ['Basınçlı Kaplar', 'Asansör', 'Kaldırma Platformu', 'Vinç', 'Forklift', 'İskele']",
+      "critical": true
+    },
+    {
+      "test": "Category Map Structure",
+      "status": "PASS",
+      "details": "Found 6 category mappings",
+      "critical": false
+    },
+    {
+      "test": "Category 'Forklift' Subcategories",
+      "status": "PASS",
+      "details": "Has 4 subcategories",
+      "critical": false
+    },
+    {
+      "test": "Category 'Asansör' Subcategories",
+      "status": "PASS",
+      "details": "Has 4 subcategories",
+      "critical": false
+    },
+    {
+      "test": "Category 'Kaldırma-İletme' Missing",
+      "status": "FAIL",
+      "details": "Category not found in mapping",
+      "critical": false
+    },
+    {
+      "test": "Get Cities",
+      "status": "PASS",
+      "details": "Status: 200, Response keys: Array",
+      "critical": true
+    },
+    {
+      "test": "Cities Count",
+      "status": "PASS",
+      "details": "Found 81 cities",
+      "critical": false
+    },
+    {
+      "test": "City 'İstanbul' Available",
+      "status": "PASS",
+      "details": "City found",
+      "critical": false
+    },
+    {
+      "test": "City 'Ankara' Available",
+      "status": "PASS",
+      "details": "City found",
+      "critical": false
+    },
+    {
+      "test": "City 'İzmir' Available",
+      "status": "PASS",
+      "details": "City found",
+      "critical": false
+    },
+    {
+      "test": "City 'Adana' Available",
+      "status": "PASS",
+      "details": "City found",
+      "critical": false
     },
     {
       "test": "Dashboard Stats",
       "status": "PASS",
-      "details": "Status: 200, Response: {\n  \"total_raporlar\": 0,\n  \"monthly_raporlar\": 0,\n  \"uygun_count\": 0,\n  \"uygun_degil_count\": 0,\n  \"expiring_30_days\": 0,\n  \"expiring_7_days\": 0,\n  \"kategori_dagilim\": []\n}..."
+      "details": "Status: 200, Response keys: ['total_raporlar', 'monthly_raporlar', 'uygun_count', 'uygun_degil_count', 'expiring_30_days', 'expiring_7_days', 'kategori_dagilim', 'iskele_stats']",
+      "critical": true
     },
     {
-      "test": "Dashboard - total_raporlar field",
+      "test": "Dashboard Field 'total_raporlar'",
       "status": "PASS",
-      "details": "Value: 0"
+      "details": "Value: 1148",
+      "critical": false
     },
     {
-      "test": "Dashboard - monthly_raporlar field",
+      "test": "Dashboard Field 'monthly_raporlar'",
       "status": "PASS",
-      "details": "Value: 0"
+      "details": "Value: 312",
+      "critical": false
     },
     {
-      "test": "Dashboard - uygun_count field",
+      "test": "Dashboard Field 'uygun_count'",
       "status": "PASS",
-      "details": "Value: 0"
+      "details": "Value: 1053",
+      "critical": false
     },
     {
-      "test": "Dashboard - uygun_degil_count field",
+      "test": "Dashboard Field 'uygun_degil_count'",
       "status": "PASS",
-      "details": "Value: 0"
+      "details": "Value: 79",
+      "critical": false
+    },
+    {
+      "test": "Dashboard Field 'expiring_30_days'",
+      "status": "PASS",
+      "details": "Value: 61",
+      "critical": false
+    },
+    {
+      "test": "Dashboard Field 'expiring_7_days'",
+      "status": "PASS",
+      "details": "Value: 21",
+      "critical": false
+    },
+    {
+      "test": "Dashboard Field 'kategori_dagilim'",
+      "status": "PASS",
+      "details": "Value: [{'count': 324, 'kategori': 'Kaldırma-İletme'}, {'count': 242, 'kategori': 'İskele (Sıva)'}, {'count': 198, 'kategori': 'Endüstriyel Raflar ve Kapılar'}, {'count': 118, 'kategori': 'Tezgah'}, {'count': 114, 'kategori': 'İş Makinesi'}, {'count': 30, 'kategori': 'Depolama Raf'}]",
+      "critical": false
+    },
+    {
+      "test": "Get Current User",
+      "status": "PASS",
+      "details": "Status: 200, Response keys: ['id', 'username', 'email', 'role', 'firma_adi', 'email_verified', 'created_at']",
+      "critical": false
+    },
+    {
+      "test": "Invalid Login",
+      "status": "PASS",
+      "details": "Status: 401, Response keys: ['detail']",
+      "critical": false
     },
     {
       "test": "Get Categories",
       "status": "PASS",
-      "details": "Status: 200, Response: [\n  {\n    \"id\": \"b103d134-cfe6-4d72-ae25-c39fc9e8ff97\",\n    \"isim\": \"Asans\\u00f6r\",\n    \"aciklama\": \"Asans\\u00f6r ekipmanlar\\u0131\",\n    \"created_at\": \"2025-11-23T17:58:51.784355Z\"\n  },\n  {\n    \"id\": ..."
+      "details": "Status: 200, Response keys: Array",
+      "critical": false
     },
     {
       "test": "Categories Count",
       "status": "PASS",
-      "details": "Found 5 categories"
+      "details": "Found 58 categories",
+      "critical": false
     },
     {
       "test": "Create Category",
       "status": "PASS",
-      "details": "Status: 200, Response: {\n  \"id\": \"c127f84c-11a5-4cc7-8a06-954e2a885bcf\",\n  \"isim\": \"Test Kategori 180044\",\n  \"aciklama\": \"Test kategorisi\",\n  \"created_at\": \"2025-11-23T18:00:44.614470Z\"\n}..."
+      "details": "Status: 200, Response keys: ['id', 'isim', 'alt_kategoriler', 'aciklama', 'created_at']",
+      "critical": false
     },
     {
       "test": "Delete Category",
       "status": "PASS",
-      "details": "Status: 200, Response: {\n  \"message\": \"Kategori silindi\"\n}..."
+      "details": "Status: 200, Response keys: ['message']",
+      "critical": false
     },
     {
       "test": "Get Reports",
       "status": "PASS",
-      "details": "Status: 200, Response: []..."
+      "details": "Status: 200, Response keys: Array",
+      "critical": false
     },
     {
       "test": "Reports Count",
       "status": "PASS",
-      "details": "Found 0 reports"
+      "details": "Found 500 reports",
+      "critical": false
     },
     {
       "test": "Search Reports",
       "status": "PASS",
-      "details": "Status: 200, Response: []..."
+      "details": "Status: 200, Response keys: Array",
+      "critical": false
     },
     {
       "test": "Filter by Category",
       "status": "PASS",
-      "details": "Status: 200, Response: []..."
+      "details": "Status: 200, Response keys: Array",
+      "critical": false
     },
     {
       "test": "Filter by Uygunluk",
       "status": "PASS",
-      "details": "Status: 200, Response: []..."
+      "details": "Status: 200, Response keys: Array",
+      "critical": false
     },
     {
       "test": "Create Report",
-      "status": "PASS",
-      "details": "Status: 200, Response: {\n  \"id\": \"ce644770-3f18-463e-a2ac-7962bb808e83\",\n  \"rapor_no\": \"RAP-2025-11-000001\",\n  \"ekipman_adi\": \"Test Ekipman 180044\",\n  \"kategori\": \"Asans\\u00f6r\",\n  \"firma\": \"Test Firma\",\n  \"lokasyon\": \"Test..."
-    },
-    {
-      "test": "Get Specific Report",
-      "status": "PASS",
-      "details": "Status: 200, Response: {\n  \"id\": \"ce644770-3f18-463e-a2ac-7962bb808e83\",\n  \"rapor_no\": \"RAP-2025-11-000001\",\n  \"ekipman_adi\": \"Test Ekipman 180044\",\n  \"kategori\": \"Asans\\u00f6r\",\n  \"firma\": \"Test Firma\",\n  \"lokasyon\": \"Test..."
-    },
-    {
-      "test": "Update Report",
-      "status": "PASS",
-      "details": "Status: 200, Response: {\n  \"id\": \"ce644770-3f18-463e-a2ac-7962bb808e83\",\n  \"rapor_no\": \"RAP-2025-11-000001\",\n  \"ekipman_adi\": \"Test Ekipman 180044\",\n  \"kategori\": \"Asans\\u00f6r\",\n  \"firma\": \"Test Firma\",\n  \"lokasyon\": \"Test..."
-    },
-    {
-      "test": "Upload Invalid File Type",
-      "status": "PASS",
-      "details": "Status: 400, Response: {\n  \"detail\": \"Sadece JPG, PNG ve PDF formatlar\\u0131 desteklenir\"\n}..."
-    },
-    {
-      "test": "Get Report Files",
-      "status": "PASS",
-      "details": "Status: 200, Response: []..."
-    },
-    {
-      "test": "Delete Report",
-      "status": "PASS",
-      "details": "Status: 200, Response: {\n  \"message\": \"Rapor silindi\"\n}..."
+      "status": "FAIL",
+      "details": "Status: 422, Error: {'detail': [{'type': 'missing', 'loc': ['body', 'proje_id'], 'msg': 'Field required', 'input': {'ekipman_adi': 'Test Ekipman 191335', 'kategori': 'Asansör', 'firma': 'Test Firma', 'lokasyon': 'Test Lokasyon', 'marka_model': 'Test Model', 'seri_no': 'TEST123', 'alt_kategori': 'Test Alt Kategori', 'periyot': '6 Aylık', 'gecerlilik_tarihi': '2025-12-31', 'uygunluk': 'Uygun', 'aciklama': 'Test raporu'}, 'url': 'https://errors.pydantic.dev/2.12/v/missing'}, {'type': 'missing', 'loc': ['body', 'sehir'], 'msg': 'Field required', 'input': {'ekipman_adi': 'Test Ekipman 191335', 'kategori': 'Asansör', 'firma': 'Test Firma', 'lokasyon': 'Test Lokasyon', 'marka_model': 'Test Model', 'seri_no': 'TEST123', 'alt_kategori': 'Test Alt Kategori', 'periyot': '6 Aylık', 'gecerlilik_tarihi': '2025-12-31', 'uygunluk': 'Uygun', 'aciklama': 'Test raporu'}, 'url': 'https://errors.pydantic.dev/2.12/v/missing'}]}",
+      "critical": false
     },
     {
       "test": "Excel Export",
       "status": "PASS",
-      "details": "Status: 200"
+      "details": "Status: 200",
+      "critical": false
     },
     {
       "test": "Excel Template",
       "status": "PASS",
-      "details": "Status: 200"
+      "details": "Status: 200",
+      "critical": false
     },
     {
       "test": "Excel Import",
-      "status": "PASS",
-      "details": "Status: 400, Response: {\n  \"detail\": \"Excel i\\u015fleme hatas\\u0131: File is not a zip file\"\n}..."
+      "status": "FAIL",
+      "details": "Status: 422, Error: {'detail': [{'type': 'missing', 'loc': ['body', 'proje_id'], 'msg': 'Field required', 'input': None, 'url': 'https://errors.pydantic.dev/2.12/v/missing'}]}",
+      "critical": false
     },
     {
       "test": "Get Users",
       "status": "PASS",
-      "details": "Status: 200, Response: [\n  {\n    \"id\": \"f83dd8f9-3ab4-4a31-9601-487031ca6b8a\",\n    \"email\": \"admin@ekipman.com\",\n    \"role\": \"admin\",\n    \"created_at\": \"2025-11-23T17:58:51.754151Z\"\n  }\n]..."
+      "details": "Status: 200, Response keys: Array",
+      "critical": false
     },
     {
       "test": "Users Count",
       "status": "PASS",
-      "details": "Found 1 users"
+      "details": "Found 5 users",
+      "critical": false
     },
     {
       "test": "Create User",
-      "status": "PASS",
-      "details": "Status: 200, Response: {\n  \"id\": \"346bbb32-ec1f-4992-9753-431bf2706294\",\n  \"email\": \"test180045@test.com\",\n  \"role\": \"viewer\",\n  \"created_at\": \"2025-11-23T18:00:45.862827Z\"\n}..."
-    },
-    {
-      "test": "Delete User",
-      "status": "PASS",
-      "details": "Status: 200, Response: {\n  \"message\": \"Kullan\\u0131c\\u0131 silindi\"\n}..."
+      "status": "FAIL",
+      "details": "Status: 422, Error: {'detail': [{'type': 'missing', 'loc': ['body', 'username'], 'msg': 'Field required', 'input': {'email': 'test191336@test.com', 'password': 'testpass123', 'role': 'viewer'}, 'url': 'https://errors.pydantic.dev/2.12/v/missing'}, {'type': 'missing', 'loc': ['body', 'password_confirm'], 'msg': 'Field required', 'input': {'email': 'test191336@test.com', 'password': 'testpass123', 'role': 'viewer'}, 'url': 'https://errors.pydantic.dev/2.12/v/missing'}, {'type': 'missing', 'loc': ['body', 'firma_adi'], 'msg': 'Field required', 'input': {'email': 'test191336@test.com', 'password': 'testpass123', 'role': 'viewer'}, 'url': 'https://errors.pydantic.dev/2.12/v/missing'}]}",
+      "critical": false
     }
   ]
 }
