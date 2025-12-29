@@ -17,6 +17,9 @@ import io
 from openpyxl import Workbook, load_workbook
 from openpyxl.styles import Font, PatternFill, Alignment
 import base64
+import zipfile
+import shutil
+import tempfile
 from constants import SEHIRLER, KATEGORI_ALT_KATEGORI
 
 ROOT_DIR = Path(__file__).parent
