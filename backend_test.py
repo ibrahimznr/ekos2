@@ -14,6 +14,7 @@ class EkipmanAPITester:
         self.tests_run = 0
         self.tests_passed = 0
         self.test_results = []
+        self.critical_failures = []
 
     def log_test(self, name, success, details=""):
         """Log test result"""
