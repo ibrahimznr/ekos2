@@ -594,60 +594,19 @@ const RaporModal = ({ open, onClose, rapor, onSuccess }) => {
                     id="lokasyon"
                       {kat.isim}
                     </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+                    id="lokasyon"
+                    value={formData.lokasyon}
+                    onChange={(e) => handleChange('lokasyon', e.target.value)}
+                    placeholder="Örn: Depo, Şantiye, Kat 2"
+                    data-testid="lokasyon-input"
+                  />
+                </div>
 
-            {/* Alt Kategori */}
-            <div className="space-y-2">
-              <Label htmlFor="alt_kategori">Alt Kategori</Label>
-              <Select 
-                value={formData.alt_kategori} 
-                onValueChange={(value) => handleChange('alt_kategori', value)}
-                disabled={!formData.kategori || altKategoriler.length === 0}
-              >
-                <SelectTrigger data-testid="alt-kategori-select">
-                  <SelectValue placeholder={formData.kategori ? "Alt kategori seçin" : "Önce kategori seçin"} />
-                </SelectTrigger>
-                <SelectContent>
-                  {altKategoriler.map((altKat, index) => (
-                    <SelectItem key={index} value={altKat}>
-                      {altKat}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Firma */}
-            <div className="space-y-2">
-              <Label htmlFor="firma">Firma *</Label>
-              <Input
-                id="firma"
-                value={formData.firma}
-                onChange={(e) => handleChange('firma', e.target.value)}
-                required
-                data-testid="firma-input"
-              />
-            </div>
-
-            {/* Lokasyon */}
-            <div className="space-y-2">
-              <Label htmlFor="lokasyon">Lokasyon</Label>
-              <Input
-                id="lokasyon"
-                value={formData.lokasyon}
-                onChange={(e) => handleChange('lokasyon', e.target.value)}
-                data-testid="lokasyon-input"
-              />
-            </div>
-
-            {/* Marka/Model */}
-            <div className="space-y-2">
-              <Label htmlFor="marka_model">Marka/Model</Label>
-              <Input
-                id="marka_model"
+                {/* Marka/Model */}
+                <div className="space-y-2">
+                  <Label htmlFor="marka_model">Marka/Model</Label>
+                  <Input
+                    id="marka_model"
                 value={formData.marka_model}
                 onChange={(e) => handleChange('marka_model', e.target.value)}
                 data-testid="marka-model-input"
