@@ -106,7 +106,6 @@ async def register(user_create: UserCreate):
 
 @router.post("/verify-email")
 async def verify_email(verify_data: VerifyEmail):
-    from server import db
     
     user = await db.users.find_one({"email": verify_data.email}, {"_id": 0})
     if not user:
