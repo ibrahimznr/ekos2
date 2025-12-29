@@ -36,6 +36,7 @@ const RaporModal = ({ open, onClose, rapor, onSuccess }) => {
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [selectedImages, setSelectedImages] = useState([]); // base64 for preview
   const [selectedImageFiles, setSelectedImageFiles] = useState([]); // actual File objects
+  const [isHeaderLocked, setIsHeaderLocked] = useState(false); // NEW: Track if header is locked
   const [formData, setFormData] = useState({
     proje_id: '',
     sehir: '',
