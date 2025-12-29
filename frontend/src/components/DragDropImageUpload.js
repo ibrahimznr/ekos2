@@ -7,7 +7,8 @@ const DragDropImageUpload = ({
   images = [], 
   onChange, 
   maxImages = 3,
-  label = "Görseller"
+  label = "Görseller",
+  onFilesChange // NEW: callback for actual File objects
 }) => {
   const [dragActive, setDragActive] = useState(false);
   const fileInputRef = useRef(null);
@@ -45,6 +46,10 @@ const DragDropImageUpload = ({
       return;
     }
 
+    const validFiles = [];
+    const base64Images = [];
+    let processedCount = 0;
+
     files.forEach(file => {
       if (!file.type.startsWith('image/')) {
         toast.error(`${file.name} bir görsel dosyası değil`);
@@ -57,9 +62,19 @@ const DragDropImageUpload = ({
         return;
       }
 
+      validFiles.push(file);
+
       const reader = new FileReader();
       reader.onloadend = () => {
-        onChange([...images, reader.result]);
+        base64Images.push(reader.result);
+        processedCount++;
+        
+        if (processedCount === validFiles.length) {
+          onChange([...images, ...base64Images]);
+          if (onFilesChange) {
+            onFilesChange(validFiles);
+          }
+        }
       };
       reader.readAsDataURL(file);
     });
