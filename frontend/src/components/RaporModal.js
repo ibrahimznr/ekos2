@@ -592,9 +592,6 @@ const RaporModal = ({ open, onClose, rapor, onSuccess }) => {
                   <Label htmlFor="lokasyon">Lokasyon</Label>
                   <Input
                     id="lokasyon"
-                      {kat.isim}
-                    </SelectItem>
-                    id="lokasyon"
                     value={formData.lokasyon}
                     onChange={(e) => handleChange('lokasyon', e.target.value)}
                     placeholder="Örn: Depo, Şantiye, Kat 2"
@@ -607,7 +604,7 @@ const RaporModal = ({ open, onClose, rapor, onSuccess }) => {
                   <Label htmlFor="marka_model">Marka/Model</Label>
                   <Input
                     id="marka_model"
-                value={formData.marka_model}
+                    value={formData.marka_model}
                 onChange={(e) => handleChange('marka_model', e.target.value)}
                 data-testid="marka-model-input"
               />
