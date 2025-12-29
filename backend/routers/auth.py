@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException, Depends
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+nfrom fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import EmailStr
 import jwt
 from datetime import datetime, timezone, timedelta
@@ -9,6 +9,7 @@ import logging
 import random
 
 from models import User, UserCreate, UserLogin, UserResponse, VerifyEmail, Token
+from database import db
 
 router = APIRouter(prefix="/auth", tags=["Auth"])
 logger = logging.getLogger(__name__)
