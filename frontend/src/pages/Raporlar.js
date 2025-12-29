@@ -403,17 +403,81 @@ const Raporlar = () => {
               </p>
             </div>
           </div>
+
+          {/* Toplu İşlemler Bölümü */}
+          {selectedRaporlar.length > 0 && (
+            <Card className="border-blue-200 bg-blue-50/50">
+              <CardContent className="py-3 px-4">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div className="flex items-center gap-2">
+                    <CheckSquare className="h-5 w-5 text-blue-600" />
+                    <span className="font-medium text-blue-800">
+                      {selectedRaporlar.length} rapor seçildi
+                    </span>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    {/* Tümünü Seç / Seçimi Temizle */}
+                    {selectedRaporlar.length < raporlar.length ? (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleSelectAll}
+                        className="border-blue-600 text-blue-700 hover:bg-blue-100"
+                      >
+                        <Square className="h-4 w-4 mr-2" />
+                        Tümünü Seç ({raporlar.length})
+                      </Button>
+                    ) : (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleClearSelection}
+                        className="border-gray-400 text-gray-600 hover:bg-gray-100"
+                      >
+                        <XSquare className="h-4 w-4 mr-2" />
+                        Seçimi Temizle
+                      </Button>
+                    )}
+                    
+                    {/* ZIP İndir Butonu */}
+                    <Button
+                      onClick={handleZipDownload}
+                      disabled={zipLoading}
+                      className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white"
+                      data-testid="zip-download-button"
+                    >
+                      {zipLoading ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          İşleniyor...
+                        </>
+                      ) : (
+                        <>
+                          <Archive className="h-4 w-4 mr-2" />
+                          ZIP Olarak İndir
+                        </>
+                      )}
+                    </Button>
+                    
+                    {/* Toplu Sil Butonu */}
+                    {canEdit && (
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={handleBulkDelete}
+                        data-testid="bulk-delete-reports-button"
+                      >
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Seçilenleri Sil
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
           <div className="flex flex-wrap gap-2">
-            {selectedRaporlar.length > 0 && canEdit && (
-              <Button
-                variant="destructive"
-                onClick={handleBulkDelete}
-                data-testid="bulk-delete-reports-button"
-              >
-                <Trash2 className="h-4 w-4 mr-2" />
-                Seçilenleri Sil ({selectedRaporlar.length})
-              </Button>
-            )}
             {canEdit && (
               <>
                 <DropdownMenu>
