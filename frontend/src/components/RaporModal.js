@@ -380,25 +380,21 @@ const RaporModal = ({ open, onClose, rapor, onSuccess }) => {
         toast.success('Rapor kaydedildi! Yeni ekipman ekleyebilirsiniz.');
       }
       
-      // Call onSuccess to refresh the list WITHOUT passing through parent re-render that might close modal
-      // We do this async to prevent modal close
-      setTimeout(() => {
-        if (onSuccess) onSuccess();
-      }, 100);
+      // DON'T call onSuccess here - it causes modal to close
+      // Parent will handle list refresh when modal finally closes
       
       resetOnlyEquipmentFields();
       
-      // Scroll to top of modal
+      // Scroll to equipment section
       setTimeout(() => {
         const modalContent = document.querySelector('[role="dialog"]');
         if (modalContent) {
-          modalContent.scrollTop = 0;
-        }
-        
-        // Focus on Ekipman Adı field
-        const ekipmanInput = document.querySelector('input[placeholder*="Ekipman" i]');
-        if (ekipmanInput) {
-          ekipmanInput.focus();
+          // Scroll to equipment section (not top, but to equipment fields)
+          const ekipmanSection = document.querySelector('input[placeholder*="Ekipman" i]');
+          if (ekipmanSection) {
+            ekipmanSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            ekipmanSection.focus();
+          }
         }
       }, 200);
       
