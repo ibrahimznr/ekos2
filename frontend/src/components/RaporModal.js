@@ -227,8 +227,8 @@ const RaporModal = ({ open, onClose, rapor, onSuccess }) => {
       }
       
       // Upload images if any
-      if (selectedImages.length > 0 && raporId) {
-        for (const image of selectedImages) {
+      if (selectedImageFiles.length > 0 && raporId) {
+        for (const image of selectedImageFiles) {
           const imageFormData = new FormData();
           imageFormData.append('file', image);
           
