@@ -511,7 +511,7 @@ const RaporModal = ({ open, onClose, rapor, onSuccess }) => {
                 <Label htmlFor="kategori">Kategori *</Label>
                 <Select 
                   value={formData.kategori} 
-                  onValueChange={handleKategoriChange} 
+                  onValueChange={(value) => handleChange('kategori', value)} 
                   required
                   disabled={isHeaderLocked}
                 >
