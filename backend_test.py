@@ -37,7 +37,7 @@ class EkipmanAPITester:
         print(f"{status} - {name}: {details}")
         return success
 
-    def run_test(self, name, method, endpoint, expected_status, data=None, files=None, headers=None):
+    def run_test(self, name, method, endpoint, expected_status, data=None, files=None, headers=None, critical=False):
         """Run a single API test"""
         url = f"{self.api_url}/{endpoint}"
         test_headers = {'Content-Type': 'application/json'}
@@ -54,16 +54,18 @@ class EkipmanAPITester:
 
         try:
             if method == 'GET':
-                response = requests.get(url, headers=test_headers)
+                response = requests.get(url, headers=test_headers, timeout=30)
             elif method == 'POST':
                 if files:
-                    response = requests.post(url, files=files, data=data, headers=test_headers)
+                    response = requests.post(url, files=files, data=data, headers=test_headers, timeout=30)
                 else:
-                    response = requests.post(url, json=data, headers=test_headers)
+                    response = requests.post(url, json=data, headers=test_headers, timeout=30)
             elif method == 'PUT':
-                response = requests.put(url, json=data, headers=test_headers)
+                response = requests.put(url, json=data, headers=test_headers, timeout=30)
             elif method == 'DELETE':
-                response = requests.delete(url, headers=test_headers)
+                response = requests.delete(url, headers=test_headers, timeout=30)
+            elif method == 'PATCH':
+                response = requests.patch(url, json=data, headers=test_headers, timeout=30)
 
             success = response.status_code == expected_status
             details = f"Status: {response.status_code}"
@@ -71,22 +73,22 @@ class EkipmanAPITester:
             if success and response.content:
                 try:
                     response_data = response.json()
-                    details += f", Response: {json.dumps(response_data, indent=2)[:200]}..."
-                    return self.log_test(name, True, details), response_data
+                    details += f", Response keys: {list(response_data.keys()) if isinstance(response_data, dict) else 'Array'}"
+                    return self.log_test(name, True, details, critical), response_data
                 except:
-                    return self.log_test(name, True, details), {}
+                    return self.log_test(name, True, details, critical), {}
             elif not success:
                 try:
                     error_data = response.json()
                     details += f", Error: {error_data}"
                 except:
                     details += f", Error: {response.text[:200]}"
-                return self.log_test(name, False, details), {}
+                return self.log_test(name, False, details, critical), {}
             
-            return self.log_test(name, success, details), {}
+            return self.log_test(name, success, details, critical), {}
 
         except Exception as e:
-            return self.log_test(name, False, f"Exception: {str(e)}"), {}
+            return self.log_test(name, False, f"Exception: {str(e)}", critical), {}
 
     def test_login(self):
         """Test login with admin credentials"""
