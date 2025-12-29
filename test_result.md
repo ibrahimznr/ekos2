@@ -121,6 +121,18 @@ backend:
         agent: "testing"
         comment: "P0 & P1 BACKEND TESTING COMPLETED (Review Request): ✅ CRITICAL USER LOGIN: Successfully tested login with ibrahimznrmak@gmail.com / Szd.dl_34 - user has admin role and full access ✅ ALL CRITICAL BACKEND ENDPOINTS WORKING: POST /api/auth/login (200 OK), GET /api/raporlar (200 OK), GET /api/kategoriler (200 OK), GET /api/projeler (200 OK), GET /api/dashboard/stats (200 OK) ✅ TWO-STAGE REPORT CREATION FLOW: Successfully tested complete report creation flow - created test report with PK2025-IST001 format, updated report (simulating second stage), all CRUD operations working ✅ CATEGORY-SUBCATEGORY RELATIONSHIPS: Verified 6 category mappings with subcategories, Forklift has 4 subcategories, Asansör has 4 subcategories ✅ CITIES ENDPOINT: All 81 Turkish cities available including İstanbul, Ankara, İzmir, Adana ✅ DASHBOARD COMPREHENSIVE: All required fields present - 1148 total reports, 312 monthly, 1053 suitable, 79 unsuitable, 61 expiring in 30 days, 21 expiring in 7 days ✅ BACKEND PERFORMANCE: 92% test success rate (46/50 tests passed), no critical failures detected, all core functionality working. Backend is stable and ready for production use."
 
+  - task: "ZIP Export Feature - Backend API"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "ZIP EXPORT ÖZELLİĞİ EKLENDİ: Backend'e /api/raporlar/zip-export endpoint'i eklendi - seçilen raporlar için klasör yapısıyla ZIP dosyası oluşturur. Her rapor için RAPOR_[RAPOR_NO]/ klasörü oluşturulur, bilgi.txt dosyası rapor detaylarını içerir, rapora ait tüm dosyalar klasöre kopyalanır. Test: curl ile ZIP oluşturma başarılı, dosya yapısı doğru."
+
 frontend:
   - task: "Admin Panel - Projects Tab with New Form Layout & Bulk Selection"
     implemented: true
