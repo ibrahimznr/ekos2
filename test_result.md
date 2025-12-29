@@ -288,6 +288,9 @@ metadata:
 
 test_plan:
   current_focus:
+    - "P0 Bug Fix - RaporModal Crash (COMPLETED)"
+    - "P1 Feature - Two-Stage Bulk Report Creation (COMPLETED)"
+    - "Backend API Testing for Review Request (COMPLETED)"
     - "Project Management (backend and frontend)"
     - "Hierarchical Categories with Cascading Dropdowns"
     - "New Report Number Format (PKYYYY-SEHIRKODU###)"
