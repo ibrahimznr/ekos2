@@ -674,9 +674,11 @@ const RaporModal = ({ open, onClose, rapor, onSuccess }) => {
               data-testid="aciklama-input"
             />
           </div>
+            </div>
+          )}
 
-          {/* Medya Dosyaları */}
-          {!rapor && (
+          {/* Medya Dosyaları - Only when header is locked */}
+          {!rapor && isHeaderLocked && (
             <div className="space-y-6 border-t pt-4">
               {/* Görseller - Drag & Drop + Paste */}
               <div className="space-y-3">
