@@ -264,7 +264,7 @@ const RaporModal = ({ open, onClose, rapor, onSuccess }) => {
         }
       }
       
-      const totalUploaded = selectedImages.length + selectedFiles.length;
+      const totalUploaded = selectedImageFiles.length + selectedFiles.length;
       if (totalUploaded > 0) {
         toast.success(`${totalUploaded} dosya yüklendi`);
       }
@@ -273,6 +273,7 @@ const RaporModal = ({ open, onClose, rapor, onSuccess }) => {
       onClose();
       setSelectedFiles([]);
       setSelectedImages([]);
+      setSelectedImageFiles([]);
     } catch (error) {
       toast.error(error.response?.data?.detail || 'Rapor kaydedilemedi');
     } finally {
