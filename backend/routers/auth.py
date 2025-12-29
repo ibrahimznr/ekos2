@@ -147,7 +147,6 @@ async def resend_verification_code(email: EmailStr):
 
 @router.post("/login", response_model=Token)
 async def login(user_login: UserLogin):
-    from server import db
     
     user = await db.users.find_one({"email": user_login.email}, {"_id": 0})
     if not user:
