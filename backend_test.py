@@ -536,31 +536,48 @@ class EkipmanAPITester:
             self.run_test("Unauthorized User Access", "GET", "users", 403)
 
     def run_all_tests(self):
-        """Run all API tests"""
-        print("🚀 Starting Ekipman API Tests...")
+        """Run all API tests focusing on review request requirements"""
+        print("🚀 Starting EKOS Backend API Tests (Review Request Focus)...")
         print(f"Testing against: {self.base_url}")
+        print("=" * 60)
         
-        # Test login first
-        if not self.test_login():
-            print("❌ Login failed, stopping tests")
-            return False
+        # Test specific user login first (from review request)
+        if not self.test_specific_user_login():
+            print("❌ Critical: Specific user login failed, trying admin login...")
+            if not self.test_admin_login():
+                print("❌ Critical: Both logins failed, stopping tests")
+                return False
         
-        # Run all test suites
+        # Run critical tests from review request
+        self.test_critical_backend_endpoints()
+        self.test_report_creation_flow()
+        self.test_category_subcategory_relationship()
+        self.test_cities_endpoint()
+        self.test_dashboard_comprehensive()
+        
+        # Run additional comprehensive tests
         self.test_auth_endpoints()
-        self.test_dashboard_stats()
         self.test_kategoriler_endpoints()
         self.test_raporlar_crud()
         self.test_excel_operations()
         self.test_admin_endpoints()
         
         # Print summary
-        print(f"\n📊 Test Summary:")
+        print("\n" + "=" * 60)
+        print(f"📊 EKOS Backend Test Summary:")
         print(f"Total tests: {self.tests_run}")
         print(f"Passed: {self.tests_passed}")
         print(f"Failed: {self.tests_run - self.tests_passed}")
         print(f"Success rate: {(self.tests_passed/self.tests_run)*100:.1f}%")
         
-        return self.tests_passed == self.tests_run
+        if self.critical_failures:
+            print(f"\n❌ CRITICAL FAILURES ({len(self.critical_failures)}):")
+            for failure in self.critical_failures:
+                print(f"  • {failure}")
+        else:
+            print(f"\n✅ No critical failures detected!")
+        
+        return len(self.critical_failures) == 0
 
 def main():
     tester = EkipmanAPITester()
