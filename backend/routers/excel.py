@@ -9,16 +9,16 @@ import uuid
 from openpyxl import Workbook, load_workbook
 from openpyxl.styles import Font, PatternFill, Alignment
 
-from models import Rapor, IskeleBileseni
+from models import Rapor
 from routers.auth import get_current_user
+from database import db
+from utils import generate_rapor_no
 from constants import SEHIRLER
 
 router = APIRouter(prefix="/excel", tags=["Excel"])
 
 @router.get("/export")
 async def export_excel(current_user: dict = Depends(get_current_user)):
-    from server import db
-    
     raporlar = await db.raporlar.find({}, {"_id": 0}).to_list(10000)
     
     wb = Workbook()
@@ -142,8 +142,6 @@ async def import_excel(
     proje_id: str = Form(...),
     current_user: dict = Depends(get_current_user)
 ):
-    from server import db, generate_rapor_no
-    
     if current_user["role"] not in ["admin", "inspector"]:
         raise HTTPException(status_code=403, detail="Excel içe aktarma yetkiniz yok")
     
