@@ -126,7 +126,6 @@ async def verify_email(verify_data: VerifyEmail):
 
 @router.post("/resend-code")
 async def resend_verification_code(email: EmailStr):
-    from server import db
     
     user = await db.users.find_one({"email": email}, {"_id": 0})
     if not user:
