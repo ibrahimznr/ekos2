@@ -496,6 +496,9 @@ const RaporModal = ({ open, onClose, rapor, onSuccess }) => {
                 <DragDropImageUpload
                   images={selectedImages}
                   onChange={setSelectedImages}
+                  onFilesChange={(newFiles) => {
+                    setSelectedImageFiles([...selectedImageFiles, ...newFiles]);
+                  }}
                   maxImages={5}
                   label="Görseller"
                 />
