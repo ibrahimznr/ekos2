@@ -614,6 +614,9 @@ class EkipmanAPITester:
         self.test_cities_endpoint()
         self.test_dashboard_comprehensive()
         
+        # Test ZIP Export Feature (Review Request)
+        self.test_zip_export_feature()
+        
         # Run additional comprehensive tests
         self.test_auth_endpoints()
         self.test_kategoriler_endpoints()
