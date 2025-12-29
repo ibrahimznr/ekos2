@@ -90,9 +90,200 @@ class EkipmanAPITester:
         except Exception as e:
             return self.log_test(name, False, f"Exception: {str(e)}", critical), {}
 
-    def test_login(self):
+    def test_specific_user_login(self):
+        """Test login with specific user credentials from review request"""
+        print("\n🔐 Testing Specific User Login (Review Request)...")
+        
+        success, response = self.run_test(
+            "Login with ibrahimznrmak@gmail.com",
+            "POST",
+            "auth/login",
+            200,
+            data={"email": "ibrahimznrmak@gmail.com", "password": "Szd.dl_34"},
+            critical=True
+        )
+        
+        if success and 'access_token' in response:
+            self.token = response['access_token']
+            self.user_data = response.get('user', {})
+            self.log_test("User Role Check", True, f"User role: {self.user_data.get('role', 'unknown')}")
+            return True
+        else:
+            self.log_test("Critical Login Failed", False, "Cannot proceed with tests without login", critical=True)
+            return False
+
+    def test_critical_backend_endpoints(self):
+        """Test all critical backend endpoints mentioned in review request"""
+        print("\n🎯 Testing Critical Backend Endpoints...")
+        
+        # Test all endpoints mentioned in the review request
+        critical_endpoints = [
+            ("POST /api/auth/login", "POST", "auth/login", 200, {"email": "ibrahimznrmak@gmail.com", "password": "Szd.dl_34"}),
+            ("GET /api/raporlar", "GET", "raporlar", 200, None),
+            ("GET /api/kategoriler", "GET", "kategoriler", 200, None),
+            ("GET /api/projeler", "GET", "projeler", 200, None),
+            ("GET /api/dashboard/stats", "GET", "dashboard/stats", 200, None),
+        ]
+        
+        for name, method, endpoint, expected_status, data in critical_endpoints:
+            if name == "POST /api/auth/login":
+                # Skip login test as we already did it
+                continue
+            self.run_test(name, method, endpoint, expected_status, data=data, critical=True)
+
+    def test_report_creation_flow(self):
+        """Test the complete report creation flow for two-stage modal"""
+        print("\n📝 Testing Report Creation Flow (Two-Stage Modal)...")
+        
+        if self.user_data.get('role') not in ['admin', 'inspector']:
+            self.log_test("Report Creation Permission", False, "User doesn't have permission to create reports", critical=True)
+            return
+        
+        # First, get required data for report creation
+        success, projeler = self.run_test("Get Projects for Report", "GET", "projeler", 200, critical=True)
+        if not success or not projeler:
+            self.log_test("Projects Required", False, "No projects available for report creation", critical=True)
+            return
+        
+        success, kategoriler = self.run_test("Get Categories for Report", "GET", "kategoriler", 200, critical=True)
+        if not success or not kategoriler:
+            self.log_test("Categories Required", False, "No categories available for report creation", critical=True)
+            return
+        
+        # Test report creation with realistic data
+        proje = projeler[0]  # Use first available project
+        kategori = kategoriler[0] if kategoriler else {"isim": "Test Kategori"}
+        
+        test_rapor_data = {
+            "proje_id": proje.get("id"),
+            "sehir": "İstanbul",  # Use a valid Turkish city
+            "ekipman_adi": "Test Forklift Ekipmanı",
+            "kategori": kategori.get("isim", "Forklift"),
+            "alt_kategori": "Elektrikli Forklift",
+            "firma": "Test EKOS Company",
+            "lokasyon": "İstanbul Depo",
+            "marka_model": "Toyota 8FBE15",
+            "seri_no": f"TF{datetime.now().strftime('%H%M%S')}",
+            "periyot": "6 Aylık",
+            "gecerlilik_tarihi": "2025-12-31",
+            "uygunluk": "Uygun",
+            "aciklama": "Test raporu - İki aşamalı modal testi"
+        }
+        
+        success, new_rapor = self.run_test(
+            "Create New Report (Two-Stage Modal Test)",
+            "POST",
+            "raporlar",
+            200,
+            data=test_rapor_data,
+            critical=True
+        )
+        
+        if success and 'id' in new_rapor:
+            rapor_id = new_rapor['id']
+            rapor_no = new_rapor.get('rapor_no', 'Unknown')
+            
+            self.log_test("Report Number Format", True, f"Generated report number: {rapor_no}")
+            
+            # Test getting the created report
+            self.run_test(
+                "Get Created Report",
+                "GET",
+                f"raporlar/{rapor_id}",
+                200,
+                critical=True
+            )
+            
+            # Test updating the report (simulating second stage of modal)
+            update_data = {
+                "aciklama": "Updated via two-stage modal - equipment added successfully"
+            }
+            
+            self.run_test(
+                "Update Report (Second Stage)",
+                "PUT",
+                f"raporlar/{rapor_id}",
+                200,
+                data=update_data,
+                critical=True
+            )
+            
+            # Clean up - delete test report
+            self.run_test(
+                "Cleanup Test Report",
+                "DELETE",
+                f"raporlar/{rapor_id}",
+                200
+            )
+            
+            return True
+        else:
+            self.log_test("Report Creation Failed", False, "Could not create test report", critical=True)
+            return False
+
+    def test_category_subcategory_relationship(self):
+        """Test category and subcategory relationships"""
+        print("\n🏷️ Testing Category-Subcategory Relationships...")
+        
+        # Test kategori-alt-kategoriler endpoint
+        success, kategori_map = self.run_test(
+            "Get Category-Subcategory Map",
+            "GET",
+            "kategori-alt-kategoriler",
+            200,
+            critical=True
+        )
+        
+        if success:
+            self.log_test("Category Map Structure", True, f"Found {len(kategori_map)} category mappings")
+            
+            # Check if specific categories exist
+            expected_categories = ["Forklift", "Asansör", "Kaldırma-İletme"]
+            for cat in expected_categories:
+                if cat in kategori_map:
+                    subcats = kategori_map[cat]
+                    self.log_test(f"Category '{cat}' Subcategories", True, f"Has {len(subcats)} subcategories")
+                else:
+                    self.log_test(f"Category '{cat}' Missing", False, f"Category not found in mapping")
+
+    def test_cities_endpoint(self):
+        """Test cities endpoint"""
+        print("\n🏙️ Testing Cities Endpoint...")
+        
+        success, sehirler = self.run_test("Get Cities", "GET", "sehirler", 200, critical=True)
+        
+        if success:
+            self.log_test("Cities Count", True, f"Found {len(sehirler)} cities")
+            
+            # Check for specific cities mentioned in review
+            expected_cities = ["İstanbul", "Ankara", "İzmir", "Adana"]
+            for city_name in expected_cities:
+                city_found = any(city.get("isim") == city_name for city in sehirler)
+                self.log_test(f"City '{city_name}' Available", city_found, f"City {'found' if city_found else 'not found'}")
+
+    def test_dashboard_comprehensive(self):
+        """Comprehensive dashboard testing"""
+        print("\n📊 Testing Dashboard Comprehensive...")
+        
+        success, stats = self.run_test("Dashboard Stats", "GET", "dashboard/stats", 200, critical=True)
+        
+        if success:
+            # Check all required fields
+            required_fields = [
+                'total_raporlar', 'monthly_raporlar', 'uygun_count', 'uygun_degil_count',
+                'expiring_30_days', 'expiring_7_days', 'kategori_dagilim'
+            ]
+            
+            for field in required_fields:
+                if field in stats:
+                    value = stats[field]
+                    self.log_test(f"Dashboard Field '{field}'", True, f"Value: {value}")
+                else:
+                    self.log_test(f"Dashboard Field '{field}' Missing", False, f"Required field not found", critical=True)
+
+    def test_admin_login(self):
         """Test login with admin credentials"""
-        print("\n🔐 Testing Authentication...")
+        print("\n🔐 Testing Admin Authentication...")
         
         success, response = self.run_test(
             "Admin Login",
