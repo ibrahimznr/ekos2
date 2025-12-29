@@ -762,7 +762,7 @@ const RaporModal = ({ open, onClose, rapor, onSuccess }) => {
               İptal
             </Button>
             
-            {!rapor && (
+            {!rapor && isHeaderLocked && (
               <Button 
                 type="button" 
                 variant="secondary"
@@ -771,13 +771,15 @@ const RaporModal = ({ open, onClose, rapor, onSuccess }) => {
                 className="bg-blue-600 text-white hover:bg-blue-700"
                 data-testid="save-and-add-new-button"
               >
-                {loading ? 'Kaydediliyor...' : '💾 Kaydet ve Yeni Ekipman Ekle'}
+                {loading ? 'Kaydediliyor...' : '💾 Kaydet ve Devam Et'}
               </Button>
             )}
             
-            <Button type="submit" disabled={loading} data-testid="submit-button">
-              {loading ? 'Kaydediliyor...' : rapor ? 'Güncelle' : 'Rapor Oluştur'}
-            </Button>
+            {(rapor || isHeaderLocked) && (
+              <Button type="submit" disabled={loading} data-testid="submit-button">
+                {loading ? 'Kaydediliyor...' : rapor ? 'Güncelle' : 'Rapor Oluştur'}
+              </Button>
+            )}
           </DialogFooter>
         </form>
       </DialogContent>
