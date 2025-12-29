@@ -299,6 +299,29 @@ const RaporModal = ({ open, onClose, rapor, onSuccess }) => {
     setSelectedFiles([]);
   };
 
+  const handleLockHeader = () => {
+    // Validate header fields before locking
+    if (!formData.proje_id || !formData.sehir || !formData.firma || !formData.kategori) {
+      toast.error('Lütfen üst bilgileri (Proje, Şehir, Firma, Kategori) doldurun');
+      return;
+    }
+    setIsHeaderLocked(true);
+    toast.success('Üst bilgiler kilitlendi! Artık ekipman ekleyebilirsiniz.');
+    
+    // Focus on first equipment field
+    setTimeout(() => {
+      const ekipmanInput = document.querySelector('input[placeholder*="Ekipman" i]');
+      if (ekipmanInput) {
+        ekipmanInput.focus();
+      }
+    }, 100);
+  };
+
+  const handleUnlockHeader = () => {
+    setIsHeaderLocked(false);
+    toast.info('Üst bilgiler kilidi açıldı. Düzenleyebilirsiniz.');
+  };
+
   const handleSaveAndAddNew = async (e) => {
     e.preventDefault();
     setLoading(true);
