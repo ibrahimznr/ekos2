@@ -578,24 +578,20 @@ const RaporModal = ({ open, onClose, rapor, onSuccess }) => {
                 <div className="space-y-2">
                   <Label htmlFor="ekipman_adi">Ekipman Adı *</Label>
                   <Input
-                    id="ekipman_adi"
-                value={formData.ekipman_adi}
-                onChange={(e) => handleChange('ekipman_adi', e.target.value)}
-                required
-                data-testid="ekipman-adi-input"
-              />
-            </div>
+                        id="ekipman_adi"
+                    value={formData.ekipman_adi}
+                    onChange={(e) => handleChange('ekipman_adi', e.target.value)}
+                    placeholder="Örn: Forklift, Vinç, İskele"
+                    required
+                    data-testid="ekipman-adi-input"
+                  />
+                </div>
 
-            {/* Kategori */}
-            <div className="space-y-2">
-              <Label htmlFor="kategori">Kategori *</Label>
-              <Select value={formData.kategori} onValueChange={(value) => handleChange('kategori', value)} required>
-                <SelectTrigger data-testid="kategori-select">
-                  <SelectValue placeholder="Kategori seçin" />
-                </SelectTrigger>
-                <SelectContent>
-                  {kategoriler.map((kat) => (
-                    <SelectItem key={kat.id} value={kat.isim}>
+                {/* Lokasyon */}
+                <div className="space-y-2">
+                  <Label htmlFor="lokasyon">Lokasyon</Label>
+                  <Input
+                    id="lokasyon"
                       {kat.isim}
                     </SelectItem>
                   ))}
