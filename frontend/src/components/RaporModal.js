@@ -275,6 +275,7 @@ const RaporModal = ({ open, onClose, rapor, onSuccess }) => {
       setSelectedFiles([]);
       setSelectedImages([]);
       setSelectedImageFiles([]);
+      setIsHeaderLocked(false); // Reset lock state
     } catch (error) {
       toast.error(error.response?.data?.detail || 'Rapor kaydedilemedi');
     } finally {
