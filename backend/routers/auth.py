@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException, Depends
-nfrom fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import EmailStr
 import jwt
 from datetime import datetime, timezone, timedelta
