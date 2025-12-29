@@ -665,12 +665,26 @@ const RaporModal = ({ open, onClose, rapor, onSuccess }) => {
             </div>
           )}
 
-          <DialogFooter>
+          <DialogFooter className="gap-2">
             <Button type="button" variant="outline" onClick={onClose} data-testid="cancel-button">
               İptal
             </Button>
+            
+            {!rapor && (
+              <Button 
+                type="button" 
+                variant="secondary"
+                onClick={handleSaveAndAddNew}
+                disabled={loading}
+                className="bg-blue-600 text-white hover:bg-blue-700"
+                data-testid="save-and-add-new-button"
+              >
+                {loading ? 'Kaydediliyor...' : '💾 Kaydet ve Yeni Ekipman Ekle'}
+              </Button>
+            )}
+            
             <Button type="submit" disabled={loading} data-testid="submit-button">
-              {loading ? 'Kaydediliyor...' : rapor ? 'Güncelle' : 'Oluştur'}
+              {loading ? 'Kaydediliyor...' : rapor ? 'Güncelle' : 'Rapor Oluştur'}
             </Button>
           </DialogFooter>
         </form>
