@@ -427,47 +427,158 @@ const RaporModal = ({ open, onClose, rapor, onSuccess }) => {
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4 py-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Proje */}
-            <div className="space-y-2">
-              <Label htmlFor="proje_id">Proje *</Label>
-              <Select value={formData.proje_id} onValueChange={handleProjeChange} required>
-                <SelectTrigger data-testid="proje-select">
-                  <SelectValue placeholder="Proje seçin" />
-                </SelectTrigger>
-                <SelectContent>
-                  {projeler.map((proje) => (
-                    <SelectItem key={proje.id} value={proje.id}>
-                      {proje.proje_adi}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+        <form onSubmit={handleSubmit} className="space-y-6 py-4">
+          {/* ==================== ÜST BİLGİLER (SABİT) ==================== */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold text-blue-700 flex items-center gap-2">
+                {isHeaderLocked && <span>🔒</span>}
+                Üst Bilgiler (Proje, Firma, Kategori)
+              </h3>
+              {isHeaderLocked && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={handleUnlockHeader}
+                  className="text-amber-600 border-amber-600 hover:bg-amber-50"
+                >
+                  🔓 Kilidi Aç
+                </Button>
+              )}
             </div>
 
-            {/* Şehir */}
-            <div className="space-y-2">
-              <Label htmlFor="sehir">Şehir *</Label>
-              <Select value={formData.sehir} onValueChange={(value) => handleChange('sehir', value)} required>
-                <SelectTrigger data-testid="sehir-select">
-                  <SelectValue placeholder="Şehir seçin" />
-                </SelectTrigger>
-                <SelectContent className="max-h-60">
-                  {sehirler.map((sehir) => (
-                    <SelectItem key={sehir.kod} value={sehir.isim}>
-                      {sehir.isim}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-blue-50 p-4 rounded-lg border border-blue-200">
+              {/* Proje */}
+              <div className="space-y-2">
+                <Label htmlFor="proje_id">Proje *</Label>
+                <Select 
+                  value={formData.proje_id} 
+                  onValueChange={handleProjeChange} 
+                  required
+                  disabled={isHeaderLocked}
+                >
+                  <SelectTrigger data-testid="proje-select">
+                    <SelectValue placeholder="Proje seçin" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {projeler.map((proje) => (
+                      <SelectItem key={proje.id} value={proje.id}>
+                        {proje.proje_adi}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Şehir */}
+              <div className="space-y-2">
+                <Label htmlFor="sehir">Şehir *</Label>
+                <Select 
+                  value={formData.sehir} 
+                  onValueChange={(value) => handleChange('sehir', value)} 
+                  required
+                  disabled={isHeaderLocked}
+                >
+                  <SelectTrigger data-testid="sehir-select">
+                    <SelectValue placeholder="Şehir seçin" />
+                  </SelectTrigger>
+                  <SelectContent className="max-h-60">
+                    {sehirler.map((sehir) => (
+                      <SelectItem key={sehir.kod} value={sehir.isim}>
+                        {sehir.isim}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Firma */}
+              <div className="space-y-2">
+                <Label htmlFor="firma">Firma Adı *</Label>
+                <Input
+                  id="firma"
+                  value={formData.firma}
+                  onChange={(e) => handleChange('firma', e.target.value)}
+                  placeholder="Firma adı"
+                  required
+                  disabled={isHeaderLocked}
+                />
+              </div>
+
+              {/* Kategori */}
+              <div className="space-y-2">
+                <Label htmlFor="kategori">Kategori *</Label>
+                <Select 
+                  value={formData.kategori} 
+                  onValueChange={handleKategoriChange} 
+                  required
+                  disabled={isHeaderLocked}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Kategori seçin" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {kategoriler.map((kat) => (
+                      <SelectItem key={kat.id} value={kat.isim}>
+                        {kat.isim}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Alt Kategori */}
+              {altKategoriler.length > 0 && (
+                <div className="space-y-2">
+                  <Label htmlFor="alt_kategori">Alt Kategori</Label>
+                  <Select 
+                    value={formData.alt_kategori} 
+                    onValueChange={(value) => handleChange('alt_kategori', value)}
+                    disabled={isHeaderLocked}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Alt kategori seçin" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {altKategoriler.map((altKat) => (
+                        <SelectItem key={altKat} value={altKat}>
+                          {altKat}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
             </div>
 
-            {/* Ekipman Adı */}
-            <div className="space-y-2">
-              <Label htmlFor="ekipman_adi">Ekipman Adı *</Label>
-              <Input
-                id="ekipman_adi"
+            {!isHeaderLocked && !rapor && (
+              <Button
+                type="button"
+                onClick={handleLockHeader}
+                className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-3"
+              >
+                🔒 Kilitle ve Ekipman Ekle →
+              </Button>
+            )}
+          </div>
+
+          {/* Divider */}
+          {isHeaderLocked && (
+            <div className="border-t-2 border-dashed border-blue-300 my-6"></div>
+          )}
+
+          {/* ==================== EKIPMAN BİLGİLERİ ==================== */}
+          {(isHeaderLocked || rapor) && (
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold text-gray-800">Ekipman Bilgileri</h3>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Ekipman Adı */}
+                <div className="space-y-2">
+                  <Label htmlFor="ekipman_adi">Ekipman Adı *</Label>
+                  <Input
+                    id="ekipman_adi"
                 value={formData.ekipman_adi}
                 onChange={(e) => handleChange('ekipman_adi', e.target.value)}
                 required
