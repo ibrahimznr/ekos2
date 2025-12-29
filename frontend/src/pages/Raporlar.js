@@ -68,6 +68,7 @@ const Raporlar = () => {
   const [deleteRaporId, setDeleteRaporId] = useState(null);
   const [selectedRaporlar, setSelectedRaporlar] = useState([]);
   const [user, setUser] = useState(null);
+  const [zipLoading, setZipLoading] = useState(false);
 
   useEffect(() => {
     const userData = localStorage.getItem('user');
