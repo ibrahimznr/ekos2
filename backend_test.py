@@ -580,6 +580,9 @@ class EkipmanAPITester:
         return len(self.critical_failures) == 0
 
 def main():
+    # Create test reports directory
+    Path("/app/test_reports").mkdir(exist_ok=True)
+    
     tester = EkipmanAPITester()
     success = tester.run_all_tests()
     
@@ -588,9 +591,12 @@ def main():
     with open(results_file, 'w', encoding='utf-8') as f:
         json.dump({
             "timestamp": datetime.now().isoformat(),
+            "test_focus": "EKOS Review Request - P0 Bug Fix & P1 Features",
             "total_tests": tester.tests_run,
             "passed_tests": tester.tests_passed,
+            "failed_tests": tester.tests_run - tester.tests_passed,
             "success_rate": (tester.tests_passed/tester.tests_run)*100 if tester.tests_run > 0 else 0,
+            "critical_failures": tester.critical_failures,
             "test_results": tester.test_results
         }, f, indent=2, ensure_ascii=False)
     
