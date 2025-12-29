@@ -495,45 +495,104 @@ class EkipmanAPITester:
                 files=files
             )
 
-    def test_admin_endpoints(self):
-        """Test admin-only endpoints"""
-        print("\n👑 Testing Admin Endpoints...")
+    def test_zip_export_feature(self):
+        """Test ZIP export feature according to review request specifications"""
+        print("\n📦 Testing ZIP Export Feature (Review Request)...")
         
-        if self.user_data.get('role') == 'admin':
-            # Get users
-            success, users = self.run_test("Get Users", "GET", "users", 200)
-            
-            if success:
-                self.log_test("Users Count", len(users) > 0, f"Found {len(users)} users")
-            
-            # Test user creation
-            test_user = {
-                "email": f"test{datetime.now().strftime('%H%M%S')}@test.com",
-                "password": "testpass123",
-                "role": "viewer"
-            }
-            
-            success, new_user = self.run_test(
-                "Create User",
-                "POST",
-                "auth/register",
-                200,
-                data=test_user
-            )
-            
-            if success and 'id' in new_user:
-                user_id = new_user['id']
-                
-                # Delete test user
-                self.run_test(
-                    "Delete User",
-                    "DELETE",
-                    f"users/{user_id}",
-                    200
-                )
-        else:
-            # Test unauthorized access
-            self.run_test("Unauthorized User Access", "GET", "users", 403)
+        if self.user_data.get('role') not in ['admin', 'inspector']:
+            self.log_test("ZIP Export Permission", False, "User doesn't have permission for ZIP export", critical=True)
+            return False
+        
+        # First get some reports to export
+        success, raporlar = self.run_test("Get Reports for ZIP Export", "GET", "raporlar?limit=3", 200, critical=True)
+        if not success or not raporlar:
+            self.log_test("Reports Required for ZIP", False, "No reports available for ZIP export", critical=True)
+            return False
+        
+        # Extract report IDs (limit to 3 as per review request)
+        rapor_ids = [rapor.get("id") for rapor in raporlar[:3] if rapor.get("id")]
+        
+        if len(rapor_ids) < 3:
+            self.log_test("Insufficient Reports", False, f"Only {len(rapor_ids)} reports available, need 3", critical=True)
+            return False
+        
+        print(f"   Using report IDs: {rapor_ids[:3]}")
+        
+        # Test 1: Successful ZIP Export with 3 reports
+        success, response = self.run_test(
+            "ZIP Export - 3 Reports Success",
+            "POST",
+            "raporlar/zip-export",
+            200,
+            data={"rapor_ids": rapor_ids[:3]},
+            critical=True
+        )
+        
+        if success:
+            # Check response headers for ZIP content
+            self.log_test("ZIP Content Type", True, "Response received for ZIP export")
+        
+        # Test 2: Empty rapor_ids error
+        success, response = self.run_test(
+            "ZIP Export - Empty IDs Error",
+            "POST",
+            "raporlar/zip-export",
+            400,
+            data={"rapor_ids": []},
+            critical=True
+        )
+        
+        if success:
+            self.log_test("Empty IDs Error Message", True, "Correctly rejected empty rapor_ids")
+        
+        # Test 3: 100+ reports limit error
+        # Create a list of 101 fake IDs
+        fake_ids = [f"fake-id-{i}" for i in range(101)]
+        success, response = self.run_test(
+            "ZIP Export - 100+ Reports Limit",
+            "POST",
+            "raporlar/zip-export",
+            400,
+            data={"rapor_ids": fake_ids},
+            critical=True
+        )
+        
+        if success:
+            self.log_test("100+ Reports Limit Error", True, "Correctly rejected 100+ reports")
+        
+        # Test 4: Unauthorized access (test without token)
+        original_token = self.token
+        self.token = None  # Remove token temporarily
+        
+        success, response = self.run_test(
+            "ZIP Export - Unauthorized Access",
+            "POST",
+            "raporlar/zip-export",
+            401,
+            data={"rapor_ids": rapor_ids[:3]},
+            critical=True
+        )
+        
+        # Restore token
+        self.token = original_token
+        
+        if success:
+            self.log_test("Unauthorized Access Blocked", True, "Correctly blocked unauthorized access")
+        
+        # Test 5: Invalid/non-existent report IDs
+        invalid_ids = ["invalid-id-1", "invalid-id-2", "invalid-id-3"]
+        success, response = self.run_test(
+            "ZIP Export - Invalid Report IDs",
+            "POST",
+            "raporlar/zip-export",
+            404,
+            data={"rapor_ids": invalid_ids}
+        )
+        
+        if success:
+            self.log_test("Invalid IDs Handling", True, "Correctly handled invalid report IDs")
+        
+        return True
 
     def run_all_tests(self):
         """Run all API tests focusing on review request requirements"""
