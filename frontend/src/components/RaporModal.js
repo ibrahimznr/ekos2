@@ -281,6 +281,105 @@ const RaporModal = ({ open, onClose, rapor, onSuccess }) => {
     }
   };
 
+  const resetOnlyEquipmentFields = () => {
+    setFormData(prev => ({
+      ...prev, // Keep: proje_id, sehir, firma, kategori, alt_kategori
+      ekipman_adi: '',
+      lokasyon: '', // User requested this to be cleared (optional per equipment)
+      marka_model: '',
+      seri_no: '',
+      periyot: '',
+      gecerlilik_tarihi: '',
+      uygunluk: '',
+      aciklama: ''
+    }));
+    setSelectedImages([]);
+    setSelectedImageFiles([]);
+    setSelectedFiles([]);
+  };
+
+  const handleSaveAndAddNew = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      const token = localStorage.getItem('token');
+      
+      // Create new report
+      const response = await axios.post(`${API}/raporlar`, formData, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const raporId = response.data.id;
+      
+      // Upload images if any
+      if (selectedImageFiles.length > 0 && raporId) {
+        for (const image of selectedImageFiles) {
+          const imageFormData = new FormData();
+          imageFormData.append('file', image);
+          
+          try {
+            await axios.post(`${API}/upload/${raporId}`, imageFormData, {
+              headers: {
+                Authorization: `Bearer ${token}`,
+                'Content-Type': 'multipart/form-data',
+              },
+            });
+          } catch (imageError) {
+            toast.error(`${image.name} yüklenemedi`);
+          }
+        }
+      }
+
+      // Upload files if any
+      if (selectedFiles.length > 0 && raporId) {
+        for (const file of selectedFiles) {
+          const fileFormData = new FormData();
+          fileFormData.append('file', file);
+          
+          try {
+            await axios.post(`${API}/upload/${raporId}`, fileFormData, {
+              headers: {
+                Authorization: `Bearer ${token}`,
+                'Content-Type': 'multipart/form-data',
+              },
+            });
+          } catch (fileError) {
+            toast.error(`${file.name} yüklenemedi`);
+          }
+        }
+      }
+      
+      const totalUploaded = selectedImageFiles.length + selectedFiles.length;
+      if (totalUploaded > 0) {
+        toast.success(`Rapor kaydedildi! ${totalUploaded} dosya yüklendi. Yeni ekipman ekleyebilirsiniz.`);
+      } else {
+        toast.success('Rapor kaydedildi! Yeni ekipman ekleyebilirsiniz.');
+      }
+      
+      onSuccess();
+      resetOnlyEquipmentFields();
+      
+      // Scroll to top of modal
+      setTimeout(() => {
+        const modalContent = document.querySelector('[role="dialog"]');
+        if (modalContent) {
+          modalContent.scrollTop = 0;
+        }
+        
+        // Focus on Ekipman Adı field
+        const ekipmanInput = document.querySelector('input[placeholder*="ekipman" i]');
+        if (ekipmanInput) {
+          ekipmanInput.focus();
+        }
+      }, 100);
+      
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Rapor kaydedilemedi');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleChange = (field, value) => {
     setFormData({ ...formData, [field]: value });
     
