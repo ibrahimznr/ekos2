@@ -193,6 +193,76 @@ const Raporlar = () => {
     }
   };
 
+  const handleZipDownload = async () => {
+    if (selectedRaporlar.length === 0) {
+      toast.error('Lütfen indirmek için en az bir rapor seçin');
+      return;
+    }
+
+    if (selectedRaporlar.length > 100) {
+      toast.error('En fazla 100 rapor seçilebilir');
+      return;
+    }
+
+    setZipLoading(true);
+    const loadingToast = toast.loading(`${selectedRaporlar.length} rapor hazırlanıyor...`);
+
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.post(
+        `${API}/raporlar/zip-export`,
+        { rapor_ids: selectedRaporlar },
+        {
+          headers: { 
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          responseType: 'blob',
+          timeout: 120000, // 2 dakika timeout (büyük dosyalar için)
+        }
+      );
+      
+      // Dosya adını response header'dan al veya varsayılan kullan
+      const contentDisposition = response.headers['content-disposition'];
+      let filename = `Raporlar_${new Date().toISOString().slice(0,10).replace(/-/g,'')}_${new Date().toTimeString().slice(0,5).replace(':','')}.zip`;
+      
+      if (contentDisposition) {
+        const filenameMatch = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
+        if (filenameMatch && filenameMatch[1]) {
+          filename = filenameMatch[1].replace(/['"]/g, '');
+        }
+      }
+      
+      // Blob'u indir
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', filename);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+      
+      toast.dismiss(loadingToast);
+      toast.success(`${selectedRaporlar.length} rapor başarıyla indirildi`);
+      
+    } catch (error) {
+      toast.dismiss(loadingToast);
+      if (error.code === 'ECONNABORTED') {
+        toast.error('İndirme zaman aşımına uğradı. Daha az rapor seçmeyi deneyin.');
+      } else {
+        toast.error(error.response?.data?.detail || 'ZIP indirme başarısız oldu');
+      }
+    } finally {
+      setZipLoading(false);
+    }
+  };
+
+  const handleClearSelection = () => {
+    setSelectedRaporlar([]);
+    toast.info('Seçim temizlendi');
+  };
+
   const handleSelectAll = useCallback(() => {
     if (selectedRaporlar.length === raporlar.length) {
       setSelectedRaporlar([]);
