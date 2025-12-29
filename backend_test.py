@@ -594,6 +594,46 @@ class EkipmanAPITester:
         
         return True
 
+    def test_admin_endpoints(self):
+        """Test admin-only endpoints"""
+        print("\n👑 Testing Admin Endpoints...")
+        
+        if self.user_data.get('role') == 'admin':
+            # Get users
+            success, users = self.run_test("Get Users", "GET", "users", 200)
+            
+            if success:
+                self.log_test("Users Count", len(users) > 0, f"Found {len(users)} users")
+            
+            # Test user creation
+            test_user = {
+                "email": f"test{datetime.now().strftime('%H%M%S')}@test.com",
+                "password": "testpass123",
+                "role": "viewer"
+            }
+            
+            success, new_user = self.run_test(
+                "Create User",
+                "POST",
+                "auth/register",
+                200,
+                data=test_user
+            )
+            
+            if success and 'id' in new_user:
+                user_id = new_user['id']
+                
+                # Delete test user
+                self.run_test(
+                    "Delete User",
+                    "DELETE",
+                    f"users/{user_id}",
+                    200
+                )
+        else:
+            # Test unauthorized access
+            self.run_test("Unauthorized User Access", "GET", "users", 403)
+
     def run_all_tests(self):
         """Run all API tests focusing on review request requirements"""
         print("🚀 Starting EKOS Backend API Tests (Review Request Focus)...")
