@@ -190,15 +190,16 @@ const Layout = ({ children }) => {
 
       {/* Mobile Bottom Navigation */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-50 safe-bottom">
-        <div className="flex justify-around items-center h-16 px-2">
-          {navItems.slice(0, 4).map((item) => {
+        <div className="flex justify-around items-center h-16 px-1 relative">
+          {/* Sol taraftaki nav items (ilk 2) */}
+          {navItems.slice(0, 2).map((item) => {
             const Icon = item.icon;
             const active = isActive(item.path);
             return (
               <button
                 key={item.path}
                 onClick={() => navigate(item.path)}
-                className={`flex flex-col items-center justify-center flex-1 h-full py-2 transition-colors ${
+                className={`flex flex-col items-center justify-center flex-1 h-full py-2 transition-colors relative ${
                   active 
                     ? 'text-blue-600' 
                     : 'text-gray-500 hover:text-gray-700'
@@ -209,13 +210,55 @@ const Layout = ({ children }) => {
                   {item.shortLabel}
                 </span>
                 {active && (
-                  <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-8 h-1 bg-blue-600 rounded-t-full" />
+                  <div className="absolute bottom-0 w-8 h-1 bg-blue-600 rounded-t-full" />
                 )}
               </button>
             );
           })}
           
-          {/* Logout in bottom nav */}
+          {/* Ortadaki FAB - Yeni Rapor Butonu */}
+          {(user.role === 'admin' || user.role === 'inspector') && (
+            <div className="flex-1 flex items-center justify-center relative">
+              <button
+                onClick={() => {
+                  // Navigate to raporlar and trigger modal
+                  navigate('/raporlar', { state: { openNewRaporModal: true } });
+                }}
+                className="absolute -top-6 w-14 h-14 bg-gradient-to-br from-blue-600 to-blue-700 rounded-full shadow-lg flex items-center justify-center text-white hover:from-blue-700 hover:to-blue-800 active:scale-95 transition-all border-4 border-white"
+                style={{ boxShadow: '0 4px 15px rgba(37, 99, 235, 0.4)' }}
+              >
+                <Plus className="h-7 w-7" />
+              </button>
+              <span className="text-xs text-gray-400 mt-6">Rapor</span>
+            </div>
+          )}
+          
+          {/* Sağ taraftaki nav items (sonraki 2) */}
+          {navItems.slice(2, 4).map((item) => {
+            const Icon = item.icon;
+            const active = isActive(item.path);
+            return (
+              <button
+                key={item.path}
+                onClick={() => navigate(item.path)}
+                className={`flex flex-col items-center justify-center flex-1 h-full py-2 transition-colors relative ${
+                  active 
+                    ? 'text-blue-600' 
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                <Icon className={`h-5 w-5 ${active ? 'text-blue-600' : ''}`} />
+                <span className={`text-xs mt-1 ${active ? 'font-medium' : ''}`}>
+                  {item.shortLabel}
+                </span>
+                {active && (
+                  <div className="absolute bottom-0 w-8 h-1 bg-blue-600 rounded-t-full" />
+                )}
+              </button>
+            );
+          })}
+          
+          {/* Çıkış butonu */}
           <button
             onClick={handleLogout}
             className="flex flex-col items-center justify-center flex-1 h-full py-2 text-red-500 hover:text-red-600 transition-colors"
