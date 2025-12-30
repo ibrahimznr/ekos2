@@ -141,10 +141,24 @@ const RaporDetailModal = ({ open, onClose, rapor }) => {
       };
       const mimeType = mimeTypes[fileExt] || 'application/octet-stream';
 
-      const blob = new Blob([response.data], { type: mimeType });
-      const url = window.URL.createObjectURL(blob);
-      setPreviewFile({ ...dosya, url, mimeType });
-      setShowPreview(true);
+      // For PDF files, use FileReader to create a data URL for better compatibility
+      if (fileExt === 'pdf') {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setPreviewFile({ ...dosya, url: reader.result, mimeType, isPdfDataUrl: true });
+          setShowPreview(true);
+        };
+        reader.onerror = () => {
+          toast.error('PDF dosyası yüklenemedi');
+        };
+        reader.readAsDataURL(response.data);
+      } else {
+        // For images, use object URL
+        const blob = new Blob([response.data], { type: mimeType });
+        const url = window.URL.createObjectURL(blob);
+        setPreviewFile({ ...dosya, url, mimeType, isPdfDataUrl: false });
+        setShowPreview(true);
+      }
     } catch (error) {
       console.error('Preview error:', error);
       toast.error(`Dosya önizlenemiyor: ${error.response?.statusText || error.message}`);
