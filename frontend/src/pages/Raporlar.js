@@ -706,78 +706,84 @@ const Raporlar = () => {
                           </div>
                         )}
                       </div>
-                    </div>
                     
-                    {/* Actions */}
-                    <div className="flex gap-2 lg:flex-col">
-                      <Button
-                        onClick={() => handleViewRapor(rapor)}
-                        variant="outline"
-                        size="sm"
-                        className="flex-1 lg:flex-none"
-                        data-testid={`view-report-${rapor.id}`}
-                      >
-                        <Eye className="h-4 w-4 mr-2" />
-                        Görüntüle
-                      </Button>
-                      {canEdit && (
-                        <>
-                          <Button
-                            onClick={() => handleEditRapor(rapor)}
-                            variant="outline"
-                            size="sm"
-                            className="flex-1 lg:flex-none border-blue-600 text-blue-700 hover:bg-blue-50"
-                            data-testid={`edit-report-${rapor.id}`}
-                          >
-                            <Edit className="h-4 w-4 mr-2" />
-                            Düzenle
-                          </Button>
-                          <Button
-                            onClick={() => handleDeleteClick(rapor.id)}
-                            variant="outline"
-                            size="sm"
-                            className="flex-1 lg:flex-none border-red-600 text-red-700 hover:bg-red-50"
-                            data-testid={`delete-report-${rapor.id}`}
-                          >
-                            <Trash2 className="h-4 w-4 mr-2" />
-                            Sil
-                          </Button>
-                        </>
-                      )}
+                      {/* Actions - Horizontal on mobile, stacked on larger screens */}
+                      <div className="flex flex-wrap gap-2 pt-2 border-t border-gray-100">
+                        <Button
+                          onClick={() => handleViewRapor(rapor)}
+                          variant="outline"
+                          size="sm"
+                          className="flex-1 sm:flex-none h-9"
+                          data-testid={`view-report-${rapor.id}`}
+                        >
+                          <Eye className="h-4 w-4 mr-1 sm:mr-2" />
+                          <span className="hidden xs:inline">Görüntüle</span>
+                          <span className="xs:hidden">Göster</span>
+                        </Button>
+                        {canEdit && (
+                          <>
+                            <Button
+                              onClick={() => handleEditRapor(rapor)}
+                              variant="outline"
+                              size="sm"
+                              className="flex-1 sm:flex-none h-9 border-blue-600 text-blue-700 hover:bg-blue-50"
+                              data-testid={`edit-report-${rapor.id}`}
+                            >
+                              <Edit className="h-4 w-4 mr-1 sm:mr-2" />
+                              <span className="hidden xs:inline">Düzenle</span>
+                              <span className="xs:hidden">Düzen</span>
+                            </Button>
+                            <Button
+                              onClick={() => handleDeleteClick(rapor.id)}
+                              variant="outline"
+                              size="sm"
+                              className="flex-1 sm:flex-none h-9 border-red-600 text-red-700 hover:bg-red-50"
+                              data-testid={`delete-report-${rapor.id}`}
+                            >
+                              <Trash2 className="h-4 w-4 mr-1 sm:mr-2" />
+                              Sil
+                            </Button>
+                          </>
+                        )}
+                      </div>
                     </div>
-                  </div>
                   </div>
                 </CardContent>
               </Card>
             ))}
           </div>
 
-          {/* Pagination */}
+          {/* Pagination - Mobile friendly */}
           {totalPages > 1 && (
-            <Card className="shadow-md mt-6">
-              <CardContent className="py-4">
-                <div className="flex items-center justify-between">
-                  <div className="text-sm text-gray-600">
-                    Sayfa {currentPage} / {totalPages} 
-                    <span className="ml-2">({sortedRaporlar.length} rapordan {((currentPage - 1) * itemsPerPage) + 1}-{Math.min(currentPage * itemsPerPage, sortedRaporlar.length)} arası)</span>
+            <Card className="shadow-md mt-4 sm:mt-6">
+              <CardContent className="py-3 px-3 sm:py-4 sm:px-6">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                  <div className="text-xs sm:text-sm text-gray-600 text-center sm:text-left">
+                    <span className="font-medium">{currentPage}/{totalPages}</span>
+                    <span className="text-gray-400 ml-1">
+                      ({((currentPage - 1) * itemsPerPage) + 1}-{Math.min(currentPage * itemsPerPage, sortedRaporlar.length)} / {sortedRaporlar.length})
+                    </span>
                   </div>
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 justify-center">
                     <Button
                       onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                       disabled={currentPage === 1}
                       variant="outline"
                       size="sm"
+                      className="h-10 px-3 sm:px-4"
                     >
-                      <ChevronLeft className="h-4 w-4 mr-1" />
-                      Önceki
+                      <ChevronLeft className="h-4 w-4 sm:mr-1" />
+                      <span className="hidden sm:inline">Önceki</span>
                     </Button>
                     <Button
                       onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
                       disabled={currentPage === totalPages}
                       variant="outline"
                       size="sm"
+                      className="h-10 px-3 sm:px-4"
                     >
-                      Sonraki
+                      <span className="hidden sm:inline">Sonraki</span>
+                      <ChevronRight className="h-4 w-4 sm:ml-1" />
                       <ChevronRight className="h-4 w-4 ml-1" />
                     </Button>
                   </div>
