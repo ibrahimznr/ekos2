@@ -65,7 +65,7 @@ async def export_excel(current_user: dict = Depends(get_current_user)):
             try:
                 if len(str(cell.value)) > max_length:
                     max_length = len(cell.value)
-            except:
+            except (TypeError, AttributeError):
                 pass
         adjusted_width = min(max_length + 2, 50)
         ws.column_dimensions[column].width = adjusted_width
