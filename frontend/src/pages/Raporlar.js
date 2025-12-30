@@ -76,6 +76,13 @@ const Raporlar = () => {
       setUser(JSON.parse(userData));
     }
     
+    // Check if we should open new rapor modal (from mobile FAB button)
+    if (location.state?.openNewRaporModal) {
+      setShowRaporModal(true);
+      // Clear the state to prevent modal reopening on refresh
+      window.history.replaceState({}, document.title);
+    }
+    
     // Check if we have filtered reports from Dashboard
     if (location.state?.filteredReports) {
       setRaporlar(location.state.filteredReports);
