@@ -147,137 +147,137 @@ const Dashboard = () => {
       <div className="space-y-6 animate-fade-in">
         {/* Header */}
         <div>
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">Dashboard</h1>
-          <p className="text-gray-600">Ekipman muayene raporlarınızın genel görünümü</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-1 sm:mb-2">Dashboard</h1>
+          <p className="text-sm sm:text-base text-gray-600">Ekipman muayene raporlarınızın genel görünümü</p>
         </div>
 
         {/* Hızlı İşlemler */}
         <Card className="shadow-md bg-gradient-to-r from-blue-50 to-blue-100">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <Plus className="h-5 w-5 text-blue-600" />
+          <CardHeader className="pb-2 sm:pb-4">
+            <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+              <Plus className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" />
               Hızlı İşlemler
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          <CardContent className="pt-0">
+            <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3">
               <Button
                 onClick={() => setShowRaporModal(true)}
-                className="bg-gradient-to-r from-blue-700 to-blue-600 hover:from-blue-800 hover:to-blue-700 text-white w-full justify-start"
+                className="bg-gradient-to-r from-blue-700 to-blue-600 hover:from-blue-800 hover:to-blue-700 text-white w-full justify-start h-11"
               >
-                <Plus className="h-4 w-4 mr-2" />
-                Yeni Rapor Oluştur
+                <Plus className="h-4 w-4 mr-2 flex-shrink-0" />
+                <span className="truncate">Yeni Rapor</span>
               </Button>
               <Button
                 onClick={() => navigate('/admin')}
                 variant="outline"
-                className="border-indigo-600 text-indigo-700 hover:bg-indigo-50 w-full justify-start"
+                className="border-indigo-600 text-indigo-700 hover:bg-indigo-50 w-full justify-start h-11"
               >
-                <FolderKanban className="h-4 w-4 mr-2" />
-                Projeler
+                <FolderKanban className="h-4 w-4 mr-2 flex-shrink-0" />
+                <span className="truncate">Projeler</span>
               </Button>
               <Button
                 onClick={() => navigate('/raporlar')}
                 variant="outline"
-                className="border-blue-600 text-blue-700 hover:bg-blue-50 w-full justify-start"
+                className="border-blue-600 text-blue-700 hover:bg-blue-50 w-full justify-start h-11 xs:col-span-2 lg:col-span-1"
               >
-                <FileText className="h-4 w-4 mr-2" />
-                Tüm Raporları Görüntüle
+                <FileText className="h-4 w-4 mr-2 flex-shrink-0" />
+                <span className="truncate">Tüm Raporlar</span>
               </Button>
             </div>
           </CardContent>
         </Card>
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {/* Stats Grid - 2 cols on mobile */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
           {/* Total Reports */}
           <Card className="card-hover border-l-4 border-l-blue-600 shadow-md" data-testid="total-reports-card">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600">Toplam Rapor</CardTitle>
-              <FileText className="h-5 w-5 text-blue-600" />
+            <CardHeader className="flex flex-row items-center justify-between pb-1 sm:pb-2 p-3 sm:p-4">
+              <CardTitle className="text-xs sm:text-sm font-medium text-gray-600">Toplam</CardTitle>
+              <FileText className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" />
             </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-gray-800">{stats?.total_raporlar || 0}</div>
-              <p className="text-xs text-gray-500 mt-1">Sistemdeki tüm raporlar</p>
+            <CardContent className="p-3 sm:p-4 pt-0">
+              <div className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800">{stats?.total_raporlar || 0}</div>
+              <p className="text-xs text-gray-500 mt-1 hidden sm:block">Sistemdeki tüm raporlar</p>
             </CardContent>
           </Card>
 
           {/* Monthly Reports */}
           <Card className="card-hover border-l-4 border-l-purple-600 shadow-md" data-testid="monthly-reports-card">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600">Bu Ay</CardTitle>
-              <TrendingUp className="h-5 w-5 text-purple-600" />
+            <CardHeader className="flex flex-row items-center justify-between pb-1 sm:pb-2 p-3 sm:p-4">
+              <CardTitle className="text-xs sm:text-sm font-medium text-gray-600">Bu Ay</CardTitle>
+              <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 text-purple-600" />
             </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-gray-800">{stats?.monthly_raporlar || 0}</div>
-              <p className="text-xs text-gray-500 mt-1">Oluşturulan rapor sayısı</p>
+            <CardContent className="p-3 sm:p-4 pt-0">
+              <div className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800">{stats?.monthly_raporlar || 0}</div>
+              <p className="text-xs text-gray-500 mt-1 hidden sm:block">Oluşturulan rapor</p>
             </CardContent>
           </Card>
 
           {/* Uygun Reports */}
           <Card className="card-hover border-l-4 border-l-green-600 shadow-md" data-testid="approved-reports-card">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600">Uygun</CardTitle>
-              <CheckCircle2 className="h-5 w-5 text-green-600" />
+            <CardHeader className="flex flex-row items-center justify-between pb-1 sm:pb-2 p-3 sm:p-4">
+              <CardTitle className="text-xs sm:text-sm font-medium text-gray-600">Uygun</CardTitle>
+              <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5 text-green-600" />
             </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-gray-800">{stats?.uygun_count || 0}</div>
-              <p className="text-xs text-gray-500 mt-1">%{uygunlukYuzdesi} uygunluk oranı</p>
+            <CardContent className="p-3 sm:p-4 pt-0">
+              <div className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800">{stats?.uygun_count || 0}</div>
+              <p className="text-xs text-gray-500 mt-1 hidden sm:block">%{uygunlukYuzdesi} uygunluk</p>
             </CardContent>
           </Card>
 
           {/* Uygun Değil Reports */}
           <Card className="card-hover border-l-4 border-l-red-600 shadow-md" data-testid="rejected-reports-card">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600">Uygun Değil</CardTitle>
-              <XCircle className="h-5 w-5 text-red-600" />
+            <CardHeader className="flex flex-row items-center justify-between pb-1 sm:pb-2 p-3 sm:p-4">
+              <CardTitle className="text-xs sm:text-sm font-medium text-gray-600">Uygun Değil</CardTitle>
+              <XCircle className="h-4 w-4 sm:h-5 sm:w-5 text-red-600" />
             </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-gray-800">{stats?.uygun_degil_count || 0}</div>
-              <p className="text-xs text-gray-500 mt-1">Dikkat gerekiyor</p>
+            <CardContent className="p-3 sm:p-4 pt-0">
+              <div className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800">{stats?.uygun_degil_count || 0}</div>
+              <p className="text-xs text-gray-500 mt-1 hidden sm:block">Dikkat gerekiyor</p>
             </CardContent>
           </Card>
         </div>
 
         {/* Alerts and Category Distribution */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
           {/* Expiring Reports */}
           <Card className="shadow-md" data-testid="expiring-reports-card">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <AlertTriangle className="h-5 w-5 text-amber-600" />
+            <CardHeader className="pb-2 sm:pb-4">
+              <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                <AlertTriangle className="h-4 w-4 sm:h-5 sm:w-5 text-amber-600" />
                 Geçerlilik Uyarıları
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-3 sm:space-y-4">
               <Button
                 onClick={fetchExpiringReports}
                 variant="outline"
-                className="w-full flex items-center justify-between p-4 h-auto bg-amber-50 hover:bg-amber-100 rounded-lg border border-amber-200"
+                className="w-full flex items-center justify-between p-3 sm:p-4 h-auto bg-amber-50 hover:bg-amber-100 rounded-lg border border-amber-200"
               >
-                <div className="flex items-center gap-3">
-                  <Calendar className="h-8 w-8 text-amber-600" />
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <Calendar className="h-6 w-6 sm:h-8 sm:w-8 text-amber-600 flex-shrink-0" />
                   <div className="text-left">
-                    <p className="font-semibold text-gray-800">30 Gün İçinde</p>
-                    <p className="text-sm text-gray-600">Geçerliliği bitecek raporlar</p>
+                    <p className="font-semibold text-gray-800 text-sm sm:text-base">30 Gün İçinde</p>
+                    <p className="text-xs sm:text-sm text-gray-600 hidden xs:block">Geçerliliği bitecek</p>
                   </div>
                 </div>
-                <div className="text-2xl font-bold text-amber-700">{stats?.expiring_30_days || 0}</div>
+                <div className="text-xl sm:text-2xl font-bold text-amber-700">{stats?.expiring_30_days || 0}</div>
               </Button>
               
               <Button
                 onClick={fetchExpiredReports}
                 variant="outline"
-                className="w-full flex items-center justify-between p-4 h-auto bg-red-50 hover:bg-red-100 rounded-lg border border-red-200"
+                className="w-full flex items-center justify-between p-3 sm:p-4 h-auto bg-red-50 hover:bg-red-100 rounded-lg border border-red-200"
               >
-                <div className="flex items-center gap-3">
-                  <Calendar className="h-8 w-8 text-red-600" />
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <Calendar className="h-6 w-6 sm:h-8 sm:w-8 text-red-600 flex-shrink-0" />
                   <div className="text-left">
-                    <p className="font-semibold text-gray-800">Süresi Geçenler</p>
-                    <p className="text-sm text-gray-600">Acil yenileme gerekiyor</p>
+                    <p className="font-semibold text-gray-800 text-sm sm:text-base">Süresi Geçenler</p>
+                    <p className="text-xs sm:text-sm text-gray-600 hidden xs:block">Acil yenileme</p>
                   </div>
                 </div>
-                <div className="text-2xl font-bold text-red-700">{stats?.expired_count || 0}</div>
+                <div className="text-xl sm:text-2xl font-bold text-red-700">{stats?.expired_count || 0}</div>
               </Button>
             </CardContent>
           </Card>
