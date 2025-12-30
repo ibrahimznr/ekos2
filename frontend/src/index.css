@@ -113,3 +113,96 @@ code {
         border-bottom-color: inherit;
     }
 }
+
+/* Mobile Responsive Utilities */
+@layer utilities {
+    /* Touch-friendly button sizes for mobile */
+    .btn-mobile {
+        @apply min-h-[44px] min-w-[44px];
+    }
+    
+    /* Mobile card padding */
+    .card-mobile {
+        @apply p-3 sm:p-4 md:p-6;
+    }
+    
+    /* Mobile text truncation */
+    .text-truncate-mobile {
+        @apply truncate max-w-[150px] sm:max-w-none;
+    }
+    
+    /* Hide scrollbar on mobile but allow scroll */
+    .scrollbar-hide {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+    .scrollbar-hide::-webkit-scrollbar {
+        display: none;
+    }
+    
+    /* Mobile-friendly badges */
+    .badge-mobile {
+        @apply text-xs px-2 py-1 whitespace-nowrap;
+    }
+    
+    /* Safe area for bottom navigation on mobile */
+    .safe-bottom {
+        padding-bottom: env(safe-area-inset-bottom, 16px);
+    }
+    
+    /* Floating action button */
+    .fab {
+        @apply fixed bottom-6 right-6 z-50 rounded-full shadow-lg;
+        @apply min-h-[56px] min-w-[56px];
+    }
+    
+    /* Animate on mobile touch */
+    .touch-scale {
+        @apply transition-transform active:scale-95;
+    }
+}
+
+/* Mobile-specific responsive styles */
+@media (max-width: 640px) {
+    /* Smaller padding for mobile */
+    .mobile-padding {
+        padding-left: 12px !important;
+        padding-right: 12px !important;
+    }
+    
+    /* Full width buttons on mobile */
+    .mobile-full-width {
+        width: 100% !important;
+    }
+    
+    /* Reduce font sizes on mobile */
+    .mobile-text-sm {
+        font-size: 0.875rem !important;
+    }
+    
+    /* Stack flex items vertically on mobile */
+    .mobile-stack {
+        flex-direction: column !important;
+        align-items: stretch !important;
+    }
+    
+    /* Dialog/Modal full screen on mobile */
+    [role="dialog"] {
+        max-height: 95vh !important;
+        max-width: 95vw !important;
+        margin: auto !important;
+    }
+}
+
+/* Touch device optimizations */
+@media (hover: none) and (pointer: coarse) {
+    /* Larger touch targets */
+    button, [role="button"], a, input, select, textarea {
+        min-height: 44px;
+    }
+    
+    /* Remove hover states that look bad on touch */
+    .card-hover:hover {
+        transform: none !important;
+    }
+}
