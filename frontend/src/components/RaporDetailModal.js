@@ -455,7 +455,8 @@ const RaporDetailModal = ({ open, onClose, rapor }) => {
               variant="outline"
               onClick={() => {
                 setShowPreview(false);
-                if (previewFile?.url) {
+                // Only revoke object URLs, not data URLs
+                if (previewFile?.url && !previewFile?.isPdfDataUrl) {
                   window.URL.revokeObjectURL(previewFile.url);
                 }
                 setPreviewFile(null);
