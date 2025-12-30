@@ -1,7 +1,14 @@
 from fastapi import APIRouter, HTTPException, Depends
+from fastapi.responses import StreamingResponse
+from pydantic import BaseModel
 from typing import List, Optional
 from datetime import datetime, timezone
 from pathlib import Path
+import io
+import os
+import zipfile
+import shutil
+import tempfile
 
 from models import Rapor, RaporCreate, RaporUpdate
 from routers.auth import get_current_user
@@ -10,6 +17,10 @@ from utils import generate_rapor_no
 from constants import SEHIRLER
 
 router = APIRouter(prefix="/raporlar", tags=["Raporlar"])
+
+# ZIP Export Request Model
+class ZipExportRequest(BaseModel):
+    rapor_ids: List[str]
 
 @router.get("", response_model=List[Rapor])
 async def get_raporlar(
