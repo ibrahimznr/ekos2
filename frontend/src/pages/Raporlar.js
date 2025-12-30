@@ -618,92 +618,91 @@ const Raporlar = () => {
           </Card>
         ) : (
           <>
-            <div className="grid grid-cols-1 gap-4">
+            <div className="grid grid-cols-1 gap-3 sm:gap-4">
               {paginatedRaporlar.map((rapor) => (
-                <Card key={rapor.id} className="card-hover shadow-md" data-testid={`report-card-${rapor.id}`}>
-                <CardContent className="p-6">
-                  <div className="flex gap-3">
+                <Card key={rapor.id} className="card-hover shadow-md overflow-hidden" data-testid={`report-card-${rapor.id}`}>
+                <CardContent className="p-3 sm:p-4 md:p-6">
+                  <div className="flex gap-2 sm:gap-3">
                     <Checkbox
                       checked={selectedRaporlar.includes(rapor.id)}
                       onCheckedChange={() => handleToggleSelect(rapor.id)}
-                      className="mt-1"
+                      className="mt-1 flex-shrink-0"
                     />
-                    <div className="flex-1 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-                      <div className="flex-1 space-y-3">
-                        {/* Header */}
-                        <div className="flex items-start justify-between gap-2 sm:gap-4">
-                          <div className="flex-1">
-                            <h3 className="text-lg sm:text-xl font-bold text-gray-800 mb-1">{rapor.ekipman_adi}</h3>
-                            <div className="flex items-center gap-3 flex-wrap">
-                              <p className="text-sm text-gray-500 font-medium">{rapor.rapor_no}</p>
-                              {rapor.created_by_username && (
-                                <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
-                                  {rapor.created_by_username}
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-2 flex-shrink-0">
-                            {/* Durum Toggle */}
-                            {canEdit && (
-                              <Button
-                                onClick={() => handleToggleDurum(rapor.id, rapor.durum || 'Aktif')}
-                                size="sm"
-                                className={`
-                                  ${(rapor.durum || 'Aktif') === 'Aktif' 
-                                    ? 'bg-green-600 hover:bg-green-700 text-white' 
-                                    : 'bg-gray-400 hover:bg-gray-500 text-white'
-                                  }
-                                  text-xs sm:text-sm px-2 sm:px-3 py-1 min-w-[60px] sm:min-w-[70px]
-                                `}
-                                data-testid={`toggle-status-${rapor.id}`}
-                              >
-                                {(rapor.durum || 'Aktif') === 'Aktif' ? '✓ Aktif' : '⏸ Pasif'}
-                              </Button>
-                            )}
-                            {rapor.uygunluk && (
-                              <span
-                                className={`${rapor.uygunluk === 'Uygun' ? 'badge-success' : 'badge-danger'} text-xs sm:text-sm`}
-                                data-testid={`uygunluk-badge-${rapor.id}`}
-                              >
-                                {rapor.uygunluk}
+                    <div className="flex-1 min-w-0">
+                      {/* Mobile-first header */}
+                      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 mb-3">
+                        <div className="min-w-0 flex-1">
+                          <h3 className="text-base sm:text-lg md:text-xl font-bold text-gray-800 truncate">{rapor.ekipman_adi}</h3>
+                          <div className="flex items-center gap-2 flex-wrap mt-1">
+                            <p className="text-xs sm:text-sm text-gray-500 font-medium">{rapor.rapor_no}</p>
+                            {rapor.created_by_username && (
+                              <span className="text-xs text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded truncate max-w-[100px] sm:max-w-none">
+                                {rapor.created_by_username}
                               </span>
                             )}
                           </div>
                         </div>
-                      
-                      {/* Info Grid */}
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-sm">
-                        <div>
-                          <span className="text-gray-500">Kategori:</span>
-                          <span className="ml-2 font-medium text-gray-800">{rapor.kategori}</span>
+                        {/* Status badges - row on mobile */}
+                        <div className="flex items-center gap-2 flex-shrink-0">
+                          {canEdit && (
+                            <Button
+                              onClick={() => handleToggleDurum(rapor.id, rapor.durum || 'Aktif')}
+                              size="sm"
+                              className={`
+                                ${(rapor.durum || 'Aktif') === 'Aktif' 
+                                  ? 'bg-green-600 hover:bg-green-700 text-white' 
+                                  : 'bg-gray-400 hover:bg-gray-500 text-white'
+                                }
+                                text-xs px-2 py-1 h-7 sm:h-8
+                              `}
+                              data-testid={`toggle-status-${rapor.id}`}
+                            >
+                              {(rapor.durum || 'Aktif') === 'Aktif' ? '✓ Aktif' : '⏸ Pasif'}
+                            </Button>
+                          )}
+                          {rapor.uygunluk && (
+                            <span
+                              className={`${rapor.uygunluk === 'Uygun' ? 'badge-success' : 'badge-danger'} text-xs px-2 py-1`}
+                              data-testid={`uygunluk-badge-${rapor.id}`}
+                            >
+                              {rapor.uygunluk}
+                            </span>
+                          )}
                         </div>
-                        <div>
-                          <span className="text-gray-500">Firma:</span>
-                          <span className="ml-2 font-medium text-gray-800">{rapor.firma}</span>
+                      </div>
+                      
+                      {/* Info Grid - 2 cols on mobile, 3 on larger */}
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-x-3 gap-y-1.5 text-xs sm:text-sm mb-3">
+                        <div className="truncate">
+                          <span className="text-gray-500">Kategori: </span>
+                          <span className="font-medium text-gray-800">{rapor.kategori}</span>
+                        </div>
+                        <div className="truncate">
+                          <span className="text-gray-500">Firma: </span>
+                          <span className="font-medium text-gray-800">{rapor.firma}</span>
                         </div>
                         {rapor.lokasyon && (
-                          <div>
-                            <span className="text-gray-500">Lokasyon:</span>
-                            <span className="ml-2 font-medium text-gray-800">{rapor.lokasyon}</span>
+                          <div className="truncate">
+                            <span className="text-gray-500">Lokasyon: </span>
+                            <span className="font-medium text-gray-800">{rapor.lokasyon}</span>
                           </div>
                         )}
                         {rapor.periyot && (
-                          <div>
-                            <span className="text-gray-500">Periyot:</span>
-                            <span className="ml-2 font-medium text-gray-800">{rapor.periyot}</span>
+                          <div className="truncate">
+                            <span className="text-gray-500">Periyot: </span>
+                            <span className="font-medium text-gray-800">{rapor.periyot}</span>
                           </div>
                         )}
                         {rapor.gecerlilik_tarihi && (
-                          <div>
-                            <span className="text-gray-500">Geçerlilik:</span>
-                            <span className="ml-2 font-medium text-gray-800">{rapor.gecerlilik_tarihi}</span>
+                          <div className="truncate">
+                            <span className="text-gray-500">Geçerlilik: </span>
+                            <span className="font-medium text-gray-800">{rapor.gecerlilik_tarihi}</span>
                           </div>
                         )}
                         {rapor.marka_model && (
-                          <div>
-                            <span className="text-gray-500">Marka/Model:</span>
-                            <span className="ml-2 font-medium text-gray-800">{rapor.marka_model}</span>
+                          <div className="truncate">
+                            <span className="text-gray-500">Marka: </span>
+                            <span className="font-medium text-gray-800">{rapor.marka_model}</span>
                           </div>
                         )}
                       </div>
