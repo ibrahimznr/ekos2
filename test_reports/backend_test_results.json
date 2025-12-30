@@ -1,5 +1,5 @@
 {
-  "timestamp": "2025-12-30T05:09:02.660719",
+  "timestamp": "2025-12-30T06:03:49.779829",
   "test_focus": "EKOS Review Request - P0 Bug Fix & P1 Features",
   "total_tests": 74,
   "passed_tests": 69,
@@ -414,7 +414,7 @@
     {
       "test": "Create Report",
       "status": "FAIL",
-      "details": "Status: 422, Error: {'detail': [{'type': 'missing', 'loc': ['body', 'proje_id'], 'msg': 'Field required', 'input': {'ekipman_adi': 'Test Ekipman 050902', 'kategori': 'Asansör', 'firma': 'Test Firma', 'lokasyon': 'Test Lokasyon', 'marka_model': 'Test Model', 'seri_no': 'TEST123', 'alt_kategori': 'Test Alt Kategori', 'periyot': '6 Aylık', 'gecerlilik_tarihi': '2025-12-31', 'uygunluk': 'Uygun', 'aciklama': 'Test raporu'}, 'url': 'https://errors.pydantic.dev/2.12/v/missing'}, {'type': 'missing', 'loc': ['body', 'sehir'], 'msg': 'Field required', 'input': {'ekipman_adi': 'Test Ekipman 050902', 'kategori': 'Asansör', 'firma': 'Test Firma', 'lokasyon': 'Test Lokasyon', 'marka_model': 'Test Model', 'seri_no': 'TEST123', 'alt_kategori': 'Test Alt Kategori', 'periyot': '6 Aylık', 'gecerlilik_tarihi': '2025-12-31', 'uygunluk': 'Uygun', 'aciklama': 'Test raporu'}, 'url': 'https://errors.pydantic.dev/2.12/v/missing'}]}",
+      "details": "Status: 422, Error: {'detail': [{'type': 'missing', 'loc': ['body', 'proje_id'], 'msg': 'Field required', 'input': {'ekipman_adi': 'Test Ekipman 060349', 'kategori': 'Asansör', 'firma': 'Test Firma', 'lokasyon': 'Test Lokasyon', 'marka_model': 'Test Model', 'seri_no': 'TEST123', 'alt_kategori': 'Test Alt Kategori', 'periyot': '6 Aylık', 'gecerlilik_tarihi': '2025-12-31', 'uygunluk': 'Uygun', 'aciklama': 'Test raporu'}, 'url': 'https://errors.pydantic.dev/2.12/v/missing'}, {'type': 'missing', 'loc': ['body', 'sehir'], 'msg': 'Field required', 'input': {'ekipman_adi': 'Test Ekipman 060349', 'kategori': 'Asansör', 'firma': 'Test Firma', 'lokasyon': 'Test Lokasyon', 'marka_model': 'Test Model', 'seri_no': 'TEST123', 'alt_kategori': 'Test Alt Kategori', 'periyot': '6 Aylık', 'gecerlilik_tarihi': '2025-12-31', 'uygunluk': 'Uygun', 'aciklama': 'Test raporu'}, 'url': 'https://errors.pydantic.dev/2.12/v/missing'}]}",
       "critical": false
     },
     {
@@ -450,7 +450,7 @@
     {
       "test": "Create User",
       "status": "FAIL",
-      "details": "Status: 422, Error: {'detail': [{'type': 'missing', 'loc': ['body', 'username'], 'msg': 'Field required', 'input': {'email': 'test050902@test.com', 'password': 'testpass123', 'role': 'viewer'}, 'url': 'https://errors.pydantic.dev/2.12/v/missing'}, {'type': 'missing', 'loc': ['body', 'password_confirm'], 'msg': 'Field required', 'input': {'email': 'test050902@test.com', 'password': 'testpass123', 'role': 'viewer'}, 'url': 'https://errors.pydantic.dev/2.12/v/missing'}, {'type': 'missing', 'loc': ['body', 'firma_adi'], 'msg': 'Field required', 'input': {'email': 'test050902@test.com', 'password': 'testpass123', 'role': 'viewer'}, 'url': 'https://errors.pydantic.dev/2.12/v/missing'}]}",
+      "details": "Status: 422, Error: {'detail': [{'type': 'missing', 'loc': ['body', 'username'], 'msg': 'Field required', 'input': {'email': 'test060349@test.com', 'password': 'testpass123', 'role': 'viewer'}, 'url': 'https://errors.pydantic.dev/2.12/v/missing'}, {'type': 'missing', 'loc': ['body', 'password_confirm'], 'msg': 'Field required', 'input': {'email': 'test060349@test.com', 'password': 'testpass123', 'role': 'viewer'}, 'url': 'https://errors.pydantic.dev/2.12/v/missing'}, {'type': 'missing', 'loc': ['body', 'firma_adi'], 'msg': 'Field required', 'input': {'email': 'test060349@test.com', 'password': 'testpass123', 'role': 'viewer'}, 'url': 'https://errors.pydantic.dev/2.12/v/missing'}]}",
       "critical": false
     }
   ]
