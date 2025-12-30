@@ -1362,19 +1362,19 @@ async def get_dashboard_stats(current_user: dict = Depends(get_current_user)):
     if iskele_query:
         uygun_pipeline.append({"$match": iskele_query})
     uygun_pipeline.extend([
-        {"$match": {"uygunluk": "Uygun"}},
+        {"$match": {"uygunluk": {"$regex": "^uygun$", "$options": "i"}}},
         {"$group": {"_id": None, "total": {"$sum": "$bileşen_adedi"}}}
     ])
     
     uygun_result = await db.iskele_bilesenleri.aggregate(uygun_pipeline).to_list(1)
     iskele_uygun = uygun_result[0]["total"] if uygun_result else 0
     
-    # Uygun olmayanların bileşen adedi toplamı
+    # Uygun olmayanların bileşen adedi toplamı - case-insensitive regex
     uygun_degil_pipeline = []
     if iskele_query:
         uygun_degil_pipeline.append({"$match": iskele_query})
     uygun_degil_pipeline.extend([
-        {"$match": {"uygunluk": "Uygun Değil"}},
+        {"$match": {"uygunluk": {"$regex": "uygun.*(de[ğg]il|olmayan)", "$options": "i"}}},
         {"$group": {"_id": None, "total": {"$sum": "$bileşen_adedi"}}}
     ])
     
