@@ -7,6 +7,7 @@ from .dashboard import router as dashboard_router
 from .users import router as users_router
 from .projeler import router as projeler_router
 from .iskele import router as iskele_router
+from .static import router as static_router
 
 __all__ = [
     'auth_router',
@@ -17,5 +18,6 @@ __all__ = [
     'dashboard_router',
     'users_router',
     'projeler_router',
-    'iskele_router'
+    'iskele_router',
+    'static_router'
 ]
