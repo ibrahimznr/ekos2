@@ -30,7 +30,7 @@ async def get_dashboard_stats(current_user: dict = Depends(get_current_user)):
     thirty_days = (now + timedelta(days=30)).date()
     seven_days = (now + timedelta(days=7)).date()
     
-    date_query = {**base_query, "gecerlilik_tarihi": {"$ne": None, "$ne": ""}}
+    date_query = {**base_query, "gecerlilik_tarihi": {"$nin": [None, ""]}}
     raporlar_with_dates = await db.raporlar.find(
         date_query, 
         {"gecerlilik_tarihi": 1, "_id": 0}
@@ -49,7 +49,7 @@ async def get_dashboard_stats(current_user: dict = Depends(get_current_user)):
                     try:
                         gecerlilik = dt.strptime(str(gecerlilik_str), fmt).date()
                         break
-                    except:
+                    except ValueError:
                         continue
                 
                 if gecerlilik:
