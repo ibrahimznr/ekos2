@@ -333,45 +333,45 @@ const Dashboard = () => {
         {/* İskele Bileşenleri İstatistikleri */}
         {stats?.iskele_stats && (
           <Card className="shadow-md border-l-4 border-l-teal-500" data-testid="iskele-stats-card">
-            <CardHeader>
-              <CardTitle className="text-lg flex items-center justify-between">
-                <span>İskele Bileşenleri İstatistikleri</span>
+            <CardHeader className="pb-2 sm:pb-4">
+              <CardTitle className="text-base sm:text-lg flex flex-col xs:flex-row xs:items-center xs:justify-between gap-2">
+                <span>İskele Bileşenleri</span>
                 <Button
                   size="sm"
                   variant="outline"
                   onClick={() => navigate('/iskele-bilesenleri')}
-                  className="text-teal-600 border-teal-600 hover:bg-teal-50"
+                  className="text-teal-600 border-teal-600 hover:bg-teal-50 w-full xs:w-auto"
                 >
                   Detaylı Görünüm
                 </Button>
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {/* Stats Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-                <div className="bg-gradient-to-br from-teal-50 to-teal-100 p-4 rounded-lg border border-teal-200">
-                  <p className="text-sm font-medium text-gray-600">Toplam Bileşen</p>
-                  <p className="text-3xl font-bold text-teal-700 mt-1">{stats.iskele_stats.total}</p>
+              {/* Stats Grid - 2 cols on mobile */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4 mb-4 sm:mb-6">
+                <div className="bg-gradient-to-br from-teal-50 to-teal-100 p-2 sm:p-4 rounded-lg border border-teal-200">
+                  <p className="text-xs sm:text-sm font-medium text-gray-600">Toplam</p>
+                  <p className="text-lg sm:text-2xl md:text-3xl font-bold text-teal-700 mt-1">{stats.iskele_stats.total}</p>
                 </div>
-                <div className="bg-gradient-to-br from-green-50 to-green-100 p-4 rounded-lg border border-green-200">
-                  <p className="text-sm font-medium text-gray-600">Uygun</p>
-                  <p className="text-3xl font-bold text-green-700 mt-1">{stats.iskele_stats.uygun}</p>
+                <div className="bg-gradient-to-br from-green-50 to-green-100 p-2 sm:p-4 rounded-lg border border-green-200">
+                  <p className="text-xs sm:text-sm font-medium text-gray-600">Uygun</p>
+                  <p className="text-lg sm:text-2xl md:text-3xl font-bold text-green-700 mt-1">{stats.iskele_stats.uygun}</p>
                 </div>
-                <div className="bg-gradient-to-br from-red-50 to-red-100 p-4 rounded-lg border border-red-200">
-                  <p className="text-sm font-medium text-gray-600">Uygun Değil</p>
-                  <p className="text-3xl font-bold text-red-700 mt-1">{stats.iskele_stats.uygun_degil}</p>
+                <div className="bg-gradient-to-br from-red-50 to-red-100 p-2 sm:p-4 rounded-lg border border-red-200">
+                  <p className="text-xs sm:text-sm font-medium text-gray-600">Uygun Değil</p>
+                  <p className="text-lg sm:text-2xl md:text-3xl font-bold text-red-700 mt-1">{stats.iskele_stats.uygun_degil}</p>
                 </div>
-                <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-4 rounded-lg border border-blue-200">
-                  <p className="text-sm font-medium text-gray-600">Uygunluk Oranı</p>
-                  <p className="text-3xl font-bold text-blue-700 mt-1">{stats.iskele_stats.uygunluk_orani}%</p>
+                <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-2 sm:p-4 rounded-lg border border-blue-200">
+                  <p className="text-xs sm:text-sm font-medium text-gray-600">Oran</p>
+                  <p className="text-lg sm:text-2xl md:text-3xl font-bold text-blue-700 mt-1">{stats.iskele_stats.uygunluk_orani}%</p>
                 </div>
               </div>
 
               {/* Bileşen Dağılımı */}
               {stats.iskele_stats.bilesen_dagilim && stats.iskele_stats.bilesen_dagilim.length > 0 && (
                 <div>
-                  <h4 className="font-semibold text-gray-700 mb-3">Bileşen Adlarına Göre Dağılım</h4>
-                  <div className="space-y-3">
+                  <h4 className="font-semibold text-gray-700 mb-2 sm:mb-3 text-sm sm:text-base">Bileşen Dağılımı</h4>
+                  <div className="space-y-2 sm:space-y-3">
                     {stats.iskele_stats.bilesen_dagilim.map((item, index) => {
                       const percentage = stats.iskele_stats.total > 0
                         ? Math.round((item.count / stats.iskele_stats.total) * 100)
@@ -388,13 +388,13 @@ const Dashboard = () => {
                       
                       return (
                         <div key={index} className="space-y-1">
-                          <div className="flex justify-between text-sm">
-                            <span className="font-medium text-gray-700">{item.bileşen_adi}</span>
-                            <span className="text-gray-600">{item.count} adet (%{percentage})</span>
+                          <div className="flex justify-between text-xs sm:text-sm">
+                            <span className="font-medium text-gray-700 truncate max-w-[60%]">{item.bileşen_adi}</span>
+                            <span className="text-gray-600 flex-shrink-0">{item.count} (%{percentage})</span>
                           </div>
-                          <div className="w-full bg-gray-200 rounded-full h-2">
+                          <div className="w-full bg-gray-200 rounded-full h-1.5 sm:h-2">
                             <div
-                              className={`h-2 rounded-full ${colors[index % colors.length]}`}
+                              className={`h-1.5 sm:h-2 rounded-full ${colors[index % colors.length]}`}
                               style={{ width: `${percentage}%` }}
                             ></div>
                           </div>
