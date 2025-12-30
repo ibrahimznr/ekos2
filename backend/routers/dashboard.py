@@ -109,17 +109,17 @@ async def get_dashboard_stats(current_user: dict = Depends(get_current_user)):
     uygun_degil_result = await db.iskele_bilesenleri.aggregate(uygun_degil_pipeline).to_list(1)
     iskele_uygun_degil = uygun_degil_result[0]["total"] if uygun_degil_result else 0
     
+    # Get ALL component distributions (no limit)
     iskele_pipeline = []
     if iskele_query:
         iskele_pipeline.append({"$match": iskele_query})
     iskele_pipeline.extend([
         {"$group": {"_id": "$bileşen_adi", "count": {"$sum": "$bileşen_adedi"}}},
         {"$sort": {"count": -1}},
-        {"$limit": 6},
         {"$project": {"bileşen_adi": "$_id", "count": 1, "_id": 0}}
     ])
     
-    bilesen_dagilim = await db.iskele_bilesenleri.aggregate(iskele_pipeline).to_list(6)
+    bilesen_dagilim = await db.iskele_bilesenleri.aggregate(iskele_pipeline).to_list(100)
     
     return {
         "total_raporlar": total_raporlar,
