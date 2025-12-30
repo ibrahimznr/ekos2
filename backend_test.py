@@ -495,6 +495,186 @@ class EkipmanAPITester:
                 files=files
             )
 
+    def test_dashboard_iskele_stats(self):
+        """Test Dashboard İskele Bileşenleri İstatistikleri - Review Request Test 1"""
+        print("\n🏗️ Testing Dashboard İskele Bileşenleri İstatistikleri (Review Request Test 1)...")
+        
+        # Test dashboard stats endpoint
+        success, stats = self.run_test(
+            "Dashboard Stats with İskele Data",
+            "GET",
+            "dashboard/stats",
+            200,
+            critical=True
+        )
+        
+        if not success:
+            self.log_test("Dashboard Stats Failed", False, "Cannot get dashboard stats", critical=True)
+            return False
+        
+        # Check if iskele_stats exists
+        if 'iskele_stats' not in stats:
+            self.log_test("İskele Stats Missing", False, "iskele_stats not found in dashboard response", critical=True)
+            return False
+        
+        iskele_stats = stats['iskele_stats']
+        
+        # Test the specific requirements from review request
+        total = iskele_stats.get('total', 0)
+        uygun = iskele_stats.get('uygun', 0)
+        uygun_degil = iskele_stats.get('uygun_degil', 0)
+        uygunluk_orani = iskele_stats.get('uygunluk_orani', 0)
+        
+        # Log all values
+        self.log_test("İskele Total Count", total > 0, f"Total: {total} (expected > 0)")
+        self.log_test("İskele Uygun Count", uygun > 0, f"Uygun: {uygun} (expected > 0)")
+        
+        # CRITICAL TEST: uygun_degil should be > 0 (was returning 0 before fix)
+        expected_uygun_degil = 337  # From review request
+        self.log_test(
+            "İskele Uygun Değil Count (CRITICAL FIX)", 
+            uygun_degil > 0, 
+            f"Uygun Değil: {uygun_degil} (expected: {expected_uygun_degil}, was 0 before fix)",
+            critical=True
+        )
+        
+        # Test uygunluk_orani calculation
+        if total > 0:
+            expected_ratio = round((uygun / total * 100), 1)
+            self.log_test(
+                "İskele Uygunluk Oranı Calculation",
+                abs(uygunluk_orani - expected_ratio) < 0.1,
+                f"Calculated: {uygunluk_orani}%, Expected: {expected_ratio}%"
+            )
+        
+        # Verify with direct iskele-bilesenleri endpoint
+        success, iskele_data = self.run_test(
+            "Get İskele Bileşenleri Data",
+            "GET",
+            "iskele-bilesenleri",
+            200,
+            critical=True
+        )
+        
+        if success:
+            # Count "Uygun değil" records manually
+            uygun_degil_count = 0
+            for item in iskele_data:
+                uygunluk = item.get('uygunluk', '').lower()
+                if 'uygun' in uygunluk and ('değil' in uygunluk or 'degil' in uygunluk):
+                    uygun_degil_count += item.get('bileşen_adedi', 1)
+            
+            self.log_test(
+                "İskele Data Consistency Check",
+                uygun_degil_count == uygun_degil,
+                f"Dashboard shows {uygun_degil}, Direct count: {uygun_degil_count}"
+            )
+            
+            self.log_test("İskele Bileşenleri Count", True, f"Found {len(iskele_data)} iskele bileşeni records")
+        
+        return uygun_degil > 0  # Return success if the critical fix is working
+
+    def test_pdf_preview_download(self):
+        """Test PDF Preview - Review Request Test 2"""
+        print("\n📄 Testing PDF Preview (Review Request Test 2)...")
+        
+        # Test with specific report ID from review request
+        test_rapor_id = "bed96230-c47e-4bf6-943e-a3b46732bd17"
+        
+        # Step 1: Get file list for the specific report
+        success, dosyalar = self.run_test(
+            "Get Files for Test Report",
+            "GET",
+            f"dosyalar/{test_rapor_id}",
+            200,
+            critical=True
+        )
+        
+        if not success:
+            self.log_test("Test Report Files", False, f"Cannot get files for report {test_rapor_id}", critical=True)
+            return False
+        
+        if not dosyalar:
+            self.log_test("No Files Found", False, f"No files found for report {test_rapor_id}", critical=True)
+            return False
+        
+        # Step 2: Find PDF file (test_rapor.pdf)
+        pdf_file = None
+        for dosya in dosyalar:
+            dosya_adi = dosya.get('dosya_adi', '').lower()
+            if dosya_adi.endswith('.pdf') and 'test_rapor' in dosya_adi:
+                pdf_file = dosya
+                break
+        
+        if not pdf_file:
+            # Try any PDF file
+            for dosya in dosyalar:
+                if dosya.get('dosya_adi', '').lower().endswith('.pdf'):
+                    pdf_file = dosya
+                    break
+        
+        if not pdf_file:
+            self.log_test("PDF File Not Found", False, f"No PDF file found in report {test_rapor_id}", critical=True)
+            return False
+        
+        dosya_id = pdf_file.get('id')
+        dosya_adi = pdf_file.get('dosya_adi')
+        
+        self.log_test("PDF File Found", True, f"Found PDF: {dosya_adi} (ID: {dosya_id})")
+        
+        # Step 3: Test PDF download endpoint
+        url = f"{self.api_url}/dosyalar/{dosya_id}/indir"
+        headers = {'Authorization': f'Bearer {self.token}'} if self.token else {}
+        
+        try:
+            response = requests.get(url, headers=headers, timeout=30)
+            
+            # Test 1: Response should be 200 OK
+            success_200 = response.status_code == 200
+            self.log_test(
+                "PDF Download Response 200 OK",
+                success_200,
+                f"Status: {response.status_code}",
+                critical=True
+            )
+            
+            if not success_200:
+                return False
+            
+            # Test 2: Content-Type should be application/pdf
+            content_type = response.headers.get('Content-Type', '')
+            pdf_content_type = 'application/pdf' in content_type
+            self.log_test(
+                "PDF Content-Type Header",
+                pdf_content_type,
+                f"Content-Type: {content_type}",
+                critical=True
+            )
+            
+            # Test 3: File content should start with %PDF (PDF format)
+            content = response.content
+            if content:
+                is_pdf_format = content.startswith(b'%PDF')
+                self.log_test(
+                    "PDF File Format Validation",
+                    is_pdf_format,
+                    f"File starts with: {content[:10]} (should start with %PDF)",
+                    critical=True
+                )
+                
+                # Additional check: file size
+                file_size = len(content)
+                self.log_test("PDF File Size", file_size > 0, f"File size: {file_size} bytes")
+                
+                return success_200 and pdf_content_type and is_pdf_format
+            else:
+                self.log_test("PDF Content Empty", False, "PDF file content is empty", critical=True)
+                return False
+                
+        except Exception as e:
+            self.log_test("PDF Download Exception", False, f"Exception: {str(e)}", critical=True)
+            return False
+
     def test_zip_export_feature(self):
         """Test ZIP export feature according to review request specifications"""
         print("\n📦 Testing ZIP Export Feature (Review Request)...")
