@@ -562,34 +562,36 @@ const Raporlar = () => {
 
         {/* Search and Filter */}
         <Card className="shadow-md">
-          <CardContent className="pt-6">
-            <div className="space-y-4">
-              {/* Search and Sort */}
-              <div className="flex gap-2">
+          <CardContent className="pt-4 sm:pt-6 px-3 sm:px-6">
+            <div className="space-y-3 sm:space-y-4">
+              {/* Search and Sort - Stack on mobile */}
+              <div className="flex flex-col sm:flex-row gap-2">
                 <div className="relative flex-1">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                   <Input
-                    placeholder="Rapor no, ekipman adı veya firma ara..."
+                    placeholder="Rapor no, ekipman veya firma ara..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-                    className="pl-10"
+                    className="pl-10 h-11"
                     data-testid="search-input"
                   />
                 </div>
-                <Select value={sortOrder} onValueChange={setSortOrder}>
-                  <SelectTrigger className="w-[180px]">
-                    <ArrowUpDown className="h-4 w-4 mr-2" />
-                    <SelectValue placeholder="Sıralama" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="newest">Yeniden Eskiye</SelectItem>
-                    <SelectItem value="oldest">Eskiden Yeniye</SelectItem>
-                  </SelectContent>
-                </Select>
-                <Button onClick={handleSearch} data-testid="search-button">
-                  <Search className="h-4 w-4" />
-                </Button>
+                <div className="flex gap-2">
+                  <Select value={sortOrder} onValueChange={setSortOrder}>
+                    <SelectTrigger className="w-full sm:w-[160px] h-11">
+                      <ArrowUpDown className="h-4 w-4 mr-2 flex-shrink-0" />
+                      <SelectValue placeholder="Sıralama" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="newest">Yeniden Eskiye</SelectItem>
+                      <SelectItem value="oldest">Eskiden Yeniye</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Button onClick={handleSearch} className="h-11 px-4" data-testid="search-button">
+                    <Search className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
               
               {/* Filters */}
