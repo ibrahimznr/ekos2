@@ -827,7 +827,16 @@ class EkipmanAPITester:
                 print("❌ Critical: Both logins failed, stopping tests")
                 return False
         
-        # Run critical tests from review request
+        # Run CRITICAL TESTS from review request first
+        print("\n🎯 RUNNING REVIEW REQUEST CRITICAL TESTS...")
+        
+        # Test 1: Dashboard İskele Bileşenleri İstatistikleri (Critical Fix)
+        self.test_dashboard_iskele_stats()
+        
+        # Test 2: PDF Preview (Critical Fix)
+        self.test_pdf_preview_download()
+        
+        # Run other critical tests from review request
         self.test_critical_backend_endpoints()
         self.test_report_creation_flow()
         self.test_category_subcategory_relationship()
