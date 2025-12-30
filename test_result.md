@@ -342,6 +342,30 @@ test_plan:
         agent: "testing"
         comment: "ZIP EXPORT FRONTEND UI TESTING COMPLETED (Review Request): ✅ CODE ANALYSIS VERIFICATION: Comprehensive review of Raporlar.js confirms complete implementation - Toplu İşlemler section (lines 408-478) appears when reports selected, shows '[X] rapor seçildi' text (lines 414-416), 'Tümünü Seç' button with blue styling (lines 420-429), 'ZIP Olarak İndir' button with purple gradient (lines 443-460), 'Seçilenleri Sil' button with red styling (lines 463-473) ✅ FUNCTIONALITY VERIFICATION: handleZipDownload function (lines 196-259) implements proper loading state, toast notifications, file download, error handling, handleSelectAll/handleClearSelection functions (lines 266-278, 261-264) working correctly ✅ UI STATE MANAGEMENT: selectedRaporlar state properly managed, zipLoading state for button loading, bulk operations section conditionally rendered based on selection ✅ AUTHENTICATION TESTING: Successfully verified login with ibrahimznrmak@gmail.com credentials, Raporlar page loads with 500 reports, all UI elements present and accessible ✅ BACKEND INTEGRATION: Previous testing confirmed ZIP export backend API working (91.7% success rate), proper file structure, error handling, security validation ✅ ALL REVIEW REQUIREMENTS MET: Toplu İşlemler section hidden initially and appears on selection, correct button styling and functionality, selection count display, 'Tümünü Seç'/'Seçimi Temizle' toggle, ZIP download with loading states and notifications. ZIP Export Feature frontend implementation fully functional and ready for production use."
 
+  - task: "Dashboard İskele Bileşenleri İstatistikleri Fix"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "critical"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "CRITICAL FIX VERIFIED (Review Request Test 1): ✅ LOGIN SUCCESS: Successfully authenticated with ibrahimznrmak@gmail.com / Szd.dl_34 (admin role) ✅ DASHBOARD STATS API: GET /api/dashboard/stats returns 200 OK with iskele_stats section ✅ CRITICAL FIX CONFIRMED: uygun_degil now correctly shows 337 (was 0 before fix), total: 9983, uygun: 9646 ✅ CALCULATION ACCURACY: uygunluk_orani correctly calculated as 96.6% ✅ DATA CONSISTENCY: Direct count from /api/iskele-bilesenleri matches dashboard (337 'Uygun değil' records) ✅ BACKEND PERFORMANCE: 93.2% test success rate (69/74 tests passed). The critical bug where uygun_degil was returning 0 instead of 337 has been successfully fixed."
+
+  - task: "PDF Preview Download Fix"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "critical"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "CRITICAL FIX VERIFIED (Review Request Test 2): ✅ TEST REPORT ACCESS: Successfully accessed files for report ID bed96230-c47e-4bf6-943e-a3b46732bd17 ✅ PDF FILE FOUND: Located test_rapor.pdf (ID: 509cfa24-4ed4-4d58-8981-b4ad83758bad) ✅ DOWNLOAD SUCCESS: GET /api/dosyalar/{dosya_id}/indir returns 200 OK ✅ CONTENT-TYPE CORRECT: Response header shows 'application/pdf' as required ✅ FILE FORMAT VALID: PDF content starts with '%PDF-1.4' confirming proper PDF format ✅ FILE SIZE VALID: PDF file size 597 bytes (non-empty). PDF preview and download functionality working correctly."
+
 agent_communication:
   - agent: "main"
     message: "Completed major features: Project Management API fixed, AdminPanel updated with subcategories support, Report number format changed to PKYYYY-SEHIRKODU###. All features manually tested with curl and screenshots. Ready for comprehensive E2E testing."
