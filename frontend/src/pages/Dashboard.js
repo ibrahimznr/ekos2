@@ -371,9 +371,17 @@ const Dashboard = () => {
               {/* Bileşen Dağılımı */}
               {stats.iskele_stats.bilesen_dagilim && stats.iskele_stats.bilesen_dagilim.length > 0 && (
                 <div>
-                  <h4 className="font-semibold text-gray-700 mb-2 sm:mb-3 text-sm sm:text-base">Bileşen Dağılımı</h4>
+                  <h4 className="font-semibold text-gray-700 mb-2 sm:mb-3 text-sm sm:text-base">
+                    Bileşen Dağılımı 
+                    <span className="text-xs font-normal text-gray-500 ml-2">
+                      ({stats.iskele_stats.bilesen_dagilim.length} çeşit)
+                    </span>
+                  </h4>
                   <div className="space-y-2 sm:space-y-3">
-                    {stats.iskele_stats.bilesen_dagilim.map((item, index) => {
+                    {(showAllBilesenler 
+                      ? stats.iskele_stats.bilesen_dagilim 
+                      : stats.iskele_stats.bilesen_dagilim.slice(0, 5)
+                    ).map((item, index) => {
                       const percentage = stats.iskele_stats.total > 0
                         ? Math.round((item.count / stats.iskele_stats.total) * 100)
                         : 0;
@@ -385,6 +393,10 @@ const Dashboard = () => {
                         'bg-indigo-600',
                         'bg-purple-600',
                         'bg-pink-600',
+                        'bg-emerald-600',
+                        'bg-amber-600',
+                        'bg-rose-600',
+                        'bg-violet-600',
                       ];
                       
                       return (
@@ -403,6 +415,26 @@ const Dashboard = () => {
                       );
                     })}
                   </div>
+                  
+                  {/* Tümünü Gör / Gizle Butonu */}
+                  {stats.iskele_stats.bilesen_dagilim.length > 5 && (
+                    <button
+                      onClick={() => setShowAllBilesenler(!showAllBilesenler)}
+                      className="mt-3 w-full flex items-center justify-center gap-2 py-2 text-sm text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg transition-colors"
+                    >
+                      {showAllBilesenler ? (
+                        <>
+                          <ChevronUp className="h-4 w-4" />
+                          <span>Gizle</span>
+                        </>
+                      ) : (
+                        <>
+                          <ChevronDown className="h-4 w-4" />
+                          <span>Tümünü Gör ({stats.iskele_stats.bilesen_dagilim.length - 5} daha)</span>
+                        </>
+                      )}
+                    </button>
+                  )}
                 </div>
               )}
             </CardContent>
