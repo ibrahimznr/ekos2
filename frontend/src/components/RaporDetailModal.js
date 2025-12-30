@@ -417,14 +417,12 @@ const RaporDetailModal = ({ open, onClose, rapor }) => {
                     }}
                   />
                 ) : isPdfFile(previewFile.dosya_adi) ? (
-                  <div className="w-full h-[65vh]">
-                    <embed
-                      src={`${previewFile.url}#toolbar=1&navpanes=0&scrollbar=1`}
-                      type="application/pdf"
-                      className="w-full h-full rounded"
-                      onError={(e) => {
-                        console.error('PDF load error');
-                      }}
+                  <div className="w-full h-[65vh] flex flex-col">
+                    <iframe
+                      src={previewFile.url}
+                      title={previewFile.dosya_adi}
+                      className="w-full h-full rounded border border-gray-300"
+                      style={{ minHeight: '500px' }}
                     />
                     <p className="text-xs text-gray-600 mt-2 text-center">
                       PDF görünmüyorsa{' '}
