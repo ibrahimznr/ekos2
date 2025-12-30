@@ -215,3 +215,129 @@ async def bulk_delete_raporlar(rapor_ids: List[str], current_user: dict = Depend
     
     result = await db.raporlar.delete_many({"id": {"$in": rapor_ids}})
     return {"message": f"{result.deleted_count} rapor silindi", "deleted_count": result.deleted_count}
+
+# ZIP Export Route - Seçili raporları ZIP olarak indir
+@router.post("/zip-export")
+async def zip_export_raporlar(
+    request: ZipExportRequest,
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Seçilen raporları klasör yapısıyla ZIP dosyası olarak indirir.
+    Her rapor için ayrı klasör oluşturulur ve içine rapor dosyaları ile bilgi.txt eklenir.
+    """
+    rapor_ids = request.rapor_ids
+    
+    if not rapor_ids:
+        raise HTTPException(status_code=400, detail="En az bir rapor seçilmelidir")
+    
+    if len(rapor_ids) > 100:
+        raise HTTPException(status_code=400, detail="En fazla 100 rapor seçilebilir")
+    
+    # Seçilen raporları getir
+    raporlar = await db.raporlar.find({"id": {"$in": rapor_ids}}, {"_id": 0}).to_list(100)
+    
+    if not raporlar:
+        raise HTTPException(status_code=404, detail="Seçilen raporlar bulunamadı")
+    
+    # Geçici klasör oluştur
+    temp_dir = tempfile.mkdtemp()
+    
+    try:
+        # Her rapor için klasör oluştur
+        for rapor in raporlar:
+            rapor_no = rapor.get("rapor_no", f"RAPOR_{rapor.get('id', 'unknown')[:8]}")
+            # Klasör adını güvenli hale getir (özel karakterleri kaldır)
+            safe_rapor_no = "".join(c if c.isalnum() or c in "-_" else "_" for c in rapor_no)
+            rapor_folder = os.path.join(temp_dir, f"RAPOR_{safe_rapor_no}")
+            os.makedirs(rapor_folder, exist_ok=True)
+            
+            # bilgi.txt dosyası oluştur
+            bilgi_content = f"""╔══════════════════════════════════════════════════════════════╗
+║                    RAPOR BİLGİLERİ                           ║
+╚══════════════════════════════════════════════════════════════╝
+
+📋 Rapor No        : {rapor.get('rapor_no', 'Belirtilmemiş')}
+📅 Oluşturma Tarihi: {rapor.get('created_at', 'Belirtilmemiş')[:10] if rapor.get('created_at') else 'Belirtilmemiş'}
+🏢 Firma           : {rapor.get('firma', 'Belirtilmemiş')}
+🔧 Ekipman Adı     : {rapor.get('ekipman_adi', 'Belirtilmemiş')}
+📂 Kategori        : {rapor.get('kategori', 'Belirtilmemiş')}
+📁 Alt Kategori    : {rapor.get('alt_kategori', 'Belirtilmemiş')}
+📍 Lokasyon        : {rapor.get('lokasyon', 'Belirtilmemiş')}
+🏭 Marka/Model     : {rapor.get('marka_model', 'Belirtilmemiş')}
+🔢 Seri No         : {rapor.get('seri_no', 'Belirtilmemiş')}
+⏱️ Periyot         : {rapor.get('periyot', 'Belirtilmemiş')}
+📅 Geçerlilik      : {rapor.get('gecerlilik_tarihi', 'Belirtilmemiş')}
+✅ Uygunluk        : {rapor.get('uygunluk', 'Belirtilmemiş')}
+🏙️ Şehir           : {rapor.get('sehir', 'Belirtilmemiş')}
+📝 Proje           : {rapor.get('proje_adi', 'Belirtilmemiş')}
+👤 Oluşturan       : {rapor.get('created_by_username', 'Belirtilmemiş')}
+📊 Durum           : {rapor.get('durum', 'Aktif')}
+
+═══════════════════════════════════════════════════════════════
+📝 AÇIKLAMA:
+───────────────────────────────────────────────────────────────
+{rapor.get('aciklama', 'Açıklama bulunmamaktadır.')}
+═══════════════════════════════════════════════════════════════
+
+Bu dosya EKOS - Ekipman Kontrol Otomasyon Sistemi tarafından 
+otomatik olarak oluşturulmuştur.
+Tarih: {datetime.now(timezone.utc).strftime('%d.%m.%Y %H:%M:%S')} UTC
+"""
+            
+            bilgi_path = os.path.join(rapor_folder, "bilgi.txt")
+            with open(bilgi_path, "w", encoding="utf-8") as f:
+                f.write(bilgi_content)
+            
+            # Rapora ait dosyaları kopyala
+            rapor_id = rapor.get("id")
+            dosyalar = await db.medya_dosyalari.find({"rapor_id": rapor_id}, {"_id": 0}).to_list(100)
+            
+            for idx, dosya in enumerate(dosyalar):
+                dosya_path = Path(dosya.get("dosya_yolu", ""))
+                if dosya_path.exists():
+                    # Orijinal dosya adını kullan
+                    original_name = dosya.get("dosya_adi", f"dosya_{idx}")
+                    # Dosya adını güvenli hale getir
+                    safe_name = "".join(c if c.isalnum() or c in ".-_" else "_" for c in original_name)
+                    dest_path = os.path.join(rapor_folder, safe_name)
+                    
+                    # Aynı isimde dosya varsa numara ekle
+                    counter = 1
+                    base_name, ext = os.path.splitext(safe_name)
+                    while os.path.exists(dest_path):
+                        dest_path = os.path.join(rapor_folder, f"{base_name}_{counter}{ext}")
+                        counter += 1
+                    
+                    shutil.copy2(str(dosya_path), dest_path)
+        
+        # ZIP dosyası oluştur
+        zip_buffer = io.BytesIO()
+        
+        with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
+            for root, dirs, files in os.walk(temp_dir):
+                for file in files:
+                    file_path = os.path.join(root, file)
+                    arcname = os.path.relpath(file_path, temp_dir)
+                    zip_file.write(file_path, arcname)
+        
+        zip_buffer.seek(0)
+        
+        # Dosya adı oluştur
+        now = datetime.now(timezone.utc)
+        username = current_user.get("username", "user")
+        zip_filename = f"Raporlar_{username}_{now.strftime('%Y%m%d_%H%M')}.zip"
+        
+        return StreamingResponse(
+            zip_buffer,
+            media_type="application/zip",
+            headers={
+                "Content-Disposition": f'attachment; filename="{zip_filename}"',
+                "Content-Type": "application/zip"
+            }
+        )
+        
+    finally:
+        # Geçici klasörü temizle
+        shutil.rmtree(temp_dir, ignore_errors=True)
+
