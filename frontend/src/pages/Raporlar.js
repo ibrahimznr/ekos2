@@ -407,11 +407,11 @@ const Raporlar = () => {
           {/* Toplu İşlemler Bölümü */}
           {selectedRaporlar.length > 0 && (
             <Card className="border-blue-200 bg-blue-50/50">
-              <CardContent className="py-3 px-4">
-                <div className="flex flex-wrap items-center justify-between gap-3">
+              <CardContent className="py-3 px-3 sm:px-4">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                   <div className="flex items-center gap-2">
-                    <CheckSquare className="h-5 w-5 text-blue-600" />
-                    <span className="font-medium text-blue-800">
+                    <CheckSquare className="h-5 w-5 text-blue-600 flex-shrink-0" />
+                    <span className="font-medium text-blue-800 text-sm sm:text-base">
                       {selectedRaporlar.length} rapor seçildi
                     </span>
                   </div>
@@ -422,20 +422,22 @@ const Raporlar = () => {
                         variant="outline"
                         size="sm"
                         onClick={handleSelectAll}
-                        className="border-blue-600 text-blue-700 hover:bg-blue-100"
+                        className="border-blue-600 text-blue-700 hover:bg-blue-100 flex-1 sm:flex-none h-10"
                       >
-                        <Square className="h-4 w-4 mr-2" />
-                        Tümünü Seç ({raporlar.length})
+                        <Square className="h-4 w-4 mr-1 sm:mr-2" />
+                        <span className="hidden xs:inline">Tümünü Seç</span>
+                        <span className="xs:hidden">Tümü</span>
                       </Button>
                     ) : (
                       <Button
                         variant="outline"
                         size="sm"
                         onClick={handleClearSelection}
-                        className="border-gray-400 text-gray-600 hover:bg-gray-100"
+                        className="border-gray-400 text-gray-600 hover:bg-gray-100 flex-1 sm:flex-none h-10"
                       >
-                        <XSquare className="h-4 w-4 mr-2" />
-                        Seçimi Temizle
+                        <XSquare className="h-4 w-4 mr-1 sm:mr-2" />
+                        <span className="hidden xs:inline">Seçimi Temizle</span>
+                        <span className="xs:hidden">Temizle</span>
                       </Button>
                     )}
                     
@@ -443,18 +445,20 @@ const Raporlar = () => {
                     <Button
                       onClick={handleZipDownload}
                       disabled={zipLoading}
-                      className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white"
+                      className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white flex-1 sm:flex-none h-10"
                       data-testid="zip-download-button"
                     >
                       {zipLoading ? (
                         <>
-                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                          İşleniyor...
+                          <Loader2 className="h-4 w-4 mr-1 sm:mr-2 animate-spin" />
+                          <span className="hidden sm:inline">İşleniyor...</span>
+                          <span className="sm:hidden">...</span>
                         </>
                       ) : (
                         <>
-                          <Archive className="h-4 w-4 mr-2" />
-                          ZIP Olarak İndir
+                          <Archive className="h-4 w-4 mr-1 sm:mr-2" />
+                          <span className="hidden sm:inline">ZIP İndir</span>
+                          <span className="sm:hidden">ZIP</span>
                         </>
                       )}
                     </Button>
@@ -465,10 +469,11 @@ const Raporlar = () => {
                         variant="destructive"
                         size="sm"
                         onClick={handleBulkDelete}
+                        className="flex-1 sm:flex-none h-10"
                         data-testid="bulk-delete-reports-button"
                       >
-                        <Trash2 className="h-4 w-4 mr-2" />
-                        Seçilenleri Sil
+                        <Trash2 className="h-4 w-4 mr-1 sm:mr-2" />
+                        <span className="hidden sm:inline">Sil</span>
                       </Button>
                     )}
                   </div>
