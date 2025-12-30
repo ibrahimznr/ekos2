@@ -319,6 +319,7 @@ test_plan:
     - "P0 Bug Fix - RaporModal Crash (COMPLETED)"
     - "P1 Feature - Two-Stage Bulk Report Creation (COMPLETED)"
     - "Backend API Testing for Review Request (COMPLETED)"
+    - "EKOS Mobile Responsive UI Testing (COMPLETED)"
     - "Project Management (backend and frontend)"
     - "Hierarchical Categories with Cascading Dropdowns"
     - "New Report Number Format (PKYYYY-SEHIRKODU###)"
