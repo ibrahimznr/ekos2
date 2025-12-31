@@ -223,8 +223,18 @@ async def zip_export_raporlar(
     current_user: dict = Depends(get_current_user)
 ):
     """
-    Seçilen raporları klasör yapısıyla ZIP dosyası olarak indirir.
-    Her rapor için ayrı klasör oluşturulur ve içine rapor dosyaları ile bilgi.txt eklenir.
+    Seçilen raporları kategoriye göre gruplandırılmış klasör yapısıyla ZIP dosyası olarak indirir.
+    
+    Yapı:
+    ZIP/
+    ├── Kategori_A/
+    │   ├── RAPOR_001/
+    │   │   ├── bilgi.txt
+    │   │   └── dosyalar...
+    │   └── RAPOR_002/
+    ├── Kategori_B/
+    │   └── RAPOR_003/
+    └── ...
     """
     rapor_ids = request.rapor_ids
     
@@ -244,16 +254,31 @@ async def zip_export_raporlar(
     temp_dir = tempfile.mkdtemp()
     
     try:
-        # Her rapor için klasör oluştur
+        # Raporları kategoriye göre grupla
+        kategori_raporlar = {}
         for rapor in raporlar:
-            rapor_no = rapor.get("rapor_no", f"RAPOR_{rapor.get('id', 'unknown')[:8]}")
-            # Klasör adını güvenli hale getir (özel karakterleri kaldır)
-            safe_rapor_no = "".join(c if c.isalnum() or c in "-_" else "_" for c in rapor_no)
-            rapor_folder = os.path.join(temp_dir, f"RAPOR_{safe_rapor_no}")
-            os.makedirs(rapor_folder, exist_ok=True)
+            kategori = rapor.get("kategori", "Kategorisiz")
+            if kategori not in kategori_raporlar:
+                kategori_raporlar[kategori] = []
+            kategori_raporlar[kategori].append(rapor)
+        
+        # Her kategori için klasör oluştur ve raporları içine yerleştir
+        for kategori, kategori_rapor_listesi in kategori_raporlar.items():
+            # Kategori klasör adını güvenli hale getir
+            safe_kategori = "".join(c if c.isalnum() or c in "-_ ()" else "_" for c in kategori)
+            kategori_folder = os.path.join(temp_dir, safe_kategori)
+            os.makedirs(kategori_folder, exist_ok=True)
             
-            # bilgi.txt dosyası oluştur
-            bilgi_content = f"""╔══════════════════════════════════════════════════════════════╗
+            # Bu kategorideki her rapor için klasör oluştur
+            for rapor in kategori_rapor_listesi:
+                rapor_no = rapor.get("rapor_no", f"RAPOR_{rapor.get('id', 'unknown')[:8]}")
+                # Klasör adını güvenli hale getir (özel karakterleri kaldır)
+                safe_rapor_no = "".join(c if c.isalnum() or c in "-_" else "_" for c in rapor_no)
+                rapor_folder = os.path.join(kategori_folder, f"RAPOR_{safe_rapor_no}")
+                os.makedirs(rapor_folder, exist_ok=True)
+                
+                # bilgi.txt dosyası oluştur
+                bilgi_content = f"""╔══════════════════════════════════════════════════════════════╗
 ║                    RAPOR BİLGİLERİ                           ║
 ╚══════════════════════════════════════════════════════════════╝
 
@@ -284,32 +309,32 @@ Bu dosya EKOS - Ekipman Kontrol Otomasyon Sistemi tarafından
 otomatik olarak oluşturulmuştur.
 Tarih: {datetime.now(timezone.utc).strftime('%d.%m.%Y %H:%M:%S')} UTC
 """
-            
-            bilgi_path = os.path.join(rapor_folder, "bilgi.txt")
-            with open(bilgi_path, "w", encoding="utf-8") as f:
-                f.write(bilgi_content)
-            
-            # Rapora ait dosyaları kopyala
-            rapor_id = rapor.get("id")
-            dosyalar = await db.medya_dosyalari.find({"rapor_id": rapor_id}, {"_id": 0}).to_list(100)
-            
-            for idx, dosya in enumerate(dosyalar):
-                dosya_path = Path(dosya.get("dosya_yolu", ""))
-                if dosya_path.exists():
-                    # Orijinal dosya adını kullan
-                    original_name = dosya.get("dosya_adi", f"dosya_{idx}")
-                    # Dosya adını güvenli hale getir
-                    safe_name = "".join(c if c.isalnum() or c in ".-_" else "_" for c in original_name)
-                    dest_path = os.path.join(rapor_folder, safe_name)
-                    
-                    # Aynı isimde dosya varsa numara ekle
-                    counter = 1
-                    base_name, ext = os.path.splitext(safe_name)
-                    while os.path.exists(dest_path):
-                        dest_path = os.path.join(rapor_folder, f"{base_name}_{counter}{ext}")
-                        counter += 1
-                    
-                    shutil.copy2(str(dosya_path), dest_path)
+                
+                bilgi_path = os.path.join(rapor_folder, "bilgi.txt")
+                with open(bilgi_path, "w", encoding="utf-8") as f:
+                    f.write(bilgi_content)
+                
+                # Rapora ait dosyaları kopyala
+                rapor_id = rapor.get("id")
+                dosyalar = await db.medya_dosyalari.find({"rapor_id": rapor_id}, {"_id": 0}).to_list(100)
+                
+                for idx, dosya in enumerate(dosyalar):
+                    dosya_path = Path(dosya.get("dosya_yolu", ""))
+                    if dosya_path.exists():
+                        # Orijinal dosya adını kullan
+                        original_name = dosya.get("dosya_adi", f"dosya_{idx}")
+                        # Dosya adını güvenli hale getir
+                        safe_name = "".join(c if c.isalnum() or c in ".-_" else "_" for c in original_name)
+                        dest_path = os.path.join(rapor_folder, safe_name)
+                        
+                        # Aynı isimde dosya varsa numara ekle
+                        counter = 1
+                        base_name, ext = os.path.splitext(safe_name)
+                        while os.path.exists(dest_path):
+                            dest_path = os.path.join(rapor_folder, f"{base_name}_{counter}{ext}")
+                            counter += 1
+                        
+                        shutil.copy2(str(dosya_path), dest_path)
         
         # ZIP dosyası oluştur
         zip_buffer = io.BytesIO()
@@ -323,10 +348,12 @@ Tarih: {datetime.now(timezone.utc).strftime('%d.%m.%Y %H:%M:%S')} UTC
         
         zip_buffer.seek(0)
         
-        # Dosya adı oluştur
+        # Dosya adı oluştur - kategori sayısını da ekle
         now = datetime.now(timezone.utc)
         username = current_user.get("username", "user")
-        zip_filename = f"Raporlar_{username}_{now.strftime('%Y%m%d_%H%M')}.zip"
+        kategori_count = len(kategori_raporlar)
+        rapor_count = len(raporlar)
+        zip_filename = f"Raporlar_{kategori_count}Kategori_{rapor_count}Rapor_{now.strftime('%Y%m%d_%H%M')}.zip"
         
         return StreamingResponse(
             zip_buffer,
