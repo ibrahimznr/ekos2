@@ -164,7 +164,23 @@ async def login(user_login: UserLogin):
     if not verify_password(user_login.password, user["password"]):
         raise HTTPException(status_code=401, detail="Email veya şifre hatalı")
     
-    access_token = create_access_token(data={"sub": user["id"]})
+    # Generate unique session token for single-device enforcement
+    session_token = str(uuid.uuid4())
+    
+    # Update user's active session token in database
+    await db.users.update_one(
+        {"id": user["id"]},
+        {"$set": {
+            "active_session_token": session_token,
+            "last_login": datetime.now(timezone.utc).isoformat()
+        }}
+    )
+    
+    # Include session token in JWT payload
+    access_token = create_access_token(data={
+        "sub": user["id"],
+        "session": session_token
+    })
     
     return Token(
         access_token=access_token,
