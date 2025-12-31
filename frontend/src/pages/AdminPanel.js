@@ -35,7 +35,7 @@ import {
 } from '@/components/ui/select';
 import Layout from '@/components/Layout';
 import { toast } from 'sonner';
-import { Plus, Trash2, Users, FolderTree, Shield, AlertCircle, FolderKanban, X } from 'lucide-react';
+import { Plus, Trash2, Users, FolderTree, Shield, AlertCircle, FolderKanban, X, Eye, EyeOff } from 'lucide-react';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
