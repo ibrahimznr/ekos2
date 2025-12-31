@@ -63,6 +63,8 @@ const AdminPanel = () => {
   const [editType, setEditType] = useState(''); // 'user', 'kategori', or 'proje'
   
   const [newUser, setNewUser] = useState({ username: '', email: '', password: '', password_confirm: '', role: 'viewer' });
+  const [showPassword, setShowPassword] = useState(false);
+  const [showPasswordConfirm, setShowPasswordConfirm] = useState(false);
   const [newKategori, setNewKategori] = useState({ isim: '', aciklama: '', alt_kategoriler: [] });
   const [altKategoriInput, setAltKategoriInput] = useState('');
   const [newProje, setNewProje] = useState({ 
