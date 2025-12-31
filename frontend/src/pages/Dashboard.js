@@ -39,16 +39,13 @@ const Dashboard = () => {
         return;
       }
       
-      const response = await axios.get(`${API}/dashboard/stats`, {
-        headers: { Authorization: `Bearer ${token}` },
+      const response = await api.get('/dashboard/stats', {
         timeout: 10000, // 10 second timeout
       });
       setStats(response.data);
     } catch (error) {
       if (error.response?.status === 401) {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        navigate('/login');
+        // Session handling is done by api interceptor
       } else if (error.response?.status === 403) {
         toast.error('Dashboard\'a erişim yetkiniz yok');
         navigate('/raporlar');
@@ -65,10 +62,7 @@ const Dashboard = () => {
 
   const fetchProjeler = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await axios.get(`${API}/projeler`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await api.get('/projeler');
       setProjeler(response.data);
     } catch (error) {
       console.error('Projeler yüklenemedi');
@@ -77,10 +71,7 @@ const Dashboard = () => {
 
   const fetchExpiredReports = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await axios.get(`${API}/raporlar?arama=&kategori=&uygunluk=`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await api.get('/raporlar?arama=&kategori=&uygunluk=');
       
       const today = new Date();
       const expired = response.data.filter(r => {
@@ -99,10 +90,7 @@ const Dashboard = () => {
 
   const fetchExpiringReports = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await axios.get(`${API}/raporlar?arama=&kategori=&uygunluk=`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await api.get('/raporlar?arama=&kategori=&uygunluk=');
       
       const today = new Date();
       const thirtyDaysLater = new Date();
