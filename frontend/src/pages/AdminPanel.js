@@ -455,6 +455,8 @@ const AdminPanel = () => {
     if (type === 'user') {
       setShowUserDialog(false);
       setNewUser({ username: '', email: '', password: '', password_confirm: '', role: 'viewer' });
+      setShowPassword(false);
+      setShowPasswordConfirm(false);
     } else if (type === 'kategori') {
       setShowKategoriDialog(false);
       setNewKategori({ isim: '', aciklama: '', alt_kategoriler: [] });
