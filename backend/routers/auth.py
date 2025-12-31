@@ -7,6 +7,7 @@ from passlib.context import CryptContext
 import os
 import logging
 import random
+import uuid
 
 from models import User, UserCreate, UserLogin, UserResponse, VerifyEmail, Token
 from database import db
@@ -39,6 +40,7 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
         token = credentials.credentials
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         user_id: str = payload.get("sub")
+        session_token: str = payload.get("session")
         if user_id is None:
             raise HTTPException(status_code=401, detail="Geçersiz kimlik")
     except jwt.ExpiredSignatureError:
@@ -49,6 +51,13 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
     user = await db.users.find_one({"id": user_id}, {"_id": 0})
     if user is None:
         raise HTTPException(status_code=401, detail="Kullanıcı bulunamadı")
+    
+    # Check if session token matches (single session enforcement)
+    if session_token and user.get("active_session_token") != session_token:
+        raise HTTPException(
+            status_code=401, 
+            detail="SESSION_EXPIRED_OTHER_DEVICE"
+        )
     
     if "username" not in user:
         user["username"] = user["email"].split("@")[0]
