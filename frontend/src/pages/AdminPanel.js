@@ -156,15 +156,37 @@ const AdminPanel = () => {
   const handleCreateUser = async () => {
     try {
       const token = localStorage.getItem('token');
-      // Note: User editing not implemented in backend yet
-      await axios.post(`${API}/auth/register`, newUser, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      toast.success('Kullanıcı oluşturuldu');
+      
+      if (editMode && editingItem) {
+        // Update existing user
+        const updateData = {
+          username: newUser.username,
+          email: newUser.email,
+          role: newUser.role
+        };
+        
+        // Only include password if it's provided
+        if (newUser.password) {
+          updateData.password = newUser.password;
+          updateData.password_confirm = newUser.password_confirm;
+        }
+        
+        await axios.put(`${API}/users/${editingItem.id}`, updateData, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        toast.success('Kullanıcı güncellendi');
+      } else {
+        // Create new user via admin endpoint
+        await axios.post(`${API}/users`, newUser, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        toast.success('Kullanıcı oluşturuldu');
+      }
+      
       handleCloseDialog('user');
       fetchUsers();
     } catch (error) {
-      toast.error(error.response?.data?.detail || 'Kullanıcı oluşturulamadı');
+      toast.error(error.response?.data?.detail || (editMode ? 'Kullanıcı güncellenemedi' : 'Kullanıcı oluşturulamadı'));
     }
   };
 
