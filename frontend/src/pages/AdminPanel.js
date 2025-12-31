@@ -882,12 +882,12 @@ const AdminPanel = () => {
       </div>
 
       {/* Create User Dialog */}
-      <Dialog open={showUserDialog} onOpenChange={setShowUserDialog}>
+      <Dialog open={showUserDialog} onOpenChange={(open) => !open && handleCloseDialog('user')}>
         <DialogContent data-testid="create-user-dialog">
           <DialogHeader>
-            <DialogTitle>Yeni Kullanıcı Oluştur</DialogTitle>
+            <DialogTitle>{editMode ? 'Kullanıcı Düzenle' : 'Yeni Kullanıcı Oluştur'}</DialogTitle>
             <DialogDescription>
-              Sisteme yeni bir kullanıcı ekleyin
+              {editMode ? 'Kullanıcı bilgilerini güncelleyin' : 'Sisteme yeni bir kullanıcı ekleyin'}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
@@ -914,26 +914,48 @@ const AdminPanel = () => {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="user-password">Şifre</Label>
-              <Input
-                id="user-password"
-                type="password"
-                placeholder="••••••••"
-                value={newUser.password}
-                onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
-                data-testid="user-password-input"
-              />
+              <Label htmlFor="user-password">
+                Şifre {editMode && <span className="text-xs text-gray-500">(Değiştirmek istemiyorsanız boş bırakın)</span>}
+              </Label>
+              <div className="relative">
+                <Input
+                  id="user-password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="••••••••"
+                  value={newUser.password}
+                  onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
+                  data-testid="user-password-input"
+                  className="pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
             </div>
             <div className="space-y-2">
               <Label htmlFor="user-password-confirm">Şifre Tekrar</Label>
-              <Input
-                id="user-password-confirm"
-                type="password"
-                placeholder="••••••••"
-                value={newUser.password_confirm}
-                onChange={(e) => setNewUser({ ...newUser, password_confirm: e.target.value })}
-                data-testid="user-password-confirm-input"
-              />
+              <div className="relative">
+                <Input
+                  id="user-password-confirm"
+                  type={showPasswordConfirm ? "text" : "password"}
+                  placeholder="••••••••"
+                  value={newUser.password_confirm}
+                  onChange={(e) => setNewUser({ ...newUser, password_confirm: e.target.value })}
+                  data-testid="user-password-confirm-input"
+                  className="pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPasswordConfirm(!showPasswordConfirm)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                >
+                  {showPasswordConfirm ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
             </div>
             <div className="space-y-2">
               <Label htmlFor="user-role">Rol</Label>
@@ -950,11 +972,11 @@ const AdminPanel = () => {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowUserDialog(false)} data-testid="cancel-user-button">
+            <Button variant="outline" onClick={() => handleCloseDialog('user')} data-testid="cancel-user-button">
               İptal
             </Button>
             <Button onClick={handleCreateUser} data-testid="submit-user-button">
-              Oluştur
+              {editMode ? 'Güncelle' : 'Oluştur'}
             </Button>
           </DialogFooter>
         </DialogContent>
