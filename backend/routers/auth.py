@@ -207,3 +207,13 @@ async def get_me(current_user: dict = Depends(get_current_user)):
         email_verified=current_user.get("email_verified", False),
         created_at=datetime.fromisoformat(current_user["created_at"]) if isinstance(current_user["created_at"], str) else current_user["created_at"]
     )
+
+@router.post("/logout")
+async def logout(current_user: dict = Depends(get_current_user)):
+    """Logout user and invalidate session token"""
+    await db.users.update_one(
+        {"id": current_user["id"]},
+        {"$set": {"active_session_token": None}}
+    )
+    return {"message": "Başarıyla çıkış yapıldı"}
+
