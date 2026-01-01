@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import axios from 'axios';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -11,17 +11,17 @@ import {
 } from '@/components/ui/dialog';
 import { Card, CardContent } from '@/components/ui/card';
 import { toast } from 'sonner';
-import { Upload, FileText, Download, Trash2, Calendar, Building, MapPin, Package, Eye, Image as ImageIcon } from 'lucide-react';
+import { Upload, FileText, Download, Trash2, Calendar, Building, MapPin, Package, Eye, Image as ImageIcon, Edit, Clipboard } from 'lucide-react';
+import api from '@/utils/api';
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
-const API = `${BACKEND_URL}/api`;
-
-const RaporDetailModal = ({ open, onClose, rapor }) => {
+const RaporDetailModal = ({ open, onClose, rapor, onEdit, onDelete }) => {
   const [dosyalar, setDosyalar] = useState([]);
   const [uploading, setUploading] = useState(false);
   const [user, setUser] = useState(null);
   const [previewFile, setPreviewFile] = useState(null);
   const [showPreview, setShowPreview] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const dropZoneRef = useRef(null);
 
   useEffect(() => {
     if (rapor) {
@@ -33,22 +33,41 @@ const RaporDetailModal = ({ open, onClose, rapor }) => {
     }
   }, [rapor]);
 
+  // Paste event listener for clipboard images
+  useEffect(() => {
+    const handlePaste = async (e) => {
+      if (!open || !rapor) return;
+      
+      const items = e.clipboardData?.items;
+      if (!items) return;
+
+      for (let i = 0; i < items.length; i++) {
+        const item = items[i];
+        if (item.type.startsWith('image/')) {
+          e.preventDefault();
+          const file = item.getAsFile();
+          if (file) {
+            await uploadFile(file);
+          }
+          break;
+        }
+      }
+    };
+
+    document.addEventListener('paste', handlePaste);
+    return () => document.removeEventListener('paste', handlePaste);
+  }, [open, rapor]);
+
   const fetchDosyalar = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await axios.get(`${API}/dosyalar/${rapor.id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await api.get(`/dosyalar/${rapor.id}`);
       setDosyalar(response.data);
     } catch (error) {
       toast.error('Dosyalar yüklenemedi');
     }
   };
 
-  const handleFileUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
+  const uploadFile = async (file) => {
     // Check file size (4GB)
     if (file.size > 4 * 1024 * 1024 * 1024) {
       toast.error('Dosya boyutu 4GB\'dan büyük olamaz');
@@ -56,21 +75,19 @@ const RaporDetailModal = ({ open, onClose, rapor }) => {
     }
 
     // Check file type
-    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf'];
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp', 'application/pdf'];
     if (!allowedTypes.includes(file.type)) {
-      toast.error('Sadece JPG, PNG ve PDF formatları desteklenir');
+      toast.error('Sadece JPG, PNG, GIF, WebP ve PDF formatları desteklenir');
       return;
     }
 
     setUploading(true);
     try {
-      const token = localStorage.getItem('token');
       const formData = new FormData();
       formData.append('file', file);
 
-      await axios.post(`${API}/upload/${rapor.id}`, formData, {
+      await api.post(`/upload/${rapor.id}`, formData, {
         headers: {
-          Authorization: `Bearer ${token}`,
           'Content-Type': 'multipart/form-data',
         },
       });
@@ -81,16 +98,50 @@ const RaporDetailModal = ({ open, onClose, rapor }) => {
       toast.error(error.response?.data?.detail || 'Dosya yüklenemedi');
     } finally {
       setUploading(false);
-      e.target.value = '';
+    }
+  };
+
+  const handleFileUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    await uploadFile(file);
+    e.target.value = '';
+  };
+
+  // Drag and drop handlers
+  const handleDragEnter = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleDrop = async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+
+    const files = e.dataTransfer.files;
+    if (files.length > 0) {
+      for (let i = 0; i < files.length; i++) {
+        await uploadFile(files[i]);
+      }
     }
   };
 
   const handleDeleteFile = async (dosyaId) => {
     try {
-      const token = localStorage.getItem('token');
-      await axios.delete(`${API}/dosyalar/${dosyaId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await api.delete(`/dosyalar/${dosyaId}`);
       toast.success('Dosya silindi');
       fetchDosyalar();
     } catch (error) {
@@ -101,8 +152,7 @@ const RaporDetailModal = ({ open, onClose, rapor }) => {
   const handleDownloadFile = async (dosya) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get(`${API}/dosyalar/${dosya.id}/indir`, {
-        headers: { Authorization: `Bearer ${token}` },
+      const response = await api.get(`/dosyalar/${dosya.id}/indir`, {
         responseType: 'blob',
       });
 
@@ -122,9 +172,7 @@ const RaporDetailModal = ({ open, onClose, rapor }) => {
 
   const handlePreviewFile = async (dosya) => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await axios.get(`${API}/dosyalar/${dosya.id}/indir`, {
-        headers: { Authorization: `Bearer ${token}` },
+      const response = await api.get(`/dosyalar/${dosya.id}/indir`, {
         responseType: 'blob',
       });
 
