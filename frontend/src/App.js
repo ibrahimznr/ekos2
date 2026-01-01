@@ -5,6 +5,7 @@ import Login from '@/pages/Login';
 import Register from '@/pages/Register';
 import Dashboard from '@/pages/Dashboard';
 import Raporlar from '@/pages/Raporlar';
+import ProjeRaporlar from '@/pages/ProjeRaporlar';
 import IskeleBilesenleri from '@/pages/IskeleBilesenleri';
 import AdminPanel from '@/pages/AdminPanel';
 import ErrorBoundary from '@/components/ErrorBoundary';
@@ -48,6 +49,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <Raporlar />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/projeler/:projeId/raporlar"
+              element={
+                <ProtectedRoute>
+                  <ProjeRaporlar />
                 </ProtectedRoute>
               }
             />
