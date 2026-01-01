@@ -230,8 +230,38 @@ const RaporDetailModal = ({ open, onClose, rapor, onEdit, onDelete }) => {
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto" data-testid="rapor-detail-modal">
         <DialogHeader>
-          <DialogTitle className="text-2xl">Rapor Detayları</DialogTitle>
-          <DialogDescription>{rapor.rapor_no}</DialogDescription>
+          <div className="flex items-center justify-between">
+            <div>
+              <DialogTitle className="text-2xl">Rapor Detayları</DialogTitle>
+              <DialogDescription>{rapor.rapor_no}</DialogDescription>
+            </div>
+            {canEdit && (
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => onEdit && onEdit(rapor)}
+                  className="text-amber-600 border-amber-300 hover:bg-amber-50"
+                >
+                  <Edit className="h-4 w-4 mr-1" />
+                  Düzenle
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    if (window.confirm('Bu raporu silmek istediğinizden emin misiniz?')) {
+                      onDelete && onDelete(rapor.id);
+                    }
+                  }}
+                  className="text-red-600 border-red-300 hover:bg-red-50"
+                >
+                  <Trash2 className="h-4 w-4 mr-1" />
+                  Sil
+                </Button>
+              </div>
+            )}
+          </div>
         </DialogHeader>
 
         <div className="space-y-6 py-4">
