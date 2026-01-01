@@ -29,11 +29,16 @@ async def get_raporlar(
     periyot: Optional[str] = None,
     uygunluk: Optional[str] = None,
     firma: Optional[str] = None,
+    proje_id: Optional[str] = None,
     limit: int = 500,
     skip: int = 0,
     current_user: dict = Depends(get_current_user)
 ):
     query = {}
+    
+    # Proje filtresi - en öncelikli
+    if proje_id:
+        query["proje_id"] = proje_id
     
     user_firma = current_user.get("firma_adi")
     if user_firma and current_user.get("role") == "viewer":
