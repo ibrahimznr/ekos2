@@ -111,7 +111,7 @@ const Dashboard = () => {
   };
 
   const handleProjectClick = (projeId) => {
-    navigate('/raporlar', { state: { filterProjeId: projeId } });
+    navigate(`/projeler/${projeId}/raporlar`);
   };
 
   if (loading) {
