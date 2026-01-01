@@ -16,6 +16,16 @@ async def get_projeler(current_user: dict = Depends(get_current_user)):
             proje['created_at'] = datetime.fromisoformat(proje['created_at'])
     return projeler
 
+@router.get("/{proje_id}", response_model=Proje)
+async def get_proje(proje_id: str, current_user: dict = Depends(get_current_user)):
+    """Tek bir projeyi ID ile getir"""
+    proje = await db.projeler.find_one({"id": proje_id}, {"_id": 0})
+    if not proje:
+        raise HTTPException(status_code=404, detail="Proje bulunamadı")
+    if isinstance(proje['created_at'], str):
+        proje['created_at'] = datetime.fromisoformat(proje['created_at'])
+    return proje
+
 @router.post("", response_model=Proje)
 async def create_proje(proje_create: ProjeCreate, current_user: dict = Depends(get_current_user)):
     if current_user["role"] != "admin":
