@@ -378,7 +378,8 @@ const RaporDetailModal = ({ open, onClose, rapor, onEdit, onDelete }) => {
                       id="file-upload"
                       className="hidden"
                       onChange={handleFileUpload}
-                      accept=".jpg,.jpeg,.png,.pdf"
+                      accept=".jpg,.jpeg,.png,.gif,.webp,.pdf"
+                      multiple
                       data-testid="file-upload-input"
                     />
                     <Button
@@ -393,6 +394,35 @@ const RaporDetailModal = ({ open, onClose, rapor, onEdit, onDelete }) => {
                   </div>
                 )}
               </div>
+
+              {/* Drag & Drop / Paste Zone */}
+              {canEdit && (
+                <div
+                  ref={dropZoneRef}
+                  onDragEnter={handleDragEnter}
+                  onDragLeave={handleDragLeave}
+                  onDragOver={handleDragOver}
+                  onDrop={handleDrop}
+                  className={`mb-4 p-6 border-2 border-dashed rounded-lg text-center transition-colors ${
+                    isDragging 
+                      ? 'border-blue-500 bg-blue-50' 
+                      : 'border-gray-300 bg-gray-50 hover:border-gray-400'
+                  }`}
+                >
+                  <div className="flex flex-col items-center gap-2 text-gray-500">
+                    <div className="flex gap-4">
+                      <Upload className={`h-8 w-8 ${isDragging ? 'text-blue-500' : 'text-gray-400'}`} />
+                      <Clipboard className={`h-8 w-8 ${isDragging ? 'text-blue-500' : 'text-gray-400'}`} />
+                    </div>
+                    <p className="text-sm font-medium">
+                      {isDragging ? 'Dosyayı bırakın...' : 'Dosyaları sürükleyip bırakın'}
+                    </p>
+                    <p className="text-xs text-gray-400">
+                      veya <span className="text-blue-600 font-medium">Ctrl+V</span> ile kopyalanan resmi yapıştırın
+                    </p>
+                  </div>
+                </div>
+              )}
 
               {dosyalar.length === 0 ? (
                 <div className="text-center py-8 text-gray-500">
