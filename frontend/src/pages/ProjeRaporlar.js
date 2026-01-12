@@ -279,7 +279,7 @@ const ProjeRaporlar = () => {
 
         {/* Action Bar */}
         <div className="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             {(user?.role === 'admin' || user?.role === 'inspector') && (
               <Button
                 onClick={() => {
@@ -310,6 +310,31 @@ const ProjeRaporlar = () => {
                 <X className="h-4 w-4 mr-1" />
                 Temizle
               </Button>
+            )}
+            
+            {/* Export Buttons */}
+            {raporlar.length > 0 && (
+              <>
+                <div className="h-6 w-px bg-gray-300 hidden sm:block" />
+                <Button
+                  variant="outline"
+                  onClick={handleExcelExport}
+                  disabled={exporting}
+                  className="text-green-600 border-green-300 hover:bg-green-50"
+                >
+                  <FileSpreadsheet className="h-4 w-4 mr-2" />
+                  {exporting ? 'İndiriliyor...' : 'Excel'}
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={handleZipExport}
+                  disabled={exporting}
+                  className="text-purple-600 border-purple-300 hover:bg-purple-50"
+                >
+                  <Archive className="h-4 w-4 mr-2" />
+                  {exporting ? 'İndiriliyor...' : 'ZIP İndir'}
+                </Button>
+              </>
             )}
           </div>
           
