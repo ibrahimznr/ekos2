@@ -1380,6 +1380,58 @@ const AdminPanel = () => {
         </DialogContent>
       </Dialog>
 
+      {/* Kalibrasyon Cihazı Dialog */}
+      <Dialog open={showKalibrasyonDialog} onOpenChange={() => handleCloseDialog('kalibrasyon')}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{editMode ? 'Ölçüm Cihazı Düzenle' : 'Yeni Ölçüm Cihazı Ekle'}</DialogTitle>
+            <DialogDescription>
+              {editMode ? 'Ölçüm cihazı bilgilerini güncelleyin.' : 'Yeni bir ölçüm cihazı ekleyin.'}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="cihaz_adi">Cihaz Adı *</Label>
+              <Input
+                id="cihaz_adi"
+                placeholder="Örn: Kumpas, Termometre, vb."
+                value={newKalibrasyon.cihaz_adi}
+                onChange={(e) => setNewKalibrasyon({ ...newKalibrasyon, cihaz_adi: e.target.value })}
+                data-testid="calibration-name-input"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="seri_no">Seri No *</Label>
+              <Input
+                id="seri_no"
+                placeholder="Cihaz seri numarası"
+                value={newKalibrasyon.seri_no}
+                onChange={(e) => setNewKalibrasyon({ ...newKalibrasyon, seri_no: e.target.value })}
+                data-testid="calibration-serial-input"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="kalibrasyon_tarihi">Kalibrasyon Tarihi *</Label>
+              <Input
+                id="kalibrasyon_tarihi"
+                type="date"
+                value={newKalibrasyon.kalibrasyon_tarihi}
+                onChange={(e) => setNewKalibrasyon({ ...newKalibrasyon, kalibrasyon_tarihi: e.target.value })}
+                data-testid="calibration-date-input"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => handleCloseDialog('kalibrasyon')}>
+              İptal
+            </Button>
+            <Button onClick={handleCreateKalibrasyon} className="bg-gradient-to-r from-teal-600 to-cyan-700 text-white">
+              {editMode ? 'Güncelle' : 'Kaydet'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent>
