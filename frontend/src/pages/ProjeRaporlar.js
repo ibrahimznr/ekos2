@@ -160,6 +160,84 @@ const ProjeRaporlar = () => {
 
   const hasActiveFilters = searchTerm || (kategoriFilter && kategoriFilter !== 'all') || (uygunlukFilter && uygunlukFilter !== 'all');
 
+  // Excel Export - Sadece bu projenin raporları
+  const handleExcelExport = async () => {
+    if (raporlar.length === 0) {
+      toast.error('Dışa aktarılacak rapor bulunamadı');
+      return;
+    }
+    
+    setExporting(true);
+    try {
+      const token = localStorage.getItem('token');
+      const rapor_ids = raporlar.map(r => r.id);
+      
+      const response = await axios.post(`${API}/excel/export`, 
+        { rapor_ids },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+          responseType: 'blob',
+        }
+      );
+
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      const projeName = proje?.proje_adi?.replace(/[^a-zA-Z0-9ğüşöçıİĞÜŞÖÇ\s]/g, '') || 'Proje';
+      link.setAttribute('download', `${projeName}_Raporlar.xlsx`);
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      
+      toast.success('Excel dosyası indirildi');
+    } catch (error) {
+      console.error('Excel export error:', error);
+      toast.error('Excel dışa aktarma başarısız');
+    } finally {
+      setExporting(false);
+    }
+  };
+
+  // ZIP Export - Sadece bu projenin raporları
+  const handleZipExport = async () => {
+    if (raporlar.length === 0) {
+      toast.error('İndirilecek rapor bulunamadı');
+      return;
+    }
+    
+    setExporting(true);
+    try {
+      const token = localStorage.getItem('token');
+      const rapor_ids = raporlar.map(r => r.id);
+      
+      const response = await axios.post(`${API}/raporlar/zip-export`, 
+        { rapor_ids },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+          responseType: 'blob',
+        }
+      );
+
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      const projeName = proje?.proje_adi?.replace(/[^a-zA-Z0-9ğüşöçıİĞÜŞÖÇ\s]/g, '') || 'Proje';
+      link.setAttribute('download', `${projeName}_Raporlar.zip`);
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      
+      toast.success('ZIP dosyası indirildi');
+    } catch (error) {
+      console.error('ZIP export error:', error);
+      toast.error('ZIP indirme başarısız');
+    } finally {
+      setExporting(false);
+    }
+  };
+
   if (loading) {
     return (
       <Layout>
