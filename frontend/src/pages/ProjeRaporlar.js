@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -22,8 +23,14 @@ import {
   Plus, 
   FolderKanban,
   Filter,
-  X
+  X,
+  Download,
+  FileSpreadsheet,
+  Archive
 } from 'lucide-react';
+
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+const API = `${BACKEND_URL}/api`;
 
 const ProjeRaporlar = () => {
   const { projeId } = useParams();
@@ -35,6 +42,7 @@ const ProjeRaporlar = () => {
   const [filteredRaporlar, setFilteredRaporlar] = useState([]);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
+  const [exporting, setExporting] = useState(false);
   
   // Modal states
   const [showRaporModal, setShowRaporModal] = useState(false);
