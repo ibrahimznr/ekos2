@@ -529,20 +529,20 @@ const RaporDetailModal = ({ open, onClose, rapor, onEdit, onDelete }) => {
       </DialogContent>
 
       {/* File Preview Dialog */}
-      <Dialog open={showPreview} onOpenChange={setShowPreview}>
+      <Dialog open={showPreview} onOpenChange={(open) => !open && closePreview()}>
         <DialogContent className="max-w-5xl max-h-[90vh]">
           <DialogHeader>
             <DialogTitle>Dosya Önizleme</DialogTitle>
             <DialogDescription>{previewFile?.dosya_adi}</DialogDescription>
           </DialogHeader>
-          <div className="flex items-center justify-center bg-gray-100 rounded-lg p-4 max-h-[70vh] overflow-auto">
+          <div className="flex items-center justify-center bg-gray-100 rounded-lg p-4 min-h-[300px] max-h-[70vh] overflow-auto">
             {previewFile && (
               <>
                 {isImageFile(previewFile.dosya_adi) ? (
                   <img 
                     src={previewFile.url} 
                     alt={previewFile.dosya_adi}
-                    className="max-w-full max-h-full object-contain"
+                    className="max-w-full max-h-[60vh] object-contain"
                     onError={(e) => {
                       console.error('Image load error');
                       toast.error('Resim yüklenemedi');
@@ -553,7 +553,7 @@ const RaporDetailModal = ({ open, onClose, rapor, onEdit, onDelete }) => {
                     <iframe
                       src={previewFile.url}
                       title={previewFile.dosya_adi}
-                      className="w-full h-full rounded border border-gray-300"
+                      className="w-full flex-1 rounded border border-gray-300"
                       style={{ minHeight: '500px' }}
                     />
                     <p className="text-xs text-gray-600 mt-2 text-center">
@@ -583,17 +583,7 @@ const RaporDetailModal = ({ open, onClose, rapor, onEdit, onDelete }) => {
             )}
           </div>
           <div className="flex justify-end gap-2 mt-4">
-            <Button
-              variant="outline"
-              onClick={() => {
-                setShowPreview(false);
-                // Only revoke object URLs, not data URLs
-                if (previewFile?.url && !previewFile?.isPdfDataUrl) {
-                  window.URL.revokeObjectURL(previewFile.url);
-                }
-                setPreviewFile(null);
-              }}
-            >
+            <Button variant="outline" onClick={closePreview}>
               Kapat
             </Button>
             {previewFile && (
