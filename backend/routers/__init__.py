@@ -8,6 +8,7 @@ from .users import router as users_router
 from .projeler import router as projeler_router
 from .iskele import router as iskele_router
 from .static import router as static_router
+from .kalibrasyon import router as kalibrasyon_router
 
 __all__ = [
     'auth_router',
@@ -19,5 +20,6 @@ __all__ = [
     'users_router',
     'projeler_router',
     'iskele_router',
-    'static_router'
+    'static_router',
+    'kalibrasyon_router'
 ]
