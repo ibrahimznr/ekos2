@@ -600,6 +600,10 @@ const AdminPanel = () => {
               <FolderKanban className="h-4 w-4" />
               İskele Bileşen Adları
             </TabsTrigger>
+            <TabsTrigger value="kalibrasyon" className="flex items-center gap-2" data-testid="calibration-tab">
+              <Gauge className="h-4 w-4" />
+              Kalibrasyon
+            </TabsTrigger>
           </TabsList>
 
           {/* Users Tab */}
