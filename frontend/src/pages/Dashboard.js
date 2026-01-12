@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Layout from '@/components/Layout';
 import RaporModal from '@/components/RaporModal';
-import { FileText, CheckCircle2, XCircle, Calendar, TrendingUp, AlertTriangle, Plus, FolderKanban, ChevronDown, ChevronUp } from 'lucide-react';
+import { FileText, CheckCircle2, XCircle, Calendar, TrendingUp, AlertTriangle, Plus, FolderKanban, ChevronDown, ChevronUp, Gauge } from 'lucide-react';
 import { toast } from 'sonner';
 import api from '@/utils/api';
 
@@ -12,6 +12,8 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const [stats, setStats] = useState(null);
   const [projeler, setProjeler] = useState([]);
+  const [kalibrasyonCihazlari, setKalibrasyonCihazlari] = useState([]);
+  const [showKalibrasyonPopup, setShowKalibrasyonPopup] = useState(false);
   const [loading, setLoading] = useState(true);
   const [showRaporModal, setShowRaporModal] = useState(false);
   const [filteredRaporlar, setFilteredRaporlar] = useState([]);
@@ -28,6 +30,7 @@ const Dashboard = () => {
     }
     
     fetchStats();
+    fetchKalibrasyonCihazlari();
     fetchProjeler();
   }, [navigate]);
 
