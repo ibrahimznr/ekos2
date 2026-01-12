@@ -135,8 +135,6 @@ const ProjeRaporlar = () => {
   };
 
   const handleDeleteRapor = async (raporId) => {
-    if (!window.confirm('Bu raporu silmek istediğinizden emin misiniz?')) return;
-    
     try {
       await api.delete(`/raporlar/${raporId}`);
       toast.success('Rapor silindi');
