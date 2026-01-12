@@ -379,13 +379,15 @@ const ProjeRaporlar = () => {
             setSelectedRapor(null);
           }}
           rapor={selectedRapor}
-          onEdit={() => {
+          onEdit={(rapor) => {
             setShowDetailModal(false);
-            handleEditRapor(selectedRapor);
+            setSelectedRapor(null);
+            handleEditRapor(rapor);
           }}
-          onDelete={() => {
+          onDelete={async (raporId) => {
             setShowDetailModal(false);
-            handleDeleteRapor(selectedRapor.id);
+            setSelectedRapor(null);
+            await handleDeleteRapor(raporId);
           }}
         />
       )}
