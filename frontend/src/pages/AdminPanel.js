@@ -105,7 +105,7 @@ const AdminPanel = () => {
   }, [navigate]);
 
   const fetchData = async () => {
-    await Promise.all([fetchUsers(), fetchKategoriler(), fetchProjeler(), fetchIskeleBilesenAdlari()]);
+    await Promise.all([fetchUsers(), fetchKategoriler(), fetchProjeler(), fetchIskeleBilesenAdlari(), fetchKalibrasyonCihazlari()]);
     setLoading(false);
   };
 
@@ -154,6 +154,59 @@ const AdminPanel = () => {
       setIskeleBilesenAdlari(response.data);
     } catch (error) {
       toast.error('İskele bileşen adları yüklenemedi');
+    }
+  };
+
+  const fetchKalibrasyonCihazlari = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get(`${API}/kalibrasyon`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setKalibrasyonCihazlari(response.data);
+    } catch (error) {
+      console.error('Kalibrasyon cihazları yüklenemedi');
+    }
+  };
+
+  const handleCreateKalibrasyon = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      
+      if (!newKalibrasyon.cihaz_adi || !newKalibrasyon.seri_no || !newKalibrasyon.kalibrasyon_tarihi) {
+        toast.error('Tüm alanları doldurun');
+        return;
+      }
+      
+      if (editMode && editingItem) {
+        await axios.put(`${API}/kalibrasyon/${editingItem.id}`, newKalibrasyon, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        toast.success('Kalibrasyon cihazı güncellendi');
+      } else {
+        await axios.post(`${API}/kalibrasyon`, newKalibrasyon, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        toast.success('Kalibrasyon cihazı eklendi');
+      }
+      
+      handleCloseDialog('kalibrasyon');
+      fetchKalibrasyonCihazlari();
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'İşlem başarısız');
+    }
+  };
+
+  const handleDeleteKalibrasyon = async (cihazId) => {
+    try {
+      const token = localStorage.getItem('token');
+      await axios.delete(`${API}/kalibrasyon/${cihazId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      toast.success('Kalibrasyon cihazı silindi');
+      fetchKalibrasyonCihazlari();
+    } catch (error) {
+      toast.error('Silme işlemi başarısız');
     }
   };
 
