@@ -949,6 +949,79 @@ const AdminPanel = () => {
               ))}
             </div>
           </TabsContent>
+
+          {/* Kalibrasyon Tab */}
+          <TabsContent value="kalibrasyon" className="space-y-4">
+            <div className="flex justify-between items-center">
+              <p className="text-gray-600">{kalibrasyonCihazlari.length} ölçüm cihazı</p>
+              <Button 
+                onClick={() => {
+                  setEditMode(false);
+                  setEditingItem(null);
+                  setNewKalibrasyon({ cihaz_adi: '', seri_no: '', kalibrasyon_tarihi: '' });
+                  setShowKalibrasyonDialog(true);
+                }} 
+                className="bg-gradient-to-r from-teal-600 to-cyan-700 hover:from-teal-700 hover:to-cyan-800 text-white"
+                data-testid="add-calibration-button"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Ölçüm Cihazı Ekle
+              </Button>
+            </div>
+            
+            <div className="grid gap-3">
+              {kalibrasyonCihazlari.length === 0 ? (
+                <div className="text-center py-8 text-gray-500">
+                  <Gauge className="h-12 w-12 mx-auto mb-2 text-gray-300" />
+                  <p>Henüz ölçüm cihazı eklenmemiş</p>
+                </div>
+              ) : (
+                kalibrasyonCihazlari.map((cihaz) => (
+                  <Card key={cihaz.id} className="hover:shadow-md transition-shadow">
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3">
+                            <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-teal-500 to-cyan-600 flex items-center justify-center">
+                              <Gauge className="h-5 w-5 text-white" />
+                            </div>
+                            <div>
+                              <h3 className="font-semibold text-gray-800">{cihaz.cihaz_adi}</h3>
+                              <p className="text-sm text-gray-500">Seri No: {cihaz.seri_no}</p>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-4">
+                          <div className="text-right">
+                            <p className="text-xs text-gray-500">Kalibrasyon Tarihi</p>
+                            <p className="text-sm font-medium text-teal-600">{cihaz.kalibrasyon_tarihi}</p>
+                          </div>
+                          <div className="flex gap-1">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleEditClick(cihaz, 'kalibrasyon')}
+                              className="text-blue-600 hover:text-blue-800 hover:bg-blue-50"
+                            >
+                              Düzenle
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleDeleteKalibrasyon(cihaz.id)}
+                              className="text-red-600 hover:text-red-800 hover:bg-red-50"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))
+              )}
+            </div>
+          </TabsContent>
         </Tabs>
       </div>
 
