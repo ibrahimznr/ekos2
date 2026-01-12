@@ -35,7 +35,8 @@ from routers import (
     users_router,
     projeler_router,
     iskele_router,
-    static_router
+    static_router,
+    kalibrasyon_router
 )
 
 ROOT_DIR = Path(__file__).parent
@@ -68,6 +69,7 @@ api_router.include_router(excel_router)
 api_router.include_router(dashboard_router)
 api_router.include_router(users_router)
 api_router.include_router(projeler_router)
+api_router.include_router(kalibrasyon_router)
 api_router.include_router(iskele_router)
 api_router.include_router(static_router)
 
