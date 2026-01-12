@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -12,7 +12,9 @@ import {
 import { Card, CardContent } from '@/components/ui/card';
 import { toast } from 'sonner';
 import { Upload, FileText, Download, Trash2, Calendar, Building, MapPin, Package, Eye, Image as ImageIcon, Edit, Clipboard } from 'lucide-react';
-import api from '@/utils/api';
+
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+const API = `${BACKEND_URL}/api`;
 
 const RaporDetailModal = ({ open, onClose, rapor, onEdit, onDelete }) => {
   const [dosyalar, setDosyalar] = useState([]);
@@ -24,19 +26,19 @@ const RaporDetailModal = ({ open, onClose, rapor, onEdit, onDelete }) => {
   const dropZoneRef = useRef(null);
 
   useEffect(() => {
-    if (rapor) {
+    if (rapor && open) {
       fetchDosyalar();
     }
     const userData = localStorage.getItem('user');
     if (userData) {
       setUser(JSON.parse(userData));
     }
-  }, [rapor]);
+  }, [rapor, open]);
 
   // Paste event listener for clipboard images
   useEffect(() => {
     const handlePaste = async (e) => {
-      if (!open || !rapor) return;
+      if (!open || !rapor || !canEdit) return;
       
       const items = e.clipboardData?.items;
       if (!items) return;
@@ -54,23 +56,29 @@ const RaporDetailModal = ({ open, onClose, rapor, onEdit, onDelete }) => {
       }
     };
 
-    document.addEventListener('paste', handlePaste);
+    if (open) {
+      document.addEventListener('paste', handlePaste);
+    }
     return () => document.removeEventListener('paste', handlePaste);
-  }, [open, rapor]);
+  }, [open, rapor, user]);
+
+  const getToken = () => localStorage.getItem('token');
 
   const fetchDosyalar = async () => {
     try {
-      const response = await api.get(`/dosyalar/${rapor.id}`);
+      const response = await axios.get(`${API}/dosyalar/${rapor.id}`, {
+        headers: { Authorization: `Bearer ${getToken()}` },
+      });
       setDosyalar(response.data);
     } catch (error) {
-      toast.error('Dosyalar yüklenemedi');
+      console.error('Dosyalar yüklenemedi:', error);
     }
   };
 
   const uploadFile = async (file) => {
-    // Check file size (4GB)
-    if (file.size > 4 * 1024 * 1024 * 1024) {
-      toast.error('Dosya boyutu 4GB\'dan büyük olamaz');
+    // Check file size (100MB limit for practical use)
+    if (file.size > 100 * 1024 * 1024) {
+      toast.error('Dosya boyutu 100MB\'dan büyük olamaz');
       return;
     }
 
@@ -86,8 +94,9 @@ const RaporDetailModal = ({ open, onClose, rapor, onEdit, onDelete }) => {
       const formData = new FormData();
       formData.append('file', file);
 
-      await api.post(`/upload/${rapor.id}`, formData, {
+      await axios.post(`${API}/upload/${rapor.id}`, formData, {
         headers: {
+          Authorization: `Bearer ${getToken()}`,
           'Content-Type': 'multipart/form-data',
         },
       });
@@ -102,9 +111,12 @@ const RaporDetailModal = ({ open, onClose, rapor, onEdit, onDelete }) => {
   };
 
   const handleFileUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    await uploadFile(file);
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+    
+    for (let i = 0; i < files.length; i++) {
+      await uploadFile(files[i]);
+    }
     e.target.value = '';
   };
 
@@ -140,8 +152,12 @@ const RaporDetailModal = ({ open, onClose, rapor, onEdit, onDelete }) => {
   };
 
   const handleDeleteFile = async (dosyaId) => {
+    if (!window.confirm('Bu dosyayı silmek istediğinizden emin misiniz?')) return;
+    
     try {
-      await api.delete(`/dosyalar/${dosyaId}`);
+      await axios.delete(`${API}/dosyalar/${dosyaId}`, {
+        headers: { Authorization: `Bearer ${getToken()}` },
+      });
       toast.success('Dosya silindi');
       fetchDosyalar();
     } catch (error) {
@@ -151,8 +167,8 @@ const RaporDetailModal = ({ open, onClose, rapor, onEdit, onDelete }) => {
 
   const handleDownloadFile = async (dosya) => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await api.get(`/dosyalar/${dosya.id}/indir`, {
+      const response = await axios.get(`${API}/dosyalar/${dosya.id}/indir`, {
+        headers: { Authorization: `Bearer ${getToken()}` },
         responseType: 'blob',
       });
 
@@ -172,11 +188,11 @@ const RaporDetailModal = ({ open, onClose, rapor, onEdit, onDelete }) => {
 
   const handlePreviewFile = async (dosya) => {
     try {
-      const response = await api.get(`/dosyalar/${dosya.id}/indir`, {
+      const response = await axios.get(`${API}/dosyalar/${dosya.id}/indir`, {
+        headers: { Authorization: `Bearer ${getToken()}` },
         responseType: 'blob',
       });
 
-      // Determine blob type from filename
       const fileExt = dosya.dosya_adi.split('.').pop().toLowerCase();
       const mimeTypes = {
         'pdf': 'application/pdf',
@@ -187,39 +203,47 @@ const RaporDetailModal = ({ open, onClose, rapor, onEdit, onDelete }) => {
         'webp': 'image/webp',
         'bmp': 'image/bmp',
       };
-      const mimeType = mimeTypes[fileExt] || 'application/octet-stream';
+      const mimeType = mimeTypes[fileExt] || response.headers['content-type'] || 'application/octet-stream';
 
-      // For PDF files, use FileReader to create a data URL for better compatibility
       if (fileExt === 'pdf') {
+        // PDF için data URL kullan
         const reader = new FileReader();
         reader.onloadend = () => {
-          setPreviewFile({ ...dosya, url: reader.result, mimeType, isPdfDataUrl: true });
+          setPreviewFile({ ...dosya, url: reader.result, mimeType, isPdf: true });
           setShowPreview(true);
         };
         reader.onerror = () => {
           toast.error('PDF dosyası yüklenemedi');
         };
-        reader.readAsDataURL(response.data);
+        reader.readAsDataURL(new Blob([response.data], { type: mimeType }));
       } else {
-        // For images, use object URL
+        // Resimler için object URL kullan
         const blob = new Blob([response.data], { type: mimeType });
         const url = window.URL.createObjectURL(blob);
-        setPreviewFile({ ...dosya, url, mimeType, isPdfDataUrl: false });
+        setPreviewFile({ ...dosya, url, mimeType, isPdf: false });
         setShowPreview(true);
       }
     } catch (error) {
       console.error('Preview error:', error);
-      toast.error(`Dosya önizlenemiyor: ${error.response?.statusText || error.message}`);
+      toast.error('Dosya önizlenemiyor');
     }
   };
 
+  const closePreview = () => {
+    if (previewFile?.url && !previewFile?.isPdf) {
+      window.URL.revokeObjectURL(previewFile.url);
+    }
+    setPreviewFile(null);
+    setShowPreview(false);
+  };
+
   const isImageFile = (filename) => {
-    const ext = filename.split('.').pop().toLowerCase();
-    return ['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext);
+    const ext = filename?.split('.').pop()?.toLowerCase() || '';
+    return ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp'].includes(ext);
   };
 
   const isPdfFile = (filename) => {
-    return filename.toLowerCase().endsWith('.pdf');
+    return filename?.toLowerCase().endsWith('.pdf');
   };
 
   const canEdit = user?.role === 'admin' || user?.role === 'inspector';
