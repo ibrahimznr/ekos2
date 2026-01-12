@@ -375,21 +375,6 @@ const ProjeRaporlar = () => {
             await handleDeleteRapor(raporId);
           }}
         />
-      )};
-            setSelectedRapor(null);
-          }}
-          rapor={selectedRapor}
-          onEdit={(rapor) => {
-            setShowDetailModal(false);
-            setSelectedRapor(null);
-            handleEditRapor(rapor);
-          }}
-          onDelete={async (raporId) => {
-            setShowDetailModal(false);
-            setSelectedRapor(null);
-            await handleDeleteRapor(raporId);
-          }}
-        />
       )}
     </Layout>
   );
