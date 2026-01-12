@@ -20,10 +20,6 @@ import {
   Search, 
   FileText, 
   Plus, 
-  Eye, 
-  Edit, 
-  Trash2, 
-  Download,
   FolderKanban,
   Filter,
   X
