@@ -501,6 +501,13 @@ const AdminPanel = () => {
         aciklama: item.aciklama || ''
       });
       setShowBilesenAdiDialog(true);
+    } else if (type === 'kalibrasyon') {
+      setNewKalibrasyon({
+        cihaz_adi: item.cihaz_adi || '',
+        seri_no: item.seri_no || '',
+        kalibrasyon_tarihi: item.kalibrasyon_tarihi || ''
+      });
+      setShowKalibrasyonDialog(true);
     }
   };
 
@@ -524,6 +531,9 @@ const AdminPanel = () => {
     } else if (type === 'bilesen_adi') {
       setShowBilesenAdiDialog(false);
       setNewBilesenAdi({ bilesen_adi: '', aciklama: '' });
+    } else if (type === 'kalibrasyon') {
+      setShowKalibrasyonDialog(false);
+      setNewKalibrasyon({ cihaz_adi: '', seri_no: '', kalibrasyon_tarihi: '' });
     }
   };
 
