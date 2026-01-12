@@ -35,7 +35,7 @@ import {
 } from '@/components/ui/select';
 import Layout from '@/components/Layout';
 import { toast } from 'sonner';
-import { Plus, Trash2, Users, FolderTree, Shield, AlertCircle, FolderKanban, X, Eye, EyeOff } from 'lucide-react';
+import { Plus, Trash2, Users, FolderTree, Shield, AlertCircle, FolderKanban, X, Eye, EyeOff, Gauge } from 'lucide-react';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -47,20 +47,22 @@ const AdminPanel = () => {
   const [kategoriler, setKategoriler] = useState([]);
   const [projeler, setProjeler] = useState([]);
   const [iskeleBilesenAdlari, setIskeleBilesenAdlari] = useState([]);
+  const [kalibrasyonCihazlari, setKalibrasyonCihazlari] = useState([]);
   const [loading, setLoading] = useState(true);
   
   const [showUserDialog, setShowUserDialog] = useState(false);
   const [showKategoriDialog, setShowKategoriDialog] = useState(false);
   const [showProjeDialog, setShowProjeDialog] = useState(false);
   const [showBilesenAdiDialog, setShowBilesenAdiDialog] = useState(false);
+  const [showKalibrasyonDialog, setShowKalibrasyonDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [deleteItem, setDeleteItem] = useState(null);
-  const [deleteType, setDeleteType] = useState(''); // 'user', 'kategori', or 'proje'
+  const [deleteType, setDeleteType] = useState(''); // 'user', 'kategori', 'proje', or 'kalibrasyon'
   
   // Edit states
   const [editMode, setEditMode] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
-  const [editType, setEditType] = useState(''); // 'user', 'kategori', or 'proje'
+  const [editType, setEditType] = useState(''); // 'user', 'kategori', 'proje', or 'kalibrasyon'
   
   const [newUser, setNewUser] = useState({ username: '', email: '', password: '', password_confirm: '', role: 'viewer' });
   const [showPassword, setShowPassword] = useState(false);
@@ -77,12 +79,14 @@ const AdminPanel = () => {
     aciklama: '' 
   });
   const [newBilesenAdi, setNewBilesenAdi] = useState({ bilesen_adi: '', aciklama: '' });
+  const [newKalibrasyon, setNewKalibrasyon] = useState({ cihaz_adi: '', seri_no: '', kalibrasyon_tarihi: '' });
   
   // Bulk delete state
   const [selectedUsers, setSelectedUsers] = useState([]);
   const [selectedKategoriler, setSelectedKategoriler] = useState([]);
   const [selectedProjeler, setSelectedProjeler] = useState([]);
   const [selectedBilesenAdlari, setSelectedBilesenAdlari] = useState([]);
+  const [selectedKalibrasyonlar, setSelectedKalibrasyonlar] = useState([]);
 
   useEffect(() => {
     const userData = localStorage.getItem('user');
