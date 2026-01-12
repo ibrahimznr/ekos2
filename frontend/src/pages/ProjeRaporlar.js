@@ -337,39 +337,6 @@ const ProjeRaporlar = () => {
                       <p><span className="text-gray-500">Geçerlilik:</span> {rapor.gecerlilik_tarihi}</p>
                     )}
                   </div>
-                  
-                  {/* Action buttons */}
-                  <div className="flex gap-2 pt-2 border-t" onClick={(e) => e.stopPropagation()}>
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      className="flex-1 text-blue-600 hover:bg-blue-50"
-                      onClick={() => handleViewRapor(rapor)}
-                    >
-                      <Eye className="h-4 w-4 mr-1" />
-                      Görüntüle
-                    </Button>
-                    {(user?.role === 'admin' || user?.role === 'inspector') && (
-                      <>
-                        <Button 
-                          variant="ghost" 
-                          size="sm"
-                          className="text-amber-600 hover:bg-amber-50"
-                          onClick={() => handleEditRapor(rapor)}
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button 
-                          variant="ghost" 
-                          size="sm"
-                          className="text-red-600 hover:bg-red-50"
-                          onClick={() => handleDeleteRapor(rapor.id)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </>
-                    )}
-                  </div>
                 </CardContent>
               </Card>
             ))}
@@ -395,9 +362,24 @@ const ProjeRaporlar = () => {
       {/* Rapor Detail Modal */}
       {showDetailModal && selectedRapor && (
         <RaporDetailModal
-          isOpen={showDetailModal}
+          open={showDetailModal}
           onClose={() => {
             setShowDetailModal(false);
+            setSelectedRapor(null);
+          }}
+          rapor={selectedRapor}
+          onEdit={(rapor) => {
+            setShowDetailModal(false);
+            setSelectedRapor(null);
+            handleEditRapor(rapor);
+          }}
+          onDelete={async (raporId) => {
+            setShowDetailModal(false);
+            setSelectedRapor(null);
+            await handleDeleteRapor(raporId);
+          }}
+        />
+      )};
             setSelectedRapor(null);
           }}
           rapor={selectedRapor}
