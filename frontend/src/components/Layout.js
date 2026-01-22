@@ -12,6 +12,7 @@ const Layout = ({ children }) => {
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = React.useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
+  const [cekilisOpen, setCekilisOpen] = React.useState(false);
   const user = JSON.parse(localStorage.getItem('user') || '{}');
 
   const handleLogout = async () => {
