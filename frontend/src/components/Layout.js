@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { LayoutDashboard, FileText, Shield, LogOut, Menu, X, Building2, User, Plus, ChevronLeft, ChevronRight, Settings, Truck } from 'lucide-react';
+import { LayoutDashboard, FileText, Shield, LogOut, Menu, X, Building2, User, Plus, ChevronLeft, ChevronRight, Settings, Truck, Trophy, BookOpen, Brain, ChevronDown } from 'lucide-react';
 import { toast } from 'sonner';
 import api from '@/utils/api';
 
