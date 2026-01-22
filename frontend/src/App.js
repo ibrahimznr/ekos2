@@ -55,6 +55,10 @@ function App() {
       <div className="App">
         <BrowserRouter>
           <Routes>
+            {/* Public Routes */}
+            <Route path="/rapor/:raporId" element={<PublicRaporView />} />
+            
+            {/* Auth Routes */}
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/" element={<DashboardRoute />} />
