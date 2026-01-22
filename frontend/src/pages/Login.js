@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,12 +8,14 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
 import { Shield } from 'lucide-react';
+import LanguageSelector from '@/components/LanguageSelector';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 const LOGO_URL = '/ekos-logo.png';
 
 const Login = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -31,10 +34,10 @@ const Login = () => {
       localStorage.setItem('token', response.data.access_token);
       localStorage.setItem('user', JSON.stringify(response.data.user));
 
-      toast.success('Giriş başarılı!');
+      toast.success(t('auth.loginSuccess'));
       navigate('/');
     } catch (error) {
-      toast.error(error.response?.data?.detail || 'Giriş başarısız');
+      toast.error(error.response?.data?.detail || t('auth.loginError'));
     } finally {
       setLoading(false);
     }
@@ -42,6 +45,11 @@ const Login = () => {
 
   return (
     <div className="min-h-screen flex" style={{ background: 'linear-gradient(135deg, #e8ecef 0%, #f0f4f8 50%, #e8ecef 100%)' }}>
+      {/* Language Selector - Top Right */}
+      <div className="absolute top-4 right-4 z-10">
+        <LanguageSelector variant="default" />
+      </div>
+
       {/* Left Side - Logo Section (hidden on mobile) */}
       <div className="hidden lg:flex lg:w-1/2 items-center justify-center p-8" style={{ background: 'linear-gradient(135deg, #e8ecef 0%, #f0f4f8 100%)' }}>
         <div className="text-center">
@@ -63,9 +71,9 @@ const Login = () => {
           {/* Desktop Header - EKOS Title above form */}
           <div className="hidden lg:block text-center mb-6">
             <h1 className="text-3xl font-bold mb-2" style={{ fontFamily: 'IBM Plex Sans, sans-serif', color: '#1e40af' }}>
-              EKOS
+              {t('common.appName')}
             </h1>
-            <p className="text-base italic" style={{ color: '#3b82f6' }}>Ekipman Kontrol Otomasyon Sistemi</p>
+            <p className="text-base italic" style={{ color: '#3b82f6' }}>{t('common.appFullName')}</p>
           </div>
 
           {/* Mobile Logo (shown only on mobile) */}
