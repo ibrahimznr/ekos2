@@ -58,6 +58,22 @@ EKOS is an equipment control automation system for managing inspection reports, 
 - Edit button now opens the edit form with pre-filled data
 - Delete button triggers confirmation dialog and deletes report
 
+**Feature: Yeni Rapor with Auto-Fill Project Data** ✅
+- "Yeni Rapor" button in ProjeRaporlar now auto-fills:
+  - Proje (automatically selected)
+  - Şehir (from project lokasyon)
+  - Firma (from project firma_adi)
+- Added auto-fill logic in RaporModal useEffect
+
+**Feature: Centered Notification Modal** ✅
+- Created new `NotificationModal` component with:
+  - Centered dialog with icon (success/error/warning/info)
+  - Title and message
+  - "Tamam" button to close
+  - Color-coded backgrounds (green/red/amber/blue)
+- Replaced corner toast notifications with centered modal in ProjeRaporlar page
+- Used for: success messages, error alerts, warnings
+
 ### January 22, 2026 - GitHub Synchronization Complete
 **P0 Task: GitHub Code Synchronization** ✅
 - Successfully synchronized application with GitHub repository: `https://github.com/ibrahimznr/ekos_local.git`
