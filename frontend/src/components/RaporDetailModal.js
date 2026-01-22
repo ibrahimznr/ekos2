@@ -649,6 +649,89 @@ const RaporDetailModal = ({ open, onClose, rapor, onEdit, onDelete }) => {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* QR Code & Share Modal */}
+      <Dialog open={showQrModal} onOpenChange={setShowQrModal}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <QrCode className="h-5 w-5 text-purple-600" />
+              Rapor Paylaşım
+            </DialogTitle>
+            <DialogDescription>
+              Bu bağlantı ile rapor önizlemesi ve medya dosyaları görüntülenebilir.
+            </DialogDescription>
+          </DialogHeader>
+          
+          {shareInfo && (
+            <div className="space-y-4 py-4">
+              {/* QR Code */}
+              <div className="flex flex-col items-center">
+                <div className="bg-white p-4 rounded-lg border shadow-sm">
+                  <img 
+                    src={shareInfo.qr_code_url} 
+                    alt="QR Kod"
+                    className="w-48 h-48"
+                  />
+                </div>
+                <p className="text-sm text-gray-500 mt-2">{shareInfo.rapor_no}</p>
+              </div>
+
+              {/* Public URL */}
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Paylaşım Linki</Label>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={shareInfo.public_url}
+                    readOnly
+                    className="flex-1 px-3 py-2 text-sm bg-gray-50 border rounded-lg"
+                  />
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => copyToClipboard(shareInfo.public_url)}
+                    title="Kopyala"
+                  >
+                    <Copy className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={openPublicLink}
+                    title="Aç"
+                  >
+                    <ExternalLink className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex gap-2 pt-2">
+                <Button
+                  variant="outline"
+                  className="flex-1"
+                  onClick={downloadQrCode}
+                >
+                  <Download className="h-4 w-4 mr-2" />
+                  QR Kodu İndir
+                </Button>
+                <Button
+                  className="flex-1 bg-purple-600 hover:bg-purple-700"
+                  onClick={() => copyToClipboard(shareInfo.public_url)}
+                >
+                  <Copy className="h-4 w-4 mr-2" />
+                  Linki Kopyala
+                </Button>
+              </div>
+
+              <p className="text-xs text-gray-500 text-center pt-2">
+                Bu link ile herkes raporu görüntüleyebilir (düzenleme yapamaz).
+              </p>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </Dialog>
   );
 };
