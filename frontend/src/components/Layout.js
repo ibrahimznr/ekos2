@@ -128,6 +128,73 @@ const Layout = ({ children }) => {
               </button>
             );
           })}
+
+          {/* Çekiliş Dropdown */}
+          <div className="pt-2 border-t border-gray-200 mt-2">
+            <button
+              onClick={() => setCekilisOpen(!cekilisOpen)}
+              className={`w-full flex items-center gap-3 px-3 py-3 rounded-lg transition-all duration-200 ${
+                location.pathname.startsWith('/cekilis') || location.pathname === '/kelime-havuzu' || location.pathname === '/zeka-oyunu'
+                  ? 'bg-gradient-to-r from-purple-600 to-purple-700 text-white shadow-md'
+                  : 'text-gray-700 hover:bg-gray-100'
+              } ${!sidebarOpen ? 'justify-center' : ''}`}
+              title={!sidebarOpen ? 'Çekiliş' : ''}
+              data-testid="nav-cekilis"
+            >
+              <Trophy className={`h-5 w-5 flex-shrink-0 ${
+                location.pathname.startsWith('/cekilis') || location.pathname === '/kelime-havuzu' || location.pathname === '/zeka-oyunu'
+                  ? 'text-white' : 'text-purple-500'
+              }`} />
+              {sidebarOpen && (
+                <>
+                  <span className="font-medium flex-1 text-left">Çekiliş</span>
+                  <ChevronDown className={`h-4 w-4 transition-transform ${cekilisOpen ? 'rotate-180' : ''}`} />
+                </>
+              )}
+            </button>
+
+            {/* Submenu */}
+            {sidebarOpen && cekilisOpen && (
+              <div className="ml-4 mt-1 space-y-1">
+                <button
+                  onClick={() => navigate('/cekilis')}
+                  className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 ${
+                    location.pathname === '/cekilis'
+                      ? 'bg-purple-100 text-purple-700'
+                      : 'text-gray-600 hover:bg-gray-100'
+                  }`}
+                  data-testid="nav-cekilis-havuzu"
+                >
+                  <Trophy className="h-4 w-4 flex-shrink-0" />
+                  <span className="text-sm">Çekiliş Havuzu</span>
+                </button>
+                <button
+                  onClick={() => navigate('/kelime-havuzu')}
+                  className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 ${
+                    location.pathname === '/kelime-havuzu'
+                      ? 'bg-purple-100 text-purple-700'
+                      : 'text-gray-600 hover:bg-gray-100'
+                  }`}
+                  data-testid="nav-kelime-havuzu"
+                >
+                  <BookOpen className="h-4 w-4 flex-shrink-0" />
+                  <span className="text-sm">İngilizce Kelime Havuzu</span>
+                </button>
+                <button
+                  onClick={() => navigate('/zeka-oyunu')}
+                  className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 ${
+                    location.pathname === '/zeka-oyunu'
+                      ? 'bg-purple-100 text-purple-700'
+                      : 'text-gray-600 hover:bg-gray-100'
+                  }`}
+                  data-testid="nav-zeka-oyunu"
+                >
+                  <Brain className="h-4 w-4 flex-shrink-0" />
+                  <span className="text-sm">Zeka Oyunları</span>
+                </button>
+              </div>
+            )}
+          </div>
         </nav>
 
         {/* Settings Button */}
