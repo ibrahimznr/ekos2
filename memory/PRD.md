@@ -52,6 +52,12 @@ EKOS is an equipment control automation system for managing inspection reports, 
 - Loading state with progress toast message
 - 5-minute timeout for large projects
 
+**Bug Fix: ProjeRaporlar Edit/Delete Buttons** ✅
+- Fixed prop name mismatch in RaporModal: `isOpen` → `open`, `editingRapor` → `rapor`
+- Added `defaultProjeId` and `defaultProjeName` props to RaporModal
+- Edit button now opens the edit form with pre-filled data
+- Delete button triggers confirmation dialog and deletes report
+
 ### January 22, 2026 - GitHub Synchronization Complete
 **P0 Task: GitHub Code Synchronization** ✅
 - Successfully synchronized application with GitHub repository: `https://github.com/ibrahimznr/ekos_local.git`
