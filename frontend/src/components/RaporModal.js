@@ -26,7 +26,7 @@ import DragDropImageUpload from './DragDropImageUpload';
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
-const RaporModal = ({ open, onClose, rapor, onSuccess }) => {
+const RaporModal = ({ open, onClose, rapor, onSuccess, defaultProjeId, defaultProjeName }) => {
   const [loading, setLoading] = useState(false);
   const [projeler, setProjeler] = useState([]);
   const [sehirler, setSehirler] = useState([]);
@@ -81,8 +81,11 @@ const RaporModal = ({ open, onClose, rapor, onSuccess }) => {
       if (rapor.kategori && kategoriAltKategoriMap[rapor.kategori]) {
         setAltKategoriler(kategoriAltKategoriMap[rapor.kategori]);
       }
+    } else if (defaultProjeId) {
+      // Set default project for new reports from project page
+      setFormData(prev => ({ ...prev, proje_id: defaultProjeId }));
     }
-  }, [open, rapor]);
+  }, [open, rapor, defaultProjeId]);
 
   const fetchProjeler = async () => {
     try {
