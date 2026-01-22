@@ -23,6 +23,8 @@ const RaporDetailModal = ({ open, onClose, rapor, onEdit, onDelete }) => {
   const [previewFile, setPreviewFile] = useState(null);
   const [showPreview, setShowPreview] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
+  const [showQrModal, setShowQrModal] = useState(false);
+  const [shareInfo, setShareInfo] = useState(null);
   const dropZoneRef = useRef(null);
 
   useEffect(() => {
