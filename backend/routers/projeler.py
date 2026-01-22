@@ -1,12 +1,26 @@
 from fastapi import APIRouter, HTTPException, Depends
-from typing import List
+from typing import List, Optional
 from datetime import datetime
+from pydantic import BaseModel
 
 from models import Proje, ProjeCreate
 from routers.auth import get_current_user
 from database import db
 
 router = APIRouter(prefix="/projeler", tags=["Projeler"])
+
+# Migration için özel model (tüm alanlar opsiyonel)
+class ProjeMigration(BaseModel):
+    id: str
+    proje_adi: str
+    firma_adi: Optional[str] = ""
+    proje_kodu: Optional[str] = ""
+    lokasyon: Optional[str] = ""
+    baslangic_tarihi: Optional[str] = None
+    bitis_tarihi: Optional[str] = None
+    durum: Optional[str] = "Aktif"
+    aciklama: Optional[str] = ""
+    created_at: Optional[str] = None
 
 @router.get("", response_model=List[Proje])
 async def get_projeler(current_user: dict = Depends(get_current_user)):
