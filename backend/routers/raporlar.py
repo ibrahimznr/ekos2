@@ -652,3 +652,111 @@ async def migrate_raporlar_bulk(raporlar: List[RaporMigration], current_user: di
     
     return {"message": f"{success_count}/{len(raporlar)} rapor aktarıldı", "success_count": success_count}
 
+
+
+# ==================== PUBLIC RAPOR GÖRÜNTÜLEME ====================
+
+@router.get("/public/{rapor_id}")
+async def get_public_rapor(rapor_id: str):
+    """
+    Public rapor görüntüleme - login gerektirmez
+    Sadece rapor bilgileri ve medya dosyaları görüntülenebilir
+    """
+    rapor = await db.raporlar.find_one({"id": rapor_id}, {"_id": 0})
+    if not rapor:
+        raise HTTPException(status_code=404, detail="Rapor bulunamadı")
+    
+    # Tarihleri düzenle
+    if isinstance(rapor.get('created_at'), str):
+        rapor['created_at'] = datetime.fromisoformat(rapor['created_at'])
+    if isinstance(rapor.get('updated_at'), str):
+        rapor['updated_at'] = datetime.fromisoformat(rapor['updated_at'])
+    if 'created_by_username' not in rapor or not rapor['created_by_username']:
+        rapor['created_by_username'] = 'Belirtilmemiş'
+    
+    # Medya dosyalarını getir
+    medya_dosyalari = await db.medya_dosyalari.find(
+        {"rapor_id": rapor_id}, 
+        {"_id": 0}
+    ).to_list(100)
+    
+    # Dosya URL'lerini oluştur
+    for dosya in medya_dosyalari:
+        dosya_yolu = dosya.get("dosya_yolu", "")
+        if dosya_yolu:
+            # Relative path oluştur
+            dosya["url"] = f"/api/files/{rapor_id}/{os.path.basename(dosya_yolu)}"
+    
+    return {
+        "rapor": rapor,
+        "medya_dosyalari": medya_dosyalari
+    }
+
+
+@router.get("/public/{rapor_id}/qr")
+async def get_rapor_qr_code(rapor_id: str, request: Request):
+    """
+    Rapor için QR kod oluştur
+    QR kod, public rapor görüntüleme sayfasına yönlendirir
+    """
+    # Rapor var mı kontrol et
+    rapor = await db.raporlar.find_one({"id": rapor_id}, {"_id": 0, "id": 1, "rapor_no": 1})
+    if not rapor:
+        raise HTTPException(status_code=404, detail="Rapor bulunamadı")
+    
+    # Frontend URL'ini oluştur
+    # Request'ten host bilgisini al
+    host = request.headers.get("x-forwarded-host") or request.headers.get("host") or "localhost"
+    scheme = request.headers.get("x-forwarded-proto") or "https"
+    
+    # Public rapor sayfası URL'i
+    public_url = f"{scheme}://{host}/rapor/{rapor_id}"
+    
+    # QR kod oluştur
+    qr = qrcode.QRCode(
+        version=1,
+        error_correction=ERROR_CORRECT_M,
+        box_size=10,
+        border=4,
+    )
+    qr.add_data(public_url)
+    qr.make(fit=True)
+    
+    # PNG olarak kaydet
+    img = qr.make_image(fill_color="black", back_color="white")
+    
+    # BytesIO'ya yaz
+    img_buffer = io.BytesIO()
+    img.save(img_buffer, format='PNG')
+    img_buffer.seek(0)
+    
+    return Response(
+        content=img_buffer.getvalue(),
+        media_type="image/png",
+        headers={
+            "Content-Disposition": f'inline; filename="rapor_{rapor.get("rapor_no", rapor_id)}_qr.png"'
+        }
+    )
+
+
+@router.get("/public/{rapor_id}/share-info")
+async def get_rapor_share_info(rapor_id: str, request: Request):
+    """
+    Rapor paylaşım bilgilerini getir (URL ve QR kod URL)
+    """
+    rapor = await db.raporlar.find_one({"id": rapor_id}, {"_id": 0, "id": 1, "rapor_no": 1, "ekipman_adi": 1})
+    if not rapor:
+        raise HTTPException(status_code=404, detail="Rapor bulunamadı")
+    
+    # URL'leri oluştur
+    host = request.headers.get("x-forwarded-host") or request.headers.get("host") or "localhost"
+    scheme = request.headers.get("x-forwarded-proto") or "https"
+    base_url = f"{scheme}://{host}"
+    
+    return {
+        "rapor_id": rapor_id,
+        "rapor_no": rapor.get("rapor_no"),
+        "ekipman_adi": rapor.get("ekipman_adi"),
+        "public_url": f"{base_url}/rapor/{rapor_id}",
+        "qr_code_url": f"{base_url}/api/raporlar/public/{rapor_id}/qr"
+    }
