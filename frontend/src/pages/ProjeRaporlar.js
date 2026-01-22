@@ -346,9 +346,10 @@ const ProjeRaporlar = () => {
                   onClick={handleZipExport}
                   disabled={exporting}
                   className="text-purple-600 border-purple-300 hover:bg-purple-50"
+                  title="Tüm raporları medya dosyalarıyla birlikte indir"
                 >
                   <Archive className="h-4 w-4 mr-2" />
-                  {exporting ? 'İndiriliyor...' : 'ZIP İndir'}
+                  {exporting ? 'Hazırlanıyor...' : 'Toplu ZIP (Medya Dahil)'}
                 </Button>
               </>
             )}
