@@ -19,6 +19,7 @@ import ExcelImportModal from '@/components/ExcelImportModal';
 import IskeleBileseniModal from '@/components/IskeleBileseniModal';
 import IskeleBileseniExcelImportModal from '@/components/IskeleBileseniExcelImportModal';
 import FiltrelemePanel from '@/components/FiltrelemePanel';
+import NotificationModal from '@/components/NotificationModal';
 import {
   DropdownMenu,
   DropdownMenuContent,
