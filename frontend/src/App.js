@@ -8,8 +8,11 @@ import Raporlar from '@/pages/Raporlar';
 import ProjeRaporlar from '@/pages/ProjeRaporlar';
 import IskeleBilesenleri from '@/pages/IskeleBilesenleri';
 import AdminPanel from '@/pages/AdminPanel';
+import Ayarlar from '@/pages/Ayarlar';
+import Makineler from '@/pages/Makineler';
+import CepheIskeleleri from '@/pages/CepheIskeleleri';
 import ErrorBoundary from '@/components/ErrorBoundary';
-import { Toaster} from '@/components/ui/sonner';
+import { Toaster } from '@/components/ui/sonner';
 
 const ProtectedRoute = ({ children }) => {
   const token = localStorage.getItem('token');
@@ -21,12 +24,12 @@ const ProtectedRoute = ({ children }) => {
 
 const DashboardRoute = () => {
   const user = JSON.parse(localStorage.getItem('user') || '{}');
-  
+
   // Viewer'lar için raporlar sayfasına yönlendir
   if (user.role === 'viewer') {
     return <Navigate to="/raporlar" replace />;
   }
-  
+
   // Admin ve Inspector için Dashboard
   return (
     <ProtectedRoute>
@@ -69,10 +72,34 @@ function App() {
               }
             />
             <Route
+              path="/makineler"
+              element={
+                <ProtectedRoute>
+                  <Makineler />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/cephe-iskeleleri"
+              element={
+                <ProtectedRoute>
+                  <CepheIskeleleri />
+                </ProtectedRoute>
+              }
+            />
+            <Route
               path="/admin"
               element={
                 <ProtectedRoute>
                   <AdminPanel />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/ayarlar"
+              element={
+                <ProtectedRoute>
+                  <Ayarlar />
                 </ProtectedRoute>
               }
             />

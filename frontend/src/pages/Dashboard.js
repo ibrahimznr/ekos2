@@ -28,7 +28,7 @@ const Dashboard = () => {
       navigate('/raporlar');
       return;
     }
-    
+
     fetchStats();
     fetchKalibrasyonCihazlari();
     fetchProjeler();
@@ -41,7 +41,7 @@ const Dashboard = () => {
         navigate('/login');
         return;
       }
-      
+
       const response = await api.get('/dashboard/stats', {
         timeout: 10000, // 10 second timeout
       });
@@ -72,17 +72,26 @@ const Dashboard = () => {
     }
   };
 
+  const fetchKalibrasyonCihazlari = async () => {
+    try {
+      const response = await api.get('/kalibrasyon/cihazlar');
+      setKalibrasyonCihazlari(response.data);
+    } catch (error) {
+      console.error('Kalibrasyon cihazları yüklenemedi');
+    }
+  };
+
   const fetchExpiredReports = async () => {
     try {
       const response = await api.get('/raporlar?arama=&kategori=&uygunluk=');
-      
+
       const today = new Date();
       const expired = response.data.filter(r => {
         if (!r.gecerlilik_tarihi) return false;
         const expiryDate = new Date(r.gecerlilik_tarihi);
         return expiryDate < today;
       });
-      
+
       setFilteredRaporlar(expired);
       setFilterType('expired');
       navigate('/raporlar', { state: { filteredReports: expired, filterType: 'Süresi Geçenler' } });
@@ -94,17 +103,17 @@ const Dashboard = () => {
   const fetchExpiringReports = async () => {
     try {
       const response = await api.get('/raporlar?arama=&kategori=&uygunluk=');
-      
+
       const today = new Date();
       const thirtyDaysLater = new Date();
       thirtyDaysLater.setDate(today.getDate() + 30);
-      
+
       const expiring = response.data.filter(r => {
         if (!r.gecerlilik_tarihi) return false;
         const expiryDate = new Date(r.gecerlilik_tarihi);
         return expiryDate >= today && expiryDate <= thirtyDaysLater;
       });
-      
+
       setFilteredRaporlar(expiring);
       setFilterType('expiring');
       navigate('/raporlar', { state: { filteredReports: expiring, filterType: '30 Gün İçinde Süresi Dolacaklar' } });
@@ -253,7 +262,7 @@ const Dashboard = () => {
                 </div>
                 <div className="text-xl sm:text-2xl font-bold text-amber-700">{stats?.expiring_30_days || 0}</div>
               </Button>
-              
+
               <Button
                 onClick={fetchExpiredReports}
                 variant="outline"
@@ -283,7 +292,7 @@ const Dashboard = () => {
                     const percentage = stats.total_raporlar > 0
                       ? Math.round((item.count / stats.total_raporlar) * 100)
                       : 0;
-                    
+
                     const colors = [
                       'bg-blue-600',
                       'bg-purple-600',
@@ -292,7 +301,7 @@ const Dashboard = () => {
                       'bg-red-600',
                       'bg-indigo-600',
                     ];
-                    
+
                     return (
                       <div key={index} className="space-y-1">
                         <div className="flex justify-between text-sm">
@@ -360,20 +369,20 @@ const Dashboard = () => {
               {stats.iskele_stats.bilesen_dagilim && stats.iskele_stats.bilesen_dagilim.length > 0 && (
                 <div>
                   <h4 className="font-semibold text-gray-700 mb-2 sm:mb-3 text-sm sm:text-base">
-                    Bileşen Dağılımı 
+                    Bileşen Dağılımı
                     <span className="text-xs font-normal text-gray-500 ml-2">
                       ({stats.iskele_stats.bilesen_dagilim.length} çeşit)
                     </span>
                   </h4>
                   <div className="space-y-2 sm:space-y-3">
-                    {(showAllBilesenler 
-                      ? stats.iskele_stats.bilesen_dagilim 
+                    {(showAllBilesenler
+                      ? stats.iskele_stats.bilesen_dagilim
                       : stats.iskele_stats.bilesen_dagilim.slice(0, 5)
                     ).map((item, index) => {
                       const percentage = stats.iskele_stats.total > 0
                         ? Math.round((item.count / stats.iskele_stats.total) * 100)
                         : 0;
-                      
+
                       const colors = [
                         'bg-teal-600',
                         'bg-cyan-600',
@@ -386,7 +395,7 @@ const Dashboard = () => {
                         'bg-rose-600',
                         'bg-violet-600',
                       ];
-                      
+
                       return (
                         <div key={index} className="space-y-1">
                           <div className="flex justify-between text-xs sm:text-sm">
@@ -403,7 +412,7 @@ const Dashboard = () => {
                       );
                     })}
                   </div>
-                  
+
                   {/* Tümünü Gör / Gizle Butonu */}
                   {stats.iskele_stats.bilesen_dagilim.length > 5 && (
                     <button

@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import * as XLSX from 'xlsx';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
   Dialog,
@@ -35,7 +35,7 @@ import {
 } from '@/components/ui/select';
 import Layout from '@/components/Layout';
 import { toast } from 'sonner';
-import { Plus, Trash2, Users, FolderTree, Shield, AlertCircle, FolderKanban, X, Eye, EyeOff, Gauge } from 'lucide-react';
+import { Plus, Trash2, Users, FolderTree, Shield, AlertCircle, FolderKanban, X, Eye, EyeOff, Gauge, ChevronRight, ArrowLeft, Building2, FileText, Save, Download } from 'lucide-react';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -48,8 +48,11 @@ const AdminPanel = () => {
   const [projeler, setProjeler] = useState([]);
   const [iskeleBilesenAdlari, setIskeleBilesenAdlari] = useState([]);
   const [kalibrasyonCihazlari, setKalibrasyonCihazlari] = useState([]);
+  const [activeSection, setActiveSection] = useState(null); // null = show cards, 'users' | 'kategoriler' | 'projeler' | 'bilesen-adlari' | 'kalibrasyon' | 'sozlesme' = show section
+  const [userAgreement, setUserAgreement] = useState('');
+  const [agreementSaving, setAgreementSaving] = useState(false);
   const [loading, setLoading] = useState(true);
-  
+
   const [showUserDialog, setShowUserDialog] = useState(false);
   const [showKategoriDialog, setShowKategoriDialog] = useState(false);
   const [showProjeDialog, setShowProjeDialog] = useState(false);
@@ -58,29 +61,30 @@ const AdminPanel = () => {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [deleteItem, setDeleteItem] = useState(null);
   const [deleteType, setDeleteType] = useState(''); // 'user', 'kategori', 'proje', or 'kalibrasyon'
-  
+
   // Edit states
   const [editMode, setEditMode] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
   const [editType, setEditType] = useState(''); // 'user', 'kategori', 'proje', or 'kalibrasyon'
-  
+
   const [newUser, setNewUser] = useState({ username: '', email: '', password: '', password_confirm: '', role: 'viewer' });
   const [showPassword, setShowPassword] = useState(false);
   const [showPasswordConfirm, setShowPasswordConfirm] = useState(false);
   const [newKategori, setNewKategori] = useState({ isim: '', aciklama: '', alt_kategoriler: [] });
   const [altKategoriInput, setAltKategoriInput] = useState('');
-  const [newProje, setNewProje] = useState({ 
-    proje_adi: '', 
-    proje_kodu: '', 
-    lokasyon: '', 
-    baslangic_tarihi: '', 
-    bitis_tarihi: '', 
-    durum: 'Aktif', 
-    aciklama: '' 
+  const [newProje, setNewProje] = useState({
+    proje_adi: '',
+    firma_adi: '',
+    proje_kodu: '',
+    lokasyon: '',
+    baslangic_tarihi: '',
+    bitis_tarihi: '',
+    durum: 'Aktif',
+    aciklama: ''
   });
   const [newBilesenAdi, setNewBilesenAdi] = useState({ bilesen_adi: '', aciklama: '' });
   const [newKalibrasyon, setNewKalibrasyon] = useState({ cihaz_adi: '', seri_no: '', kalibrasyon_tarihi: '' });
-  
+
   // Bulk delete state
   const [selectedUsers, setSelectedUsers] = useState([]);
   const [selectedKategoriler, setSelectedKategoriler] = useState([]);
@@ -93,19 +97,19 @@ const AdminPanel = () => {
     if (userData) {
       const parsedUser = JSON.parse(userData);
       setUser(parsedUser);
-      
+
       if (parsedUser.role !== 'admin') {
         toast.error('Bu sayfaya erişim yetkiniz yok');
         navigate('/');
         return;
       }
     }
-    
+
     fetchData();
   }, [navigate]);
 
   const fetchData = async () => {
-    await Promise.all([fetchUsers(), fetchKategoriler(), fetchProjeler(), fetchIskeleBilesenAdlari(), fetchKalibrasyonCihazlari()]);
+    await Promise.all([fetchUsers(), fetchKategoriler(), fetchProjeler(), fetchIskeleBilesenAdlari(), fetchKalibrasyonCihazlari(), fetchUserAgreement()]);
     setLoading(false);
   };
 
@@ -169,15 +173,40 @@ const AdminPanel = () => {
     }
   };
 
+  const fetchUserAgreement = async () => {
+    try {
+      const response = await axios.get(`${BACKEND_URL}/api/ayarlar/kullanici-sozlesmesi`);
+      setUserAgreement(response.data.content || '');
+    } catch (error) {
+      console.error('Kullanıcı sözleşmesi yüklenemedi');
+    }
+  };
+
+  const saveUserAgreement = async () => {
+    try {
+      setAgreementSaving(true);
+      const token = localStorage.getItem('token');
+      await axios.put(`${BACKEND_URL}/api/ayarlar/kullanici-sozlesmesi`,
+        { content: userAgreement },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      toast.success('Kullanıcı sözleşmesi kaydedildi');
+    } catch (error) {
+      toast.error('Kullanıcı sözleşmesi kaydedilemedi');
+    } finally {
+      setAgreementSaving(false);
+    }
+  };
+
   const handleCreateKalibrasyon = async () => {
     try {
       const token = localStorage.getItem('token');
-      
+
       if (!newKalibrasyon.cihaz_adi || !newKalibrasyon.seri_no || !newKalibrasyon.kalibrasyon_tarihi) {
         toast.error('Tüm alanları doldurun');
         return;
       }
-      
+
       if (editMode && editingItem) {
         await axios.put(`${API}/kalibrasyon/${editingItem.id}`, newKalibrasyon, {
           headers: { Authorization: `Bearer ${token}` },
@@ -189,7 +218,7 @@ const AdminPanel = () => {
         });
         toast.success('Kalibrasyon cihazı eklendi');
       }
-      
+
       handleCloseDialog('kalibrasyon');
       fetchKalibrasyonCihazlari();
     } catch (error) {
@@ -213,7 +242,7 @@ const AdminPanel = () => {
   const handleCreateUser = async () => {
     try {
       const token = localStorage.getItem('token');
-      
+
       if (editMode && editingItem) {
         // Update existing user
         const updateData = {
@@ -221,13 +250,13 @@ const AdminPanel = () => {
           email: newUser.email,
           role: newUser.role
         };
-        
+
         // Only include password if it's provided
         if (newUser.password) {
           updateData.password = newUser.password;
           updateData.password_confirm = newUser.password_confirm;
         }
-        
+
         await axios.put(`${API}/users/${editingItem.id}`, updateData, {
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -239,7 +268,7 @@ const AdminPanel = () => {
         });
         toast.success('Kullanıcı oluşturuldu');
       }
-      
+
       handleCloseDialog('user');
       fetchUsers();
     } catch (error) {
@@ -250,7 +279,7 @@ const AdminPanel = () => {
   const handleCreateKategori = async () => {
     try {
       const token = localStorage.getItem('token');
-      
+
       if (editMode && editingItem) {
         // Update existing
         await axios.put(`${API}/kategoriler/${editingItem.id}`, newKategori, {
@@ -264,7 +293,7 @@ const AdminPanel = () => {
         });
         toast.success('Kategori oluşturuldu');
       }
-      
+
       handleCloseDialog('kategori');
       fetchKategoriler();
     } catch (error) {
@@ -275,7 +304,7 @@ const AdminPanel = () => {
   const handleCreateProje = async () => {
     try {
       const token = localStorage.getItem('token');
-      
+
       if (editMode && editingItem) {
         // Update existing
         await axios.put(`${API}/projeler/${editingItem.id}`, newProje, {
@@ -289,7 +318,7 @@ const AdminPanel = () => {
         });
         toast.success('Proje oluşturuldu');
       }
-      
+
       handleCloseDialog('proje');
       fetchProjeler();
     } catch (error) {
@@ -300,11 +329,11 @@ const AdminPanel = () => {
   const handleCreateBilesenAdi = async () => {
     try {
       const token = localStorage.getItem('token');
-      
+
       if (editMode && editingItem) {
         // Update existing
         await axios.put(
-          `${API}/iskele-bilesen-adlari/${editingItem.id}`, 
+          `${API}/iskele-bilesen-adlari/${editingItem.id}`,
           null,
           {
             headers: { Authorization: `Bearer ${token}` },
@@ -330,7 +359,7 @@ const AdminPanel = () => {
         );
         toast.success('Bileşen adı oluşturuldu');
       }
-      
+
       handleCloseDialog('bilesen_adi');
       fetchIskeleBilesenAdlari();
     } catch (error) {
@@ -347,7 +376,7 @@ const AdminPanel = () => {
   const handleDeleteConfirm = async () => {
     try {
       const token = localStorage.getItem('token');
-      
+
       if (deleteType === 'user') {
         await axios.delete(`${API}/users/${deleteItem.id}`, {
           headers: { Authorization: `Bearer ${token}` },
@@ -373,7 +402,7 @@ const AdminPanel = () => {
         toast.success('Bileşen adı silindi');
         fetchIskeleBilesenAdlari();
       }
-      
+
       setShowDeleteDialog(false);
       setDeleteItem(null);
       setDeleteType('');
@@ -386,7 +415,7 @@ const AdminPanel = () => {
     const token = localStorage.getItem('token');
     let ids = [];
     let endpoint = '';
-    
+
     if (type === 'user') {
       ids = selectedUsers;
       endpoint = `${API}/users/bulk-delete`;
@@ -397,18 +426,18 @@ const AdminPanel = () => {
       ids = selectedProjeler;
       endpoint = `${API}/projeler/bulk-delete`;
     }
-    
+
     if (ids.length === 0) {
       toast.error('Lütfen silmek için en az bir öğe seçin');
       return;
     }
-    
+
     try {
       const response = await axios.post(endpoint, ids, {
         headers: { Authorization: `Bearer ${token}` },
       });
       toast.success(response.data.message);
-      
+
       if (type === 'user') {
         setSelectedUsers([]);
         fetchUsers();
@@ -448,7 +477,7 @@ const AdminPanel = () => {
 
   const handleToggleSelect = (id, type) => {
     if (type === 'user') {
-      setSelectedUsers(prev => 
+      setSelectedUsers(prev =>
         prev.includes(id) ? prev.filter(uid => uid !== id) : [...prev, id]
       );
     } else if (type === 'kategori') {
@@ -467,7 +496,7 @@ const AdminPanel = () => {
     setEditingItem(item);
     setEditType(type);
     setEditMode(true);
-    
+
     if (type === 'user') {
       setNewUser({
         username: item.username || '',
@@ -487,6 +516,7 @@ const AdminPanel = () => {
     } else if (type === 'proje') {
       setNewProje({
         proje_adi: item.proje_adi || '',
+        firma_adi: item.firma_adi || '',
         proje_kodu: item.proje_kodu || '',
         lokasyon: item.lokasyon || '',
         baslangic_tarihi: item.baslangic_tarihi || '',
@@ -515,7 +545,7 @@ const AdminPanel = () => {
     setEditMode(false);
     setEditingItem(null);
     setEditType('');
-    
+
     if (type === 'user') {
       setShowUserDialog(false);
       setNewUser({ username: '', email: '', password: '', password_confirm: '', role: 'viewer' });
@@ -527,7 +557,7 @@ const AdminPanel = () => {
       setAltKategoriInput('');
     } else if (type === 'proje') {
       setShowProjeDialog(false);
-      setNewProje({ proje_adi: '', proje_kodu: '', lokasyon: '', baslangic_tarihi: '', bitis_tarihi: '', durum: 'Aktif', aciklama: '' });
+      setNewProje({ proje_adi: '', firma_adi: '', proje_kodu: '', lokasyon: '', baslangic_tarihi: '', bitis_tarihi: '', durum: 'Aktif', aciklama: '' });
     } else if (type === 'bilesen_adi') {
       setShowBilesenAdiDialog(false);
       setNewBilesenAdi({ bilesen_adi: '', aciklama: '' });
@@ -559,6 +589,55 @@ const AdminPanel = () => {
     }
   };
 
+  // Excel Export Function
+  const exportUsersToExcel = () => {
+    if (users.length === 0) {
+      toast.error('Dışa aktarılacak kullanıcı bulunamadı');
+      return;
+    }
+
+    // Prepare data for Excel
+    const excelData = users.map(u => ({
+      'Kullanıcı Adı': u.username || '',
+      'Email': u.email || '',
+      'Ad': u.ad || '',
+      'Soyad': u.soyad || '',
+      'Telefon': u.telefon || '',
+      'Şehir': u.sehir || '',
+      'Doğum Tarihi': u.dogum_tarihi || '',
+      'Firma': u.firma_adi || '',
+      'Rol': getRoleLabel(u.role),
+      'Email Doğrulandı': u.email_verified ? 'Evet' : 'Hayır',
+      'Kayıt Tarihi': u.created_at ? new Date(u.created_at).toLocaleDateString('tr-TR') : ''
+    }));
+
+    // Create workbook and worksheet
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.json_to_sheet(excelData);
+
+    // Set column widths
+    ws['!cols'] = [
+      { wch: 15 }, // Kullanıcı Adı
+      { wch: 25 }, // Email
+      { wch: 12 }, // Ad
+      { wch: 12 }, // Soyad
+      { wch: 15 }, // Telefon
+      { wch: 12 }, // Şehir
+      { wch: 12 }, // Doğum Tarihi
+      { wch: 15 }, // Firma
+      { wch: 12 }, // Rol
+      { wch: 15 }, // Email Doğrulandı
+      { wch: 12 }, // Kayıt Tarihi
+    ];
+
+    XLSX.utils.book_append_sheet(wb, ws, 'Kullanıcılar');
+
+    // Generate file and download
+    XLSX.writeFile(wb, `kullanicilar_${new Date().toISOString().split('T')[0]}.xlsx`);
+
+    toast.success('Kullanıcı listesi Excel formatında indirildi');
+  };
+
   if (loading) {
     return (
       <Layout>
@@ -573,41 +652,204 @@ const AdminPanel = () => {
     <Layout>
       <div className="space-y-6 animate-fade-in">
         {/* Header */}
-        <div>
-          <h1 className="text-3xl font-bold text-gray-800 mb-2 flex items-center gap-2">
-            <Shield className="h-8 w-8 text-blue-700" />
-            Yönetim Paneli
-          </h1>
-          <p className="text-gray-600">Kullanıcı ve kategori yönetimi</p>
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-3">
+            {activeSection && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setActiveSection(null)}
+                className="text-gray-600 hover:text-gray-800"
+              >
+                <ArrowLeft className="h-5 w-5" />
+              </Button>
+            )}
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 flex items-center gap-2">
+                <Shield className="h-7 w-7 sm:h-8 sm:w-8 text-blue-700" />
+                Yönetim Paneli
+              </h1>
+              <p className="text-sm text-gray-600">
+                {activeSection ? (
+                  activeSection === 'users' ? 'Kullanıcı Yönetimi' :
+                    activeSection === 'kategoriler' ? 'Kategori Yönetimi' :
+                      activeSection === 'projeler' ? 'Proje Yönetimi' :
+                        activeSection === 'bilesen-adlari' ? 'İskele Bileşen Adları Yönetimi' :
+                          'Kalibrasyon Cihazları Yönetimi'
+                ) : 'Sistem ayarlarını ve verileri yönetin'}
+              </p>
+            </div>
+          </div>
         </div>
 
-        {/* Tabs */}
-        <Tabs defaultValue="users" className="space-y-6">
-          <TabsList className="grid w-full max-w-3xl grid-cols-4">
-            <TabsTrigger value="users" className="flex items-center gap-2" data-testid="users-tab">
-              <Users className="h-4 w-4" />
-              Kullanıcılar
-            </TabsTrigger>
-            <TabsTrigger value="kategoriler" className="flex items-center gap-2" data-testid="categories-tab">
-              <FolderTree className="h-4 w-4" />
-              Kategoriler
-            </TabsTrigger>
-            <TabsTrigger value="projeler" className="flex items-center gap-2" data-testid="projects-tab">
-              <FolderKanban className="h-4 w-4" />
-              Projeler
-            </TabsTrigger>
-            <TabsTrigger value="bilesen-adlari" className="flex items-center gap-2" data-testid="component-names-tab">
-              <FolderKanban className="h-4 w-4" />
-              İskele Bileşen Adları
-            </TabsTrigger>
-            <TabsTrigger value="kalibrasyon" className="flex items-center gap-2" data-testid="calibration-tab">
-              <Gauge className="h-4 w-4" />
-              Kalibrasyon
-            </TabsTrigger>
-          </TabsList>
+        {/* Navigation Cards - Show when no section is active */}
+        {!activeSection && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {/* Kullanıcılar Card */}
+            <Card
+              className="cursor-pointer hover:shadow-lg transition-all duration-200 border-l-4 border-l-purple-500 hover:border-l-purple-600"
+              onClick={() => setActiveSection('users')}
+            >
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center shadow-md">
+                      <Users className="h-6 w-6 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-gray-800 text-lg">Kullanıcılar</h3>
+                      <p className="text-sm text-gray-500">{users.length} kullanıcı</p>
+                    </div>
+                  </div>
+                  <ChevronRight className="h-5 w-5 text-gray-400" />
+                </div>
+              </CardContent>
+            </Card>
 
-          {/* Users Tab */}
-          <TabsContent value="users" className="space-y-4">
+            {/* Projeler Card */}
+            <Card
+              className="cursor-pointer hover:shadow-lg transition-all duration-200 border-l-4 border-l-indigo-500 hover:border-l-indigo-600"
+              onClick={() => setActiveSection('projeler')}
+            >
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-600 flex items-center justify-center shadow-md">
+                      <FolderKanban className="h-6 w-6 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-gray-800 text-lg">Projeler</h3>
+                      <p className="text-sm text-gray-500">{projeler.length} proje</p>
+                    </div>
+                  </div>
+                  <ChevronRight className="h-5 w-5 text-gray-400" />
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Kategoriler Card */}
+            <Card
+              className="cursor-pointer hover:shadow-lg transition-all duration-200 border-l-4 border-l-green-500 hover:border-l-green-600"
+              onClick={() => setActiveSection('kategoriler')}
+            >
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center shadow-md">
+                      <FolderTree className="h-6 w-6 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-gray-800 text-lg">Kategoriler</h3>
+                      <p className="text-sm text-gray-500">{kategoriler.length} kategori</p>
+                    </div>
+                  </div>
+                  <ChevronRight className="h-5 w-5 text-gray-400" />
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* İskele Bileşen Adları Card */}
+            <Card
+              className="cursor-pointer hover:shadow-lg transition-all duration-200 border-l-4 border-l-teal-500 hover:border-l-teal-600"
+              onClick={() => setActiveSection('bilesen-adlari')}
+            >
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-teal-500 to-teal-600 flex items-center justify-center shadow-md">
+                      <Building2 className="h-6 w-6 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-gray-800 text-lg">İskele Bileşen Adları</h3>
+                      <p className="text-sm text-gray-500">{iskeleBilesenAdlari.length} bileşen</p>
+                    </div>
+                  </div>
+                  <ChevronRight className="h-5 w-5 text-gray-400" />
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Kalibrasyon Card */}
+            <Card
+              className="cursor-pointer hover:shadow-lg transition-all duration-200 border-l-4 border-l-cyan-500 hover:border-l-cyan-600"
+              onClick={() => setActiveSection('kalibrasyon')}
+            >
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-500 to-cyan-600 flex items-center justify-center shadow-md">
+                      <Gauge className="h-6 w-6 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-gray-800 text-lg">Kalibrasyon</h3>
+                      <p className="text-sm text-gray-500">{kalibrasyonCihazlari.length} cihaz</p>
+                    </div>
+                  </div>
+                  <ChevronRight className="h-5 w-5 text-gray-400" />
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Kullanıcı Sözleşmesi Card */}
+            <Card
+              className="cursor-pointer hover:shadow-lg transition-all duration-200 border-l-4 border-l-amber-500 hover:border-l-amber-600"
+              onClick={() => setActiveSection('sozlesme')}
+            >
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center shadow-md">
+                      <FileText className="h-6 w-6 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-gray-800 text-lg">Kullanıcı Sözleşmesi</h3>
+                      <p className="text-sm text-gray-500">Kayıt sözleşmesi</p>
+                    </div>
+                  </div>
+                  <ChevronRight className="h-5 w-5 text-gray-400" />
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {/* Kullanıcı Sözleşmesi Section */}
+        {activeSection === 'sozlesme' && (
+          <div className="space-y-4">
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <h2 className="text-xl font-semibold text-gray-800">Kullanıcı Sözleşmesi</h2>
+                    <p className="text-sm text-gray-500">Yeni kayıt olan kullanıcılara gösterilecek sözleşme metni</p>
+                  </div>
+                  <Button
+                    onClick={saveUserAgreement}
+                    disabled={agreementSaving}
+                    className="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white"
+                  >
+                    <Save className="h-4 w-4 mr-2" />
+                    {agreementSaving ? 'Kaydediliyor...' : 'Kaydet'}
+                  </Button>
+                </div>
+                <Textarea
+                  value={userAgreement}
+                  onChange={(e) => setUserAgreement(e.target.value)}
+                  placeholder="Kullanıcı sözleşmesi metnini buraya yazın..."
+                  className="min-h-[400px] font-mono text-sm"
+                  data-testid="user-agreement-textarea"
+                />
+                <p className="text-xs text-gray-400 mt-2">
+                  Markdown formatını destekler. Başlıklar için # kullanabilirsiniz.
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {/* Users Section */}
+        {activeSection === 'users' && (
+          <div className="space-y-4">
             <div className="flex justify-between items-center">
               <div className="flex items-center gap-3">
                 <Checkbox
@@ -627,6 +869,15 @@ const AdminPanel = () => {
                     Seçilenleri Sil ({selectedUsers.length})
                   </Button>
                 )}
+                <Button
+                  variant="outline"
+                  onClick={exportUsersToExcel}
+                  className="border-green-600 text-green-700 hover:bg-green-50"
+                  data-testid="export-users-button"
+                >
+                  <Download className="h-4 w-4 mr-2" />
+                  Excel İndir
+                </Button>
                 <Button
                   onClick={() => setShowUserDialog(true)}
                   className="bg-gradient-to-r from-blue-700 to-blue-600 hover:from-blue-800 hover:to-blue-700 text-white"
@@ -653,8 +904,11 @@ const AdminPanel = () => {
                       <div className="flex-1">
                         <div className="flex items-start justify-between mb-3">
                           <div className="flex-1">
-                            <h3 className="font-semibold text-gray-800 mb-1">@{u.username}</h3>
-                            <p className="text-xs text-gray-600 mb-2">{u.email}</p>
+                            <h3 className="font-semibold text-gray-800 mb-1">
+                              {u.ad || u.soyad ? `${u.ad || ''} ${u.soyad || ''}`.trim() : `@${u.username}`}
+                            </h3>
+                            <p className="text-xs text-gray-600 mb-1">@{u.username}</p>
+                            <p className="text-xs text-gray-500 mb-2">{u.email}</p>
                             <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium border ${getRoleBadgeColor(u.role)}`}>
                               {getRoleLabel(u.role)}
                             </span>
@@ -681,19 +935,34 @@ const AdminPanel = () => {
                             </div>
                           )}
                         </div>
-                        <p className="text-xs text-gray-500">
-                          Oluşturulma: {new Date(u.created_at).toLocaleDateString('tr-TR')}
-                        </p>
+                        {/* Profile Info */}
+                        <div className="space-y-1 text-xs text-gray-500">
+                          {u.firma_adi && (
+                            <p><span className="font-medium">Firma:</span> {u.firma_adi}</p>
+                          )}
+                          {u.telefon && (
+                            <p><span className="font-medium">Telefon:</span> {u.telefon}</p>
+                          )}
+                          {u.sehir && (
+                            <p><span className="font-medium">Şehir:</span> {u.sehir}</p>
+                          )}
+                          {u.dogum_tarihi && (
+                            <p><span className="font-medium">Doğum:</span> {new Date(u.dogum_tarihi).toLocaleDateString('tr-TR')}</p>
+                          )}
+                          <p><span className="font-medium">Kayıt:</span> {new Date(u.created_at).toLocaleDateString('tr-TR')}</p>
+                        </div>
                       </div>
                     </div>
                   </CardContent>
                 </Card>
               ))}
             </div>
-          </TabsContent>
+          </div>
+        )}
 
-          {/* Kategoriler Tab */}
-          <TabsContent value="kategoriler" className="space-y-4">
+        {/* Kategoriler Section */}
+        {activeSection === 'kategoriler' && (
+          <div className="space-y-4">
             <div className="flex justify-between items-center">
               <div className="flex items-center gap-3">
                 <Checkbox
@@ -734,7 +1003,7 @@ const AdminPanel = () => {
                         onCheckedChange={() => handleToggleSelect(kat.id, 'kategori')}
                         className="mt-1"
                       />
-                      <div 
+                      <div
                         className="flex-1 cursor-pointer"
                         onClick={() => handleEditClick(kat, 'kategori')}
                       >
@@ -792,10 +1061,12 @@ const AdminPanel = () => {
                 </Card>
               ))}
             </div>
-          </TabsContent>
+          </div>
+        )}
 
-          {/* Projeler Tab */}
-          <TabsContent value="projeler" className="space-y-4">
+        {/* Projeler Section */}
+        {activeSection === 'projeler' && (
+          <div className="space-y-4">
             <div className="flex justify-between items-center">
               <div className="flex items-center gap-3">
                 <Checkbox
@@ -836,23 +1107,25 @@ const AdminPanel = () => {
                         onCheckedChange={() => handleToggleSelect(proje.id, 'proje')}
                         className="mt-1"
                       />
-                      <div 
+                      <div
                         className="flex-1 cursor-pointer"
                         onClick={() => handleEditClick(proje, 'proje')}
                       >
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
-                            <h3 className="font-semibold text-gray-800 mb-2 hover:text-blue-600">{proje.proje_adi}</h3>
+                            <h3 className="font-semibold text-gray-800 mb-1 hover:text-blue-600">{proje.proje_adi}</h3>
+                            {proje.firma_adi && (
+                              <p className="text-sm text-indigo-600 font-medium mb-2">🏢 {proje.firma_adi}</p>
+                            )}
                             {proje.proje_kodu && (
                               <p className="text-xs text-blue-600 mb-1 font-mono">{proje.proje_kodu}</p>
                             )}
                             {proje.durum && (
-                              <span className={`inline-block px-2 py-0.5 rounded text-xs font-medium mb-2 ${
-                                proje.durum === 'Aktif' ? 'bg-green-100 text-green-800' :
+                              <span className={`inline-block px-2 py-0.5 rounded text-xs font-medium mb-2 ${proje.durum === 'Aktif' ? 'bg-green-100 text-green-800' :
                                 proje.durum === 'Tamamlandı' ? 'bg-blue-100 text-blue-800' :
-                                proje.durum === 'Askıda' ? 'bg-yellow-100 text-yellow-800' :
-                                'bg-gray-100 text-gray-800'
-                              }`}>
+                                  proje.durum === 'Askıda' ? 'bg-yellow-100 text-yellow-800' :
+                                    'bg-gray-100 text-gray-800'
+                                }`}>
                                 {proje.durum}
                               </span>
                             )}
@@ -898,10 +1171,12 @@ const AdminPanel = () => {
                 </Card>
               ))}
             </div>
-          </TabsContent>
+          </div>
+        )}
 
-          {/* İskele Bileşen Adları Tab */}
-          <TabsContent value="bilesen-adlari" className="space-y-4">
+        {/* İskele Bileşen Adları Section */}
+        {activeSection === 'bilesen-adlari' && (
+          <div className="space-y-4">
             <div className="flex justify-between items-center">
               <h2 className="text-xl font-semibold">İskele Bileşen Adları</h2>
               <Button onClick={() => {
@@ -948,19 +1223,21 @@ const AdminPanel = () => {
                 </Card>
               ))}
             </div>
-          </TabsContent>
+          </div>
+        )}
 
-          {/* Kalibrasyon Tab */}
-          <TabsContent value="kalibrasyon" className="space-y-4">
+        {/* Kalibrasyon Section */}
+        {activeSection === 'kalibrasyon' && (
+          <div className="space-y-4">
             <div className="flex justify-between items-center">
               <p className="text-gray-600">{kalibrasyonCihazlari.length} ölçüm cihazı</p>
-              <Button 
+              <Button
                 onClick={() => {
                   setEditMode(false);
                   setEditingItem(null);
                   setNewKalibrasyon({ cihaz_adi: '', seri_no: '', kalibrasyon_tarihi: '' });
                   setShowKalibrasyonDialog(true);
-                }} 
+                }}
                 className="bg-gradient-to-r from-teal-600 to-cyan-700 hover:from-teal-700 hover:to-cyan-800 text-white"
                 data-testid="add-calibration-button"
               >
@@ -968,7 +1245,7 @@ const AdminPanel = () => {
                 Ölçüm Cihazı Ekle
               </Button>
             </div>
-            
+
             <div className="grid gap-3">
               {kalibrasyonCihazlari.length === 0 ? (
                 <div className="text-center py-8 text-gray-500">
@@ -1021,8 +1298,8 @@ const AdminPanel = () => {
                 ))
               )}
             </div>
-          </TabsContent>
-        </Tabs>
+          </div>
+        )}
       </div>
 
       {/* Create User Dialog */}
@@ -1255,6 +1532,19 @@ const AdminPanel = () => {
                 />
               </div>
               <div className="space-y-2">
+                <Label htmlFor="firma-adi">Firma Adı *</Label>
+                <Input
+                  id="firma-adi"
+                  placeholder="Örn: ABC İnşaat Ltd."
+                  value={newProje.firma_adi}
+                  onChange={(e) => setNewProje({ ...newProje, firma_adi: e.target.value })}
+                  data-testid="project-company-input"
+                  required
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
                 <Label htmlFor="proje-kodu">Proje Kodu *</Label>
                 <Input
                   id="proje-kodu"
@@ -1265,17 +1555,16 @@ const AdminPanel = () => {
                   required
                 />
               </div>
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="proje-lokasyon">Lokasyon</Label>
-              <Input
-                id="proje-lokasyon"
-                placeholder="Proje lokasyonu"
-                value={newProje.lokasyon}
-                onChange={(e) => setNewProje({ ...newProje, lokasyon: e.target.value })}
-                data-testid="project-location-input"
-              />
+              <div className="space-y-2">
+                <Label htmlFor="proje-lokasyon">Lokasyon</Label>
+                <Input
+                  id="proje-lokasyon"
+                  placeholder="Proje lokasyonu"
+                  value={newProje.lokasyon}
+                  onChange={(e) => setNewProje({ ...newProje, lokasyon: e.target.value })}
+                  data-testid="project-location-input"
+                />
+              </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
@@ -1444,8 +1733,8 @@ const AdminPanel = () => {
               {deleteType === 'user'
                 ? `${deleteItem?.email} kullanıcısını silmek istediğinizden emin misiniz?`
                 : deleteType === 'kategori'
-                ? `${deleteItem?.isim} kategorisini silmek istediğinizden emin misiniz? Bu kategoriye ait raporlar etkilenmeyecektir.`
-                : `${deleteItem?.proje_adi} projesini silmek istediğinizden emin misiniz?`}
+                  ? `${deleteItem?.isim} kategorisini silmek istediğinizden emin misiniz? Bu kategoriye ait raporlar etkilenmeyecektir.`
+                  : `${deleteItem?.proje_adi} projesini silmek istediğinizden emin misiniz?`}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -1460,7 +1749,7 @@ const AdminPanel = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </Layout>
+    </Layout >
   );
 };
 
