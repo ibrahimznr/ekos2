@@ -149,16 +149,17 @@ const ProjeRaporlar = () => {
   const handleDeleteRapor = async (raporId) => {
     try {
       await api.delete(`/raporlar/${raporId}`);
-      toast.success('Rapor silindi');
+      showNotification('success', 'Başarılı', 'Rapor başarıyla silindi');
       fetchProjeAndRaporlar();
     } catch (error) {
-      toast.error('Rapor silinemedi');
+      showNotification('error', 'Hata', 'Rapor silinemedi');
     }
   };
 
   const handleRaporSaved = () => {
     setShowRaporModal(false);
     setEditingRapor(null);
+    showNotification('success', 'Başarılı', editingRapor ? 'Rapor başarıyla güncellendi' : 'Yeni rapor başarıyla oluşturuldu');
     fetchProjeAndRaporlar();
   };
 
