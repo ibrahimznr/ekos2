@@ -22,6 +22,9 @@ import DrawResultsPage from '@/pages/cekilis/DrawResultsPage';
 import VocabularyPage from '@/pages/cekilis/VocabularyPage';
 import MindReaderGame from '@/pages/cekilis/MindReaderGame';
 
+// Public Pages
+import PublicRaporView from '@/pages/PublicRaporView';
+
 const ProtectedRoute = ({ children }) => {
   const token = localStorage.getItem('token');
   if (!token) {
