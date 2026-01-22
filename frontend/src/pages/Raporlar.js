@@ -190,10 +190,10 @@ const Raporlar = () => {
       await axios.delete(`${API}/raporlar/${deleteRaporId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      toast.success('Rapor silindi');
+      showNotification('success', 'Rapor başarıyla silindi');
       fetchRaporlar();
     } catch (error) {
-      toast.error(error.response?.data?.detail || 'Rapor silinemedi');
+      showNotification('error', error.response?.data?.detail || 'Rapor silinemedi');
     } finally {
       setShowDeleteDialog(false);
       setDeleteRaporId(null);
