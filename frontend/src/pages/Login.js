@@ -89,9 +89,9 @@ const Login = () => {
               />
             </div>
             <h1 className="text-3xl font-bold mb-2" style={{ fontFamily: 'IBM Plex Sans, sans-serif', color: '#1e40af' }}>
-              EKOS
+              {t('common.appName')}
             </h1>
-            <p className="text-base italic" style={{ color: '#3b82f6' }}>Ekipman Kontrol Otomasyon Sistemi</p>
+            <p className="text-base italic" style={{ color: '#3b82f6' }}>{t('common.appFullName')}</p>
           </div>
 
           {/* Login Card */}
@@ -99,16 +99,16 @@ const Login = () => {
             <CardHeader className="space-y-1 pb-4">
               <CardTitle className="text-2xl font-bold flex items-center gap-2" style={{ color: '#1e40af' }}>
                 <Shield className="w-6 h-6 text-blue-700" />
-                Giriş Yap
+                {t('auth.login')}
               </CardTitle>
               <CardDescription className="text-gray-600">
-                Hesabınıza erişmek için bilgilerinizi girin
+                {t('auth.loginSubtitle')}
               </CardDescription>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleLogin} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="email" className="font-medium" style={{ color: '#1e40af' }}>Email</Label>
+                  <Label htmlFor="email" className="font-medium" style={{ color: '#1e40af' }}>{t('auth.email')}</Label>
                   <Input
                     id="email"
                     type="email"
@@ -121,7 +121,7 @@ const Login = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="password" className="font-medium" style={{ color: '#1e40af' }}>Şifre</Label>
+                  <Label htmlFor="password" className="font-medium" style={{ color: '#1e40af' }}>{t('auth.password')}</Label>
                   <Input
                     id="password"
                     type="password"
@@ -139,21 +139,21 @@ const Login = () => {
                   disabled={loading}
                   data-testid="login-button"
                 >
-                  {loading ? 'Giriş yapılıyor...' : 'Giriş Yap'}
+                  {loading ? t('common.loading') : t('auth.login')}
                 </Button>
               </form>
 
               {/* Register Link */}
               <div className="mt-6 pt-6 border-t border-gray-200">
                 <div className="text-center">
-                  <p className="text-sm text-gray-600 mb-3">Hesabınız yok mu?</p>
+                  <p className="text-sm text-gray-600 mb-3">{t('auth.noAccount')}</p>
                   <Button
                     variant="outline"
                     className="w-full border-blue-600 text-blue-700 hover:bg-blue-50"
                     onClick={() => navigate('/register')}
                     data-testid="register-link-button"
                   >
-                    Kayıt Ol
+                    {t('auth.register')}
                   </Button>
                 </div>
               </div>
@@ -162,7 +162,7 @@ const Login = () => {
 
           {/* Footer */}
           <p className="text-center text-gray-500 text-sm mt-6">
-            © 2025 EKOS - Ekipman Kontrol Otomasyon Sistemi. Tüm hakları saklıdır.
+            © 2025 {t('common.appName')} - {t('common.appFullName')}.
           </p>
         </div>
       </div>
