@@ -202,7 +202,7 @@ const Raporlar = () => {
 
   const handleBulkDelete = async () => {
     if (selectedRaporlar.length === 0) {
-      toast.error('Lütfen silmek için en az bir rapor seçin');
+      showNotification('warning', 'Lütfen silmek için en az bir rapor seçin');
       return;
     }
 
@@ -211,11 +211,11 @@ const Raporlar = () => {
       const response = await axios.post(`${API}/raporlar/bulk-delete`, selectedRaporlar, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      toast.success(response.data.message);
+      showNotification('success', response.data.message);
       setSelectedRaporlar([]);
       fetchRaporlar();
     } catch (error) {
-      toast.error(error.response?.data?.detail || 'Toplu silme işlemi başarısız');
+      showNotification('error', error.response?.data?.detail || 'Toplu silme işlemi başarısız');
     }
   };
 
