@@ -14,7 +14,7 @@ import {
 import Layout from '@/components/Layout';
 import RaporModal from '@/components/RaporModal';
 import RaporDetailModal from '@/components/RaporDetailModal';
-import { toast } from 'sonner';
+import NotificationModal from '@/components/NotificationModal';
 import api from '@/utils/api';
 import { 
   ArrowLeft, 
@@ -49,6 +49,9 @@ const ProjeRaporlar = () => {
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [selectedRapor, setSelectedRapor] = useState(null);
   const [editingRapor, setEditingRapor] = useState(null);
+  
+  // Notification modal state
+  const [notification, setNotification] = useState({ open: false, type: 'success', title: '', message: '' });
   
   // Filter states
   const [searchTerm, setSearchTerm] = useState('');
