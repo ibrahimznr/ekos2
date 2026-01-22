@@ -70,6 +70,22 @@ const Raporlar = () => {
   const [selectedRaporlar, setSelectedRaporlar] = useState([]);
   const [user, setUser] = useState(null);
   const [zipLoading, setZipLoading] = useState(false);
+  
+  // Notification Modal state
+  const [notification, setNotification] = useState({
+    open: false,
+    type: 'success',
+    title: '',
+    message: ''
+  });
+
+  const showNotification = (type, message, title = '') => {
+    setNotification({ open: true, type, message, title });
+  };
+
+  const closeNotification = () => {
+    setNotification(prev => ({ ...prev, open: false }));
+  };
 
   useEffect(() => {
     const userData = localStorage.getItem('user');
