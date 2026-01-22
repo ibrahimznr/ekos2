@@ -14,6 +14,14 @@ import CepheIskeleleri from '@/pages/CepheIskeleleri';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import { Toaster } from '@/components/ui/sonner';
 
+// Çekiliş Pages
+import DrawsListPage from '@/pages/cekilis/DrawsListPage';
+import CreateDrawPage from '@/pages/cekilis/CreateDrawPage';
+import DrawDetailPage from '@/pages/cekilis/DrawDetailPage';
+import DrawResultsPage from '@/pages/cekilis/DrawResultsPage';
+import VocabularyPage from '@/pages/cekilis/VocabularyPage';
+import MindReaderGame from '@/pages/cekilis/MindReaderGame';
+
 const ProtectedRoute = ({ children }) => {
   const token = localStorage.getItem('token');
   if (!token) {
