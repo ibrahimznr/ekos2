@@ -603,3 +603,50 @@ Tarih: {datetime.now(timezone.utc).strftime('%d.%m.%Y %H:%M:%S')} UTC
         # Geçici klasörü temizle
         shutil.rmtree(temp_dir, ignore_errors=True)
 
+
+
+# Migration endpoint - raporu ID ile birlikte oluştur
+@router.post("/migrate")
+async def migrate_rapor(rapor_data: RaporMigration, current_user: dict = Depends(get_current_user)):
+    """Migration için rapor oluştur - ID dahil tüm verilerle"""
+    if current_user["role"] != "admin":
+        raise HTTPException(status_code=403, detail="Bu işlem için yetkiniz yok")
+    
+    doc = rapor_data.model_dump()
+    
+    # Tarihleri ayarla
+    if doc.get('created_at') is None:
+        doc['created_at'] = datetime.now(timezone.utc).isoformat()
+    if doc.get('updated_at') is None:
+        doc['updated_at'] = datetime.now(timezone.utc).isoformat()
+    
+    # Eğer aynı ID'li rapor varsa sil
+    await db.raporlar.delete_one({"id": doc['id']})
+    
+    await db.raporlar.insert_one(doc)
+    return {"message": "Rapor aktarıldı", "id": doc['id']}
+
+# Bulk migration endpoint - çoklu rapor aktarımı
+@router.post("/migrate-bulk")
+async def migrate_raporlar_bulk(raporlar: List[RaporMigration], current_user: dict = Depends(get_current_user)):
+    """Migration için toplu rapor aktarımı"""
+    if current_user["role"] != "admin":
+        raise HTTPException(status_code=403, detail="Bu işlem için yetkiniz yok")
+    
+    success_count = 0
+    for rapor_data in raporlar:
+        try:
+            doc = rapor_data.model_dump()
+            if doc.get('created_at') is None:
+                doc['created_at'] = datetime.now(timezone.utc).isoformat()
+            if doc.get('updated_at') is None:
+                doc['updated_at'] = datetime.now(timezone.utc).isoformat()
+            
+            await db.raporlar.delete_one({"id": doc['id']})
+            await db.raporlar.insert_one(doc)
+            success_count += 1
+        except Exception as e:
+            pass
+    
+    return {"message": f"{success_count}/{len(raporlar)} rapor aktarıldı", "success_count": success_count}
+
