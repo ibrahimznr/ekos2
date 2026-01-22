@@ -340,7 +340,7 @@ const Raporlar = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
       
-      toast.success(response.data.message);
+      showNotification('success', response.data.message);
     } catch (error) {
       // Revert on error
       setRaporlar(prev => prev.map(r => 
@@ -348,7 +348,7 @@ const Raporlar = () => {
           ? { ...r, durum: currentDurum }
           : r
       ));
-      toast.error(error.response?.data?.detail || 'Durum güncellenemedi');
+      showNotification('error', error.response?.data?.detail || 'Durum güncellenemedi');
     }
   };
 
