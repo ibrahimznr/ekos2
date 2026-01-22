@@ -252,15 +252,13 @@ const ProjeRaporlar = () => {
       link.parentNode.removeChild(link);
       window.URL.revokeObjectURL(url);
       
-      toast.dismiss(loadingToast);
-      toast.success('Proje ZIP dosyası indirildi (tüm medya dahil)');
+      showNotification('success', 'Başarılı', 'Proje ZIP dosyası başarıyla indirildi (tüm medya dahil)');
     } catch (error) {
-      toast.dismiss(loadingToast);
       console.error('ZIP export error:', error);
       if (error.code === 'ECONNABORTED') {
-        toast.error('İndirme zaman aşımına uğradı. Dosya boyutu çok büyük olabilir.');
+        showNotification('error', 'Hata', 'İndirme zaman aşımına uğradı. Dosya boyutu çok büyük olabilir.');
       } else {
-        toast.error(error.response?.data?.detail || 'ZIP indirme başarısız');
+        showNotification('error', 'Hata', error.response?.data?.detail || 'ZIP indirme başarısız');
       }
     } finally {
       setExporting(false);
