@@ -119,7 +119,7 @@ async def add_participant(draw_id: str, participant_data: ParticipantCreate, cur
     participant_dict = {
         "id": participant_id,
         "draw_id": draw_id,
-        "user_id": current_user.username,
+        "user_id": user_id,
         "id_no": participant_data.id_no,
         "first_name": participant_data.first_name,
         "last_name": participant_data.last_name,
@@ -138,7 +138,8 @@ async def add_participant(draw_id: str, participant_data: ParticipantCreate, cur
 @router.post("/{draw_id}/participants/upload")
 async def upload_participants(draw_id: str, file: UploadFile = File(...), current_user=Depends(get_current_user)):
     """Excel dosyasından toplu katılımcı yükle"""
-    draw = await db.draws.find_one({"id": draw_id, "user_id": current_user.username})
+    user_id = current_user.get("username") or current_user.get("email", "").split("@")[0]
+    draw = await db.draws.find_one({"id": draw_id, "user_id": user_id})
     if not draw:
         raise HTTPException(status_code=404, detail="Çekiliş bulunamadı")
     
@@ -195,7 +196,7 @@ async def upload_participants(draw_id: str, file: UploadFile = File(...), curren
                 participant_dict = {
                     "id": str(uuid.uuid4()),
                     "draw_id": draw_id,
-                    "user_id": current_user.username,
+                    "user_id": user_id,
                     "id_no": id_no,
                     "first_name": first_name,
                     "last_name": last_name,
@@ -230,7 +231,8 @@ async def upload_participants(draw_id: str, file: UploadFile = File(...), curren
 @router.get("/{draw_id}/participants")
 async def list_participants(draw_id: str, current_user=Depends(get_current_user)):
     """Çekiliş katılımcılarını listele"""
-    draw = await db.draws.find_one({"id": draw_id, "user_id": current_user.username})
+    user_id = current_user.get("username") or current_user.get("email", "").split("@")[0]
+    draw = await db.draws.find_one({"id": draw_id, "user_id": user_id})
     if not draw:
         raise HTTPException(status_code=404, detail="Çekiliş bulunamadı")
     
@@ -246,14 +248,15 @@ async def list_participants(draw_id: str, current_user=Depends(get_current_user)
 @router.delete("/{draw_id}/participants/{participant_id}")
 async def delete_participant(draw_id: str, participant_id: str, current_user=Depends(get_current_user)):
     """Katılımcıyı sil"""
-    draw = await db.draws.find_one({"id": draw_id, "user_id": current_user.username})
+    user_id = current_user.get("username") or current_user.get("email", "").split("@")[0]
+    draw = await db.draws.find_one({"id": draw_id, "user_id": user_id})
     if not draw:
         raise HTTPException(status_code=404, detail="Çekiliş bulunamadı")
     
     if draw["status"] == "completed":
         raise HTTPException(status_code=400, detail="Tamamlanmış çekilişten katılımcı silinemez")
     
-    result = await db.participants.delete_one({"id": participant_id, "draw_id": draw_id, "user_id": current_user.username})
+    result = await db.participants.delete_one({"id": participant_id, "draw_id": draw_id, "user_id": user_id})
     
     if result.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Katılımcı bulunamadı")
@@ -266,7 +269,8 @@ async def delete_participant(draw_id: str, participant_id: str, current_user=Dep
 @router.post("/{draw_id}/execute")
 async def execute_draw(draw_id: str, current_user=Depends(get_current_user)):
     """Çekilişi gerçekleştir"""
-    draw = await db.draws.find_one({"id": draw_id, "user_id": current_user.username})
+    user_id = current_user.get("username") or current_user.get("email", "").split("@")[0]
+    draw = await db.draws.find_one({"id": draw_id, "user_id": user_id})
     if not draw:
         raise HTTPException(status_code=404, detail="Çekiliş bulunamadı")
     
@@ -289,7 +293,7 @@ async def execute_draw(draw_id: str, current_user=Depends(get_current_user)):
     
     result_dict = {
         "draw_id": draw_id,
-        "user_id": current_user.username,
+        "user_id": user_id,
         "winners": winners,
         "backups": backups,
         "draw_date": datetime.now(timezone.utc).isoformat()
@@ -306,7 +310,8 @@ async def execute_draw(draw_id: str, current_user=Depends(get_current_user)):
 @router.get("/{draw_id}/results")
 async def get_results(draw_id: str, current_user=Depends(get_current_user)):
     """Çekiliş sonuçlarını getir"""
-    result = await db.draw_results.find_one({"draw_id": draw_id, "user_id": current_user.username}, {"_id": 0})
+    user_id = current_user.get("username") or current_user.get("email", "").split("@")[0]
+    result = await db.draw_results.find_one({"draw_id": draw_id, "user_id": user_id}, {"_id": 0})
     
     if not result:
         raise HTTPException(status_code=404, detail="Sonuç bulunamadı")
@@ -324,7 +329,8 @@ async def get_results(draw_id: str, current_user=Depends(get_current_user)):
 @router.get("/{draw_id}/export")
 async def export_results(draw_id: str, current_user=Depends(get_current_user)):
     """Çekiliş sonuçlarını Excel'e aktar"""
-    draw = await db.draws.find_one({"id": draw_id, "user_id": current_user.username})
+    user_id = current_user.get("username") or current_user.get("email", "").split("@")[0]
+    draw = await db.draws.find_one({"id": draw_id, "user_id": user_id})
     if not draw:
         raise HTTPException(status_code=404, detail="Çekiliş bulunamadı")
     
@@ -393,7 +399,8 @@ async def export_results(draw_id: str, current_user=Depends(get_current_user)):
 @router.delete("/{draw_id}")
 async def delete_draw(draw_id: str, current_user=Depends(get_current_user)):
     """Çekilişi sil"""
-    draw = await db.draws.find_one({"id": draw_id, "user_id": current_user.username})
+    user_id = current_user.get("username") or current_user.get("email", "").split("@")[0]
+    draw = await db.draws.find_one({"id": draw_id, "user_id": user_id})
     if not draw:
         raise HTTPException(status_code=404, detail="Çekiliş bulunamadı")
     
