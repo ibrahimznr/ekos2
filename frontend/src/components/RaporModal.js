@@ -81,11 +81,37 @@ const RaporModal = ({ open, onClose, rapor, onSuccess, defaultProjeId, defaultPr
       if (rapor.kategori && kategoriAltKategoriMap[rapor.kategori]) {
         setAltKategoriler(kategoriAltKategoriMap[rapor.kategori]);
       }
-    } else if (defaultProjeId) {
+    } else if (defaultProjeId && !rapor) {
       // Set default project for new reports from project page
+      // Will be filled after projeler are fetched
       setFormData(prev => ({ ...prev, proje_id: defaultProjeId }));
     }
   }, [open, rapor, defaultProjeId]);
+
+  // Auto-fill project data when defaultProjeId is set and projects are loaded
+  useEffect(() => {
+    if (defaultProjeId && projeler.length > 0 && !rapor && open) {
+      const selectedProje = projeler.find(p => p.id === defaultProjeId);
+      if (selectedProje) {
+        setFormData(prev => ({ 
+          ...prev, 
+          proje_id: defaultProjeId,
+          firma: selectedProje.firma_adi || prev.firma,
+        }));
+        
+        // Auto-fill city from project location
+        if (selectedProje.lokasyon && sehirler.length > 0) {
+          const matchingCity = sehirler.find(s => 
+            s.isim.toLowerCase().includes(selectedProje.lokasyon.toLowerCase()) ||
+            selectedProje.lokasyon.toLowerCase().includes(s.isim.toLowerCase())
+          );
+          if (matchingCity) {
+            setFormData(prev => ({ ...prev, sehir: matchingCity.isim }));
+          }
+        }
+      }
+    }
+  }, [defaultProjeId, projeler, sehirler, rapor, open]);
 
   const fetchProjeler = async () => {
     try {
