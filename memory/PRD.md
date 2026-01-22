@@ -12,6 +12,7 @@ EKOS is an equipment control automation system for managing inspection reports, 
 6. **Project Management** - Organize reports by projects
 7. **Category Management** - Equipment categorization
 8. **Admin Panel** - User management, settings
+9. **Çekiliş (Raffle) Module** - NEW: Draw management, vocabulary learning, mind games
 
 ## Architecture
 - **Frontend:** React 18 + TailwindCSS + Shadcn/UI
@@ -24,98 +25,79 @@ EKOS is an equipment control automation system for managing inspection reports, 
 - Single-session login enforcement
 - ZIP export with category-based folder structure
 - Project-specific report filtering and export
-- **NEW:** Project-based bulk ZIP export with all media files
+- Project-based bulk ZIP export with all media files
+- **NEW:** Çekiliş module with 3 sub-features
 
 ---
 
 ## What's Been Implemented
 
+### January 22, 2026 - Çekiliş (Raffle) Feature Integration ✅
+**P0 Task: Çekiliş Özelliği Entegrasyonu** ✅
+- Added 3 new sub-modules from external repository (`cekilix_local`)
+
+**1. Çekiliş Havuzu (Raffle Pool):**
+- Create, view, delete raffles
+- Add/remove participants (manual or Excel upload)
+- Execute draw with random selection
+- Export results to Excel
+- Backend: `/api/draws/*` endpoints
+- Frontend: `/cekilis`, `/cekilis/olustur`, `/cekilis/{id}`, `/cekilis/{id}/sonuclar`
+
+**2. İngilizce Kelime Havuzu (English Vocabulary Pool):**
+- Add, edit, delete vocabulary words
+- Fuzzy search with suggestions
+- Quiz mode (5 questions, scoring)
+- Sentence practice with feedback
+- Statistics dashboard
+- Backend: `/api/vocabulary/*` endpoints
+- Frontend: `/kelime-havuzu`
+
+**3. Zeka Oyunları (Mind Games):**
+- "Sayı Okuyucu" (Number Reader) game
+- Step-by-step mathematical puzzle
+- Interactive UI with progress bar
+- Frontend: `/zeka-oyunu`
+
+**Sidebar Navigation Updated:**
+- Added "Çekiliş" dropdown menu with purple accent
+- Sub-menu items: Çekiliş Havuzu, İngilizce Kelime Havuzu, Zeka Oyunları
+- Works on both desktop and mobile
+
+**P1 Task: Bildirim Sistemi Standardizasyonu** ✅
+- Added `NotificationModal` import to `Raporlar.js`
+- Replaced critical toast notifications with centered modal dialogs
+- Modal types: success, error, warning, info
+- Modal includes icon, title, message, and "Tamam" button
+
 ### January 22, 2026 - Project ZIP Export with Media
 **Feature: Proje Bazlı Toplu ZIP İndirme (Medya Dahil)** ✅
 - Added new backend endpoint: `GET /api/raporlar/proje-zip-export/{proje_id}`
 - Downloads ALL reports and media files for a specific project
-- ZIP structure organized by category and report number:
-  ```
-  ProjeAdi_Raporlar/
-  ├── proje_ozet.txt (project summary with statistics)
-  ├── Kategori_A/
-  │   ├── RaporNo_001/
-  │   │   ├── bilgi.txt (report details)
-  │   │   ├── image1.jpg
-  │   │   └── report.pdf
-  │   └── RaporNo_002/
-  ├── Kategori_B/
-  │   └── RaporNo_003/
-  └── ...
-  ```
-- Frontend button: "Toplu ZIP (Medya Dahil)" in ProjeRaporlar page
-- Loading state with progress toast message
-- 5-minute timeout for large projects
+- ZIP structure organized by category and report number
 
 **Bug Fix: ProjeRaporlar Edit/Delete Buttons** ✅
-- Fixed prop name mismatch in RaporModal: `isOpen` → `open`, `editingRapor` → `rapor`
-- Added `defaultProjeId` and `defaultProjeName` props to RaporModal
-- Edit button now opens the edit form with pre-filled data
-- Delete button triggers confirmation dialog and deletes report
+- Fixed prop name mismatch in RaporModal
+- Edit and Delete buttons work correctly
 
 **Feature: Yeni Rapor with Auto-Fill Project Data** ✅
-- "Yeni Rapor" button in ProjeRaporlar now auto-fills:
-  - Proje (automatically selected)
-  - Şehir (from project lokasyon)
-  - Firma (from project firma_adi)
-- Added auto-fill logic in RaporModal useEffect
+- "Yeni Rapor" button auto-fills project data
 
 **Feature: Centered Notification Modal** ✅
-- Created new `NotificationModal` component with:
-  - Centered dialog with icon (success/error/warning/info)
-  - Title and message
-  - "Tamam" button to close
-  - Color-coded backgrounds (green/red/amber/blue)
-- Replaced corner toast notifications with centered modal in ProjeRaporlar page
-- Used for: success messages, error alerts, warnings
+- Created `NotificationModal` component
+- Used in ProjeRaporlar page
 
 ### January 22, 2026 - GitHub Synchronization Complete
 **P0 Task: GitHub Code Synchronization** ✅
-- Successfully synchronized application with GitHub repository: `https://github.com/ibrahimznr/ekos_local.git`
-- All new and modified files copied from `/tmp/ekos_local` to `/app`
-- New dependencies installed (xlsx)
-- Services restarted and verified working
-
-**New Features Added from GitHub:**
-1. **Makineler (Machines) Module**
-   - Machine tracking page
-   - Operators tab
-   - Excel import/export functionality
-   
-2. **Cephe İskeleleri (Facade Scaffolding) Module**
-   - New menu item and page
-   
-3. **Ayarlar (Settings) Page**
-   - Profile settings (Ad, Soyad, Şehir, Doğum Tarihi, Cep Telefonu)
-   - Account settings
-   - Security settings (password change)
-   
-4. **Kullanıcı Sözleşmesi (User Agreement)**
-   - Agreement management in Admin Panel
-   - Agreement acceptance during registration
-   
-5. **Kalibrasyon (Calibration) Feature**
-   - Calibration management in Admin Panel
-
-**P1 Task: Edit/Delete Buttons in Report Modal** ✅
-- Fixed `onEdit` and `onDelete` props not being passed to RaporDetailModal
-- Edit and Delete buttons now work correctly in the report detail modal
-- Clicking Edit opens the report edit form
-- Clicking Delete triggers the delete confirmation
+- Synchronized with `https://github.com/ibrahimznr/ekos_local.git`
+- Added: Makineler, Cephe İskeleleri, Ayarlar, Kullanıcı Sözleşmesi, Kalibrasyon
 
 ### Previously Implemented Features
 - Single-session login policy
 - Category-based folder structure for ZIP exports
-- Project-specific report pages (/projeler/:projeId/raporlar)
-- Enhanced report cards with clickable details
-- FAB button navigation
-- Admin Panel fixes (user creation/editing, password visibility)
-- Image and PDF preview in report detail modal
+- Project-specific report pages
+- Admin Panel fixes
+- Image and PDF preview
 
 ---
 
@@ -125,32 +107,53 @@ EKOS is an equipment control automation system for managing inspection reports, 
 All critical tasks completed.
 
 ### P1 - High Priority
-- [ ] Email verification (full implementation with email service)
-- [ ] User-specific ZIP naming
+- [ ] Email verification (full implementation)
+- [ ] Notification system full standardization (remaining pages)
 
 ### P2 - Medium Priority
-- [ ] Additional calibration device features
+- [ ] Database cleanup (duplicate projects from migration)
 - [ ] Machine maintenance tracking
 - [ ] Operator certification management
 
 ### Future Tasks
 - [ ] Mobile app optimization
 - [ ] Advanced reporting/analytics
-- [ ] Notification system
 - [ ] Multi-language support
 
 ---
 
 ## API Endpoints
 
-### New Endpoint
-- `GET /api/raporlar/proje-zip-export/{proje_id}` - Download all project reports with media as ZIP
+### New Endpoints (Çekiliş Module)
+**Draws API:**
+- `GET /api/draws` - List all draws
+- `POST /api/draws` - Create new draw
+- `GET /api/draws/{id}` - Get draw details
+- `POST /api/draws/{id}/participants` - Add participant
+- `POST /api/draws/{id}/participants/upload` - Upload participants from Excel
+- `GET /api/draws/{id}/participants` - List participants
+- `DELETE /api/draws/{id}/participants/{pid}` - Delete participant
+- `POST /api/draws/{id}/execute` - Execute draw
+- `GET /api/draws/{id}/results` - Get results
+- `GET /api/draws/{id}/export` - Export results to Excel
+- `DELETE /api/draws/{id}` - Delete draw
+
+**Vocabulary API:**
+- `GET /api/vocabulary` - List all words
+- `POST /api/vocabulary` - Add new word
+- `GET /api/vocabulary/{id}` - Get word details
+- `PUT /api/vocabulary/{id}` - Update word
+- `DELETE /api/vocabulary/{id}` - Delete word
+- `GET /api/vocabulary/search?q=` - Search words
+- `GET /api/vocabulary/quiz/generate` - Generate quiz
+- `POST /api/vocabulary/quiz/submit` - Submit quiz answers
+- `POST /api/vocabulary/practice/sentence` - Practice sentence
+- `GET /api/vocabulary/statistics` - Get statistics
 
 ### Existing Endpoints
 - `POST /api/raporlar/zip-export` - Download selected reports as ZIP
+- `GET /api/raporlar/proje-zip-export/{proje_id}` - Download project reports with media
 - `POST /api/excel/export` - Export reports to Excel
-- `GET /api/raporlar?proje_id={id}` - Get reports for a project
-- `GET /api/projeler/{id}` - Get project details
 
 ---
 
@@ -161,33 +164,46 @@ All critical tasks completed.
 
 ---
 
+## Test Results (January 22, 2026)
+- **Backend Tests:** 100% (16/16 passed)
+- **Frontend Tests:** 100% (all pages load and function correctly)
+- Test file: `/app/backend/tests/test_cekilis_features.py`
+
+---
+
 ## File Structure
 ```
 /app/
 ├── backend/
-│   ├── models/
-│   │   ├── user.py, proje.py, rapor.py, kategori.py
-│   │   ├── makine.py, operator.py, cephe_iskelesi.py
-│   │   └── kalibrasyon.py, iskele_bileseni.py
 │   ├── routers/
-│   │   ├── auth.py, users.py, raporlar.py (updated - new ZIP endpoint)
-│   │   ├── projeler.py, makineler.py, operatorler.py
-│   │   ├── cephe_iskeleleri.py, ayarlar.py, kalibrasyon.py
-│   │   ├── iskele.py, files.py, excel.py, dashboard.py
-│   │   └── kategoriler.py, static.py
-│   └── server.py
+│   │   ├── draws.py (NEW - Çekiliş API)
+│   │   ├── vocabulary.py (NEW - Kelime API)
+│   │   └── ... (existing routers)
+│   └── server.py (updated - new routers)
 ├── frontend/
 │   ├── src/
 │   │   ├── pages/
-│   │   │   ├── Dashboard.js, Raporlar.js
-│   │   │   ├── ProjeRaporlar.js (updated - new ZIP button)
-│   │   │   ├── AdminPanel.js, Login.js, Register.js
-│   │   │   ├── Makineler.js, CepheIskeleleri.js, Ayarlar.js
-│   │   │   └── IskeleBilesenleri.js
-│   │   └── components/
-│   │       ├── Layout.js, RaporModal.js
-│   │       ├── RaporDetailModal.js (fixed - onEdit/onDelete props)
-│   │       └── ...
+│   │   │   ├── cekilis/ (NEW)
+│   │   │   │   ├── DrawsListPage.js
+│   │   │   │   ├── CreateDrawPage.js
+│   │   │   │   ├── DrawDetailPage.js
+│   │   │   │   ├── DrawResultsPage.js
+│   │   │   │   ├── VocabularyPage.js
+│   │   │   │   └── MindReaderGame.js
+│   │   │   └── ... (existing pages)
+│   │   ├── components/
+│   │   │   ├── vocabulary/ (NEW)
+│   │   │   │   ├── WordList.js
+│   │   │   │   ├── AddWordForm.js
+│   │   │   │   ├── WordSearch.js
+│   │   │   │   ├── QuizMode.js
+│   │   │   │   ├── PracticeMode.js
+│   │   │   │   └── VocabularyStats.js
+│   │   │   ├── Layout.js (updated - Çekiliş menu)
+│   │   │   └── NotificationModal.js
+│   │   ├── services/
+│   │   │   └── vocabularyService.js (NEW)
+│   │   └── App.js (updated - new routes)
 │   └── package.json
 └── memory/
     └── PRD.md
