@@ -471,13 +471,13 @@ const ProjeRaporlar = () => {
       {/* Rapor Create/Edit Modal */}
       {showRaporModal && (
         <RaporModal
-          isOpen={showRaporModal}
+          open={showRaporModal}
           onClose={() => {
             setShowRaporModal(false);
             setEditingRapor(null);
           }}
           onSuccess={handleRaporSaved}
-          editingRapor={editingRapor}
+          rapor={editingRapor}
           defaultProjeId={projeId}
           defaultProjeName={proje?.proje_adi}
         />
