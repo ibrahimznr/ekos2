@@ -269,15 +269,15 @@ const Raporlar = () => {
       link.remove();
       window.URL.revokeObjectURL(url);
       
-      toast.dismiss(loadingToast);
-      toast.success(`${selectedRaporlar.length} rapor başarıyla indirildi`);
+      toast.dismiss();
+      showNotification('success', `${selectedRaporlar.length} rapor başarıyla indirildi`);
       
     } catch (error) {
-      toast.dismiss(loadingToast);
+      toast.dismiss();
       if (error.code === 'ECONNABORTED') {
-        toast.error('İndirme zaman aşımına uğradı. Daha az rapor seçmeyi deneyin.');
+        showNotification('error', 'İndirme zaman aşımına uğradı. Daha az rapor seçmeyi deneyin.');
       } else {
-        toast.error(error.response?.data?.detail || 'ZIP indirme başarısız oldu');
+        showNotification('error', error.response?.data?.detail || 'ZIP indirme başarısız oldu');
       }
     } finally {
       setZipLoading(false);
