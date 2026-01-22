@@ -1,13 +1,16 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { LayoutDashboard, FileText, Shield, LogOut, Menu, X, Building2, User, Plus, ChevronLeft, ChevronRight, Settings, Truck, Trophy, BookOpen, Brain, ChevronDown } from 'lucide-react';
 import { toast } from 'sonner';
 import api from '@/utils/api';
+import LanguageSelector from '@/components/LanguageSelector';
 
 const LOGO_URL = '/ekos-logo.png';
 
 const Layout = ({ children }) => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = React.useState(true);
@@ -23,7 +26,7 @@ const Layout = ({ children }) => {
     }
     localStorage.removeItem('token');
     localStorage.removeItem('user');
-    toast.success('Çıkış yapıldı');
+    toast.success(t('auth.logoutSuccess'));
     navigate('/login');
   };
 
