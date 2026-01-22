@@ -81,6 +81,8 @@ api_router.include_router(static_router)
 api_router.include_router(makineler_router)
 api_router.include_router(operatorler_router)
 api_router.include_router(cephe_iskeleleri_router)
+api_router.include_router(draws_router)
+api_router.include_router(vocabulary_router)
 
 # Include the main API router
 app.include_router(api_router)
