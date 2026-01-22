@@ -174,7 +174,7 @@ const ProjeRaporlar = () => {
   // Excel Export - Sadece bu projenin raporları
   const handleExcelExport = async () => {
     if (raporlar.length === 0) {
-      toast.error('Dışa aktarılacak rapor bulunamadı');
+      showNotification('warning', 'Uyarı', 'Dışa aktarılacak rapor bulunamadı');
       return;
     }
     
@@ -201,10 +201,10 @@ const ProjeRaporlar = () => {
       link.parentNode.removeChild(link);
       window.URL.revokeObjectURL(url);
       
-      toast.success('Excel dosyası indirildi');
+      showNotification('success', 'Başarılı', 'Excel dosyası başarıyla indirildi');
     } catch (error) {
       console.error('Excel export error:', error);
-      toast.error('Excel dışa aktarma başarısız');
+      showNotification('error', 'Hata', 'Excel dışa aktarma başarısız');
     } finally {
       setExporting(false);
     }
@@ -213,12 +213,12 @@ const ProjeRaporlar = () => {
   // ZIP Export - Projeye ait tüm raporlar ve medya dosyaları
   const handleZipExport = async () => {
     if (raporlar.length === 0) {
-      toast.error('İndirilecek rapor bulunamadı');
+      showNotification('warning', 'Uyarı', 'İndirilecek rapor bulunamadı');
       return;
     }
     
     setExporting(true);
-    const loadingToast = toast.loading(`${raporlar.length} rapor ve medya dosyaları hazırlanıyor...`);
+    showNotification('info', 'Hazırlanıyor', `${raporlar.length} rapor ve medya dosyaları hazırlanıyor... Lütfen bekleyin.`);
     
     try {
       const token = localStorage.getItem('token');
