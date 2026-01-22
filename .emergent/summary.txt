@@ -1,183 +1,162 @@
 <analysis>**original_problem_statement:**
-The user initially requested a full-stack Equipment Inspection Report Management System (EKOS). Over time, requirements expanded to include a multi-tenant architecture, advanced UI/UX features, and a separate Scaffolding Components management system.
+The user's high-level goal is to synchronize the current application with an updated version from a GitHub repository.
 
-In the current session, the user requested the following features and bug fixes:
-1.  **Scaffolding Components Page:**
-    *   Convert the table view to a card-based layout.
-    *   Add Preview, Edit, and Delete buttons to each component card.
-    *   Add a Back button to navigate to the previous page.
-    *   Implement bulk selection and deletion (Select All and Delete Selected).
-    *   Fix / operations which were returning Not Found errors.
-    *   Sort the components from newest to oldest by default.
-2.  **Dashboard:**
-    *   Add statistics for Scaffolding Components.
-    *   Correct the statistics to sum the total quantity () of components, not just count the number of records.
-3.  **Admin Panel:**
-    *   Create a new section to manage a list of predefined Scaffolding Component Names ().
-    *   Add Edit buttons for Users, Categories, and Projects sections.
-4.  **Report & Component Creation:**
-    *   In the Add Scaffolding Component modal, change the Component Name from a text input to a dropdown populated from the new Admin Panel list.
-    *   Fix an issue where copy-pasted images were not being saved when creating a new report.
-    *   Implement a two-stage Bulk Report Creation flow in the New Report modal to prevent users from re-entering header information (Project, Company, etc.) for each piece of equipment.
-5.  **Bug Fixes:**
-    *   Resolve a critical frontend compilation error on the  page.
-    *   Fix a  error when trying to import an Excel file for reports.
-    *   Fix a frontend crash () that occurs when opening the New Report modal after it was refactored for the bulk creation feature.
+The latest user requests are:
+1.  **(P0) GitHub Sync:** Update the entire application to match the code from the provided GitHub repository: . This new version contains additional features like Makineler, Operatörler, Cephe İskeleleri, and Ayarlar.
+2.  **(P1) Fix Edit/Delete Buttons:** The edit and delete buttons in the project-specific report view's detail modal were not working.
+3.  **(P2) Add Calibration Feature:** Implement a Kalibrasyon tab in the Admin Panel to manage measurement devices, and display this information on the Dashboard.
+
+The agent was interrupted while performing the P0 GitHub Sync task. The other tasks (P1, P2) were requested just before the sync and may already be resolved by the code in the GitHub repository.
 
 **User's preferred language**: The user's primary language is **Turkish**. The next agent MUST respond in Turkish only.
 
 **what currently exists?**
-The application is a full-stack system with a FastAPI backend and React frontend. Most of the requested features, including the Scaffolding Components page with card view and bulk actions, are implemented. The Admin Panel has been updated, and several bugs have been fixed.
-
-However, the application is currently in a **broken state**. The agent refactored the  component to implement a two-stage bulk report creation flow. This change introduced a critical bug, causing the application to crash with a generic Bir Hata Oluştu error screen whenever the user tries to open the New Report modal, making a core feature unusable.
+The application is in a **broken, partially synchronized state**. The agent started the GitHub synchronization task by cloning the repository to , copying *new* files (like new routers and pages) into the  directory, and overwriting core backend files (, ). However, the process is incomplete. Many *modified* files have not been updated, and new dependencies have not been installed. The frontend and backend are out of sync, and the application will not function correctly.
 
 **Last working item**:
-- **Last item agent was working:** The agent was debugging a critical frontend crash. After refactoring  for the new two-stage bulk-add feature, opening the modal now crashes the app. The user provided a screenshot of the error page. The agent was analyzing logs to find the root cause.
+- **Last item agent was working:** Synchronizing the application with the code from the user-provided GitHub repository. The agent was in the middle of identifying and copying files from the cloned repo () to the live application directory ().
 - **Status:** IN PROGRESS
 - **Agent Testing Done:** N
-- **Which testing method agent to use?** The agent MUST use the **screenshot tool** to capture the browser's developer console log. The error is a client-side React error, not a backend issue. After identifying and fixing the error, the agent should use the screenshot tool again to test the entire two-stage report creation flow.
-- **User Testing Done:** N (User reported the crash).
+- **Which testing method agent to use?** After completing the file synchronization, a comprehensive test is required.
+    1.  Install new dependencies from  and .
+    2.  Restart both backend and frontend services.
+    3.  Use the  to verify all API endpoints, including the newly added ones.
+    4.  Use the  to test the entire UI, including the new pages (, , etc.).
+- **User Testing Done:** N
 
 **All Pending/In progress Issue list**:
-- **Issue 1:** The application crashes when opening the New Report modal. (Priority: **P0 - BLOCKER**)
+- **Issue 1:** Complete the GitHub code synchronization. (Priority: **P0**)
 
   **Issues Detail:**
-  - **Issue 1:** Yeni Rapor Oluştur modal crashes the application.
-     - **Error Message:** The user sees a generic Bir Hata Oluştu screen. The underlying error is likely a JavaScript/React error.
-     - **Attempted fixes:** The agent completely refactored  to a two-stage form, which introduced this bug. The agent checked backend logs which showed irrelevant old errors. The problem is on the frontend.
+  - **Issue 1:**
+     - **Attempted fixes:** The agent cloned the repo, copied new files, and overwrote  and . This was insufficient as it missed modified files.
      - **Next debug checklist:**
-        1.  Use the  and check the browser's developer console log to get the specific React error message (e.g., state error, lifecycle issue, missing function).
-        2.  Thoroughly review . The error is likely in the  hooks or the initial state setup for the new  logic.
-        3.  Check how the modal is invoked from  to ensure all props are correctly passed.
-     - **Why fix this issue and what will be achieved with the fix?** This is a hard blocker. Creating reports is a core function of the application. Fixing this will restore essential functionality and allow the completion of the bulk-add feature.
+        1.  Perform a comprehensive  and  to find all differing files.
+        2.  Systematically copy all new and modified files from  to , overwriting the existing versions. Pay special attention to core files like , , and .
+        3.  Compare  and  between the two versions and install any new dependencies.
+        4.  Restart the services using backend: stopped
+frontend: ERROR (not running)
+backend: started
+frontend: ERROR (already started).
+        5.  Thoroughly test the application.
+     - **Why fix this issue and what will be achieved with the fix?** To bring the application to the state desired by the user, incorporating all new features and changes from the GitHub repository.
      - **Status:** IN PROGRESS
-     - **Is recurring issue?** Y (Large component refactors have repeatedly introduced breaking bugs in this project).
-     - **Should Test frontend/backend/both after fix?** Frontend.
+     - **Is recurring issue?** N
+     - **Should Test frontend/backend/both after fix?** Both.
      - **Blocked on other issue:** None.
 
 **In progress Task List**:
-- **Task 1:** Complete and test the two-stage Bulk Report Creation feature. (Priority: **P1**)
-
-  **Task Detail:**
-  - **Task 1:**
-     - **Where to resume:** After fixing the P0 crash in .
-     - **What will be achieved with this?** A highly efficient workflow for creating multiple reports for the same project, as requested by the user. The user will be able to lock header fields, enter equipment details, save, and immediately enter the next equipment's details without the modal closing or header fields resetting.
-     - **Status:** BLOCKED
-     - **Should Test frontend/backend/both after fix?** Frontend.
-     - **Blocked on something:** Issue 1: Yeni Rapor Oluştur modal crash.
+- **Task 1:** GitHub Code Synchronization
+     - **Where to resume:** Resume by identifying all modified files (not just new ones) and overwriting them. Then, install dependencies and test.
+     - **What will be achieved with this?** The application will be fully aligned with the user's GitHub repository.
+     - **Status:** IN PROGRESS
+     - **Should Test frontend/backend/both after fix?** Both.
+     - **Blocked on something:** None.
 
 **Upcoming and Future Tasks**
-- **Upcoming Tasks:**
-  - **P1: Backend Refactoring:** The agent started refactoring the monolithic  file by creating a  directory and moving Pydantic models into it. This work is incomplete. The next step is to create a  directory and move the API endpoint logic into separate router files. This was paused to address user-_reported bugs.
+- **Upcoming Tasks (To be verified AFTER GitHub sync):**
+  - **P1: Verify Edit/Delete Button Functionality:** Check if the edit/delete buttons in the project detail modal work correctly in the new version.
+  - **P2: Verify Calibration Feature:** Check if the Kalibrasyon feature is present and functional in the new version.
 - **Future Tasks:**
-  - **P2: Email Verification:** This is a deferred requirement from a previous session.
+  - **Email Verification:** A deferred requirement.
+  - **User-specific ZIP Naming:** An optional enhancement.
 
 **Completed work in this session**
-- **Scaffolding Components Feature Enhancements:**
-  - Fixed a critical compilation error in .
-  - Converted the list view from a table to a responsive card grid.
-  - Added Preview, Edit, Delete, and Back buttons.
-  - Implemented bulk selection and deletion functionality.
-  - Fixed API / errors by correcting route parameter names ( -> ).
-  - Sorted the component list from newest to oldest.
-- **Dashboard Enhancements:**
-  - Added a new statistics section for Scaffolding Components.
-  - Corrected the logic to sum component quantities () instead of just counting records.
-- **Admin Panel & Data Management:**
-  - Added a new Admin Panel tab for managing Scaffolding Component Names.
-  - Implemented full CRUD functionality for this new section.
-  - Changed the Component Name field in modals to a dropdown populated by this new managed list.
-  - Added Edit buttons to the Users, Categories, and Projects sections of the Admin Panel.
-- **Bug Fixes & UX Improvements:**
-  - Fixed an issue where copy-pasted images were not saved correctly in the New Report modal.
-  - Fixed a  in the Report Excel Import modal.
-  - Began implementation of the two-stage Bulk Report Creation feature (which unfortunately led to the current P0 blocker).
-  - Started the backend refactoring by creating the  directory structure.
+- **Refactoring:** Completed a major backend refactoring, moving logic from a monolithic  into modular router files.
+- **Feature:** Implemented a single-session login policy to prevent concurrent logins.
+- **Feature:** Enhanced ZIP export to group reports into category-named folders.
+- **Feature:** Created dedicated project report pages () with scoped filtering, search, and project-specific Excel/ZIP export functionality.
+- **UI/UX:**
+    - Made report cards clickable to open details, removing the explicit View button.
+    - Moved Edit and Delete buttons into the detail modal.
+    - Added a Show All/Hide feature for the component list on the Dashboard.
+- **Bug Fixes:**
+    - Fixed the FAB button navigation issue.
+    - Resolved errors in the Admin Panel for user creation/editing and added a show password icon.
+    - Fixed image and PDF preview issues in the report detail modal.
 
 **Earlier issues found/mentioned but not fixed**
-- None.
+- The tasks for fixing edit/delete buttons and implementing the calibration feature were superseded by the GitHub sync request. Their status in the new codebase is unknown and must be verified after the sync is complete.
 
 **Known issue recurrence from previous fork**
-- **Issue:** Large, single-step refactoring of major frontend components (, ) has repeatedly introduced critical, application-breaking syntax or runtime errors.
-- **Recurrence count:** 2 (in this fork alone).
-- **Status:** RECURRING.
-- **Note:** The next agent should be extremely cautious when refactoring large files. It's better to make smaller, incremental changes and test at each step rather than rewriting an entire file at once.
+- None.
 
 **Code Architecture**
+The architecture is currently being overwritten. The target architecture from the GitHub repo includes:
 
 
 **Key Technical Concepts**
-- **Frontend:** React, Shadcn UI, Tailwind CSS.
-- **State Management:** Extensive use of  and  for managing complex forms, modals, filters, and conditional UI.
-- **UI/UX Pattern:** Implemented a two-stage form with a lockable header to improve bulk data entry efficiency.
-- **Backend:** FastAPI, Motor (async MongoDB).
-- **Refactoring:** Started a backend refactor to move from a monolithic  to a structured  and  architecture.
+- **Code Synchronization:** Using  and file system commands (, ) to align a local project with a remote repository.
+- **Modular FastAPI Architecture:** The application heavily relies on  to structure the backend.
+- **File I/O:** Dynamic generation of ZIP archives () and Excel files ().
+- **Single Session Management:** Using a database-stored  to enforce a single active login per user.
 
 **key DB schema**
-- **iskele_bilesen_adlari:**  (NEW)
-- **iskele_bilesenleri:** 
-- **raporlar:** 
-- **users:** 
-- **projeler:** 
-- **kategoriler:** 
+- The synchronization will likely introduce new collections: , , , .
 
 **All files of reference**
-- **/app/frontend/src/components/RaporModal.js**: **(BROKEN)** This file was heavily refactored to create a two-stage form and is now causing the application to crash on render. This is the source of the P0 bug.
-- **/app/frontend/src/pages/AdminPanel.js**: Heavily modified to add a new tab and CRUD operations for İskele Bileşen Adları, as well as adding Edit buttons to other tabs. This file has become very large.
-- **/app/backend/server.py**: Modified to add new endpoints for  and to update the dashboard statistics logic. Refactoring has started but is incomplete.
-- **/app/frontend/src/pages/IskeleBilesenleri.js**: Modified to implement the card view, sorting, and bulk action features.
-- **/app/backend/models/**: New directory containing the Pydantic models separated from .
+- **/tmp/ekos_local/**: The source of truth. All files for the synchronization are located here.
+- **/app/**: The destination directory, which is currently in a partially updated state.
 
 **Areas that need refactoring**:
-- **/app/backend/server.py**: The refactoring into routers needs to be completed. All API endpoint logic still resides in this single file.
-- **/app/frontend/src/pages/AdminPanel.js**: This file is now over 1200 lines long and handles logic for four different types of data. It should be broken down into smaller, more manageable components for each tab.
+- The priority is to complete the synchronization. After the sync, running a lint check across the project is recommended to ensure code quality.
 
 **key api endpoints**
-- **New:**
-    - : Full CRUD for managing Scaffolding Component Names.
-    - : Endpoint to delete multiple components at once.
-- **Updated:**
-    - : Logic updated to aggregate component quantities () instead of just counting documents.
-    - : Path parameter name fixed.
+- **New endpoints to be added from the repo:**
+  - 
+  - 
+  - 
+  - 
 
 **Critical Info for New Agent**
-- **IMMEDIATE PRIORITY:** The application is **UNUSABLE** for creating reports. You must first fix the crash in . Do not attempt any other task until this is resolved. The error is client-side; check the browser console.
-- **RECURRING ISSUE:** Be aware that large, all-in-one refactors have repeatedly broken this application. After fixing the current bug, proceed with caution and prefer smaller, verifiable steps.
-- **INCOMPLETE REFACTOR:** The backend refactoring is half-finished. The  exist, but the  do not. This should be the next major task after the P0 bug is squashed and the bulk-add feature is verified by the user.
+- **Your immediate and sole priority is to complete the code synchronization** from the repository cloned at .
+- The previous agent's work was incomplete. You must not assume all necessary files have been copied.
+- **Action Plan:**
+    1.  Perform a comprehensive  between  and  to find all new and modified files.
+    2.  Copy all identified files from the source to the  directory, overwriting existing ones.
+    3.  Check  and  for new dependencies and install them.
+    4.  Restart both  and  services.
+    5.  Thoroughly test the application, focusing on the new features to ensure the sync was successful.
+- **Do not** attempt to fix the edit/delete buttons or add the calibration feature manually. First, complete the sync and then verify if those issues persist in the new codebase.
 
 **documents and test reports created in this job**
 - 
 - 
-- (and other model files in )
+- 
+- 
+-  (cloned repository)
 
 **Last 10 User Messages and any pending HUMAN messages**
-1.  **User Report (Current Blocker):** User provided a screenshot of the Bir Hata Oluştu error screen, stating the app is inaccessible after the agent's last changes to the New Report modal.
-2.  **User Request:** User asks to implement the two-stage, lockable header form for bulk report creation. Provides detailed requirements.
-3.  **Confirmation:** User confirms the copy-paste image upload fix is working and approves the plan for the bulk-add feature.
-4.  **Request:** User asks for the copy-paste image upload fix and the bulk report creation feature.
-5.  **User Report:** User reports that the Kaydet ve Yeni Ekipman Ekle button is closing the modal, defeating its purpose.
-6.  **Confirmation:** User confirms Admin Panel edit buttons are good and that the Excel import error is now fixed.
-7.  **User Report:** User reports a  error when trying to import Excel files.
-8.  **Request:** User asks for Edit buttons in the Admin panel and reports an error with the Excel Import button for reports.
-9.  **Confirmation:** User confirms the new sorting on the Scaffolding Components page is working.
-10. **Request:** User asks for the Scaffolding Components card view to be sorted from newest to oldest.
+1.  **User (Pending):** *Request to sync the app with a GitHub repo.* (This is the last working item).
+2.  **User:** *Reported that edit/delete buttons on the project page modal are not working and requested a new Calibration feature.*
+3.  **Agent:** Confirmed completion of the project-specific Excel/ZIP export feature.
+4.  **User:** *Requested project-specific Excel and ZIP export buttons.*
+5.  **Agent:** Confirmed completion of the new project-specific report page.
+6.  **User:** *Reported that clicking a project on the dashboard and then filtering mixes up data from other projects. Requested a dedicated page for project reports.*
+7.  **Agent:** Confirmed completion of the category-based folder structure for ZIP exports.
+8.  **User:** *Requested that ZIP exports group reports into folders by category.*
+9.  **Agent:** Confirmed completion of the single-session login feature.
+10. **User:** *Requested a single-session login policy to prevent concurrent logins on multiple devices.*
 
 **Project Health Check:**
-*   **Broken:** The core functionality of creating a new report is completely broken, leading to a full-page crash.
+- **Broken:** The application is in a partially synchronized state and is not functional. The backend and frontend codebases are inconsistent.
 
 **3rd Party Integrations**
-*   None.
+- None.
 
 **Testing status**
-- **Testing agent used after significant changes:** NO
+- **Testing agent used after significant changes:** YES (before the sync request).
 - **Troubleshoot agent used after agent stuck in loop:** NO
 - **Test files created:** None.
-- **Known regressions:** The New Report feature is a major regression, going from working to completely broken.
+- **Known regressions:** The entire application is likely non-functional due to the incomplete synchronization.
 
 **Credentials to test flow:**
-*   **Admin Email:** 
-*   **Admin Username:** 
-*   **Admin Password:** 
+- **Admin Email:** 
+- **Admin Username:** 
+- **Admin Password:** 
 
 **What agent forgot to execute**
-The agent did not forget a task but introduced a critical P0 bug while implementing the user's request for a two-stage report creation modal. The most important unfulfilled task is to deliver a working version of this feature without crashing the application. The backend refactoring task also remains incomplete.</analysis>
+- The agent was interrupted mid-task. It needs to complete the synchronization by:
+    1.  Copying all *modified* files (not just new ones).
+    2.  Checking for and installing new dependencies from  and .
+    3.  Restarting and testing the application.</analysis>
