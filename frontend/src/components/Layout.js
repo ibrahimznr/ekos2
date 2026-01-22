@@ -311,6 +311,50 @@ const Layout = ({ children }) => {
                 );
               })}
 
+              {/* Çekiliş Section */}
+              <div className="pt-2 border-t border-gray-200 mt-2">
+                <p className="px-3 py-1 text-xs font-semibold text-purple-600 uppercase">Çekiliş</p>
+                <Button
+                  variant={location.pathname === '/cekilis' ? 'default' : 'ghost'}
+                  onClick={() => {
+                    navigate('/cekilis');
+                    setMobileMenuOpen(false);
+                  }}
+                  className={`w-full justify-start h-12 ${location.pathname === '/cekilis'
+                    ? 'bg-gradient-to-r from-purple-600 to-purple-700 text-white'
+                    : 'text-gray-700 hover:bg-gray-100'}`}
+                >
+                  <Trophy className="h-5 w-5 mr-3" />
+                  Çekiliş Havuzu
+                </Button>
+                <Button
+                  variant={location.pathname === '/kelime-havuzu' ? 'default' : 'ghost'}
+                  onClick={() => {
+                    navigate('/kelime-havuzu');
+                    setMobileMenuOpen(false);
+                  }}
+                  className={`w-full justify-start h-12 ${location.pathname === '/kelime-havuzu'
+                    ? 'bg-gradient-to-r from-purple-600 to-purple-700 text-white'
+                    : 'text-gray-700 hover:bg-gray-100'}`}
+                >
+                  <BookOpen className="h-5 w-5 mr-3" />
+                  İngilizce Kelime Havuzu
+                </Button>
+                <Button
+                  variant={location.pathname === '/zeka-oyunu' ? 'default' : 'ghost'}
+                  onClick={() => {
+                    navigate('/zeka-oyunu');
+                    setMobileMenuOpen(false);
+                  }}
+                  className={`w-full justify-start h-12 ${location.pathname === '/zeka-oyunu'
+                    ? 'bg-gradient-to-r from-purple-600 to-purple-700 text-white'
+                    : 'text-gray-700 hover:bg-gray-100'}`}
+                >
+                  <Brain className="h-5 w-5 mr-3" />
+                  Zeka Oyunları
+                </Button>
+              </div>
+
               {/* Settings Button */}
               <Button
                 variant={isActive('/ayarlar') ? 'default' : 'ghost'}
