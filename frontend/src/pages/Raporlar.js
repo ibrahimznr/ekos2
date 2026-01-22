@@ -286,7 +286,7 @@ const Raporlar = () => {
 
   const handleClearSelection = () => {
     setSelectedRaporlar([]);
-    toast.info('Seçim temizlendi');
+    showNotification('info', 'Seçim temizlendi');
   };
 
   const handleSelectAll = useCallback(() => {
