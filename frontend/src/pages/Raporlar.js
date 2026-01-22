@@ -368,9 +368,9 @@ const Raporlar = () => {
       link.click();
       link.remove();
       
-      toast.success('Excel dosyası indirildi');
+      showNotification('success', 'Excel dosyası indirildi');
     } catch (error) {
-      toast.error('Excel export başarısız');
+      showNotification('error', 'Excel export başarısız');
     }
   };
 
