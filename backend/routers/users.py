@@ -39,7 +39,14 @@ async def get_users(current_user: dict = Depends(get_current_user)):
             username=user.get("username", user["email"].split("@")[0]),
             email=user["email"],
             role=user["role"],
+            firma_adi=user.get("firma_adi"),
             email_verified=user.get("email_verified", False),
+            ad=user.get("ad"),
+            soyad=user.get("soyad"),
+            sehir=user.get("sehir"),
+            dogum_tarihi=user.get("dogum_tarihi"),
+            profil_resmi=user.get("profil_resmi"),
+            telefon=user.get("telefon"),
             created_at=datetime.fromisoformat(user["created_at"]) if isinstance(user["created_at"], str) else user["created_at"]
         ))
     

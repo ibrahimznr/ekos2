@@ -10,7 +10,8 @@ from database import db
 
 router = APIRouter(tags=["Files"])
 
-UPLOAD_DIR = Path("/app/uploads")
+ROOT_DIR = Path(__file__).parent.parent
+UPLOAD_DIR = ROOT_DIR.parent / "uploads"
 UPLOAD_DIR.mkdir(exist_ok=True)
 
 @router.post("/upload/{rapor_id}")

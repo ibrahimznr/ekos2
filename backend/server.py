@@ -51,7 +51,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Upload directory
-UPLOAD_DIR = Path("/app/uploads")
+UPLOAD_DIR = ROOT_DIR.parent / "uploads"
 UPLOAD_DIR.mkdir(exist_ok=True)
 
 # Create the main app
@@ -125,7 +125,7 @@ async def startup_db():
         admin = User(
             username="miharbirnz",
             email="ibrahimznrmak@gmail.com",
-            password=get_password_hash("Szd.dl_34"),
+            password=get_password_hash("admin234"),
             role="admin",
             email_verified=True
         )

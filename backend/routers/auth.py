@@ -94,7 +94,14 @@ async def register(user_create: UserCreate):
         role="viewer",
         firma_adi=user_create.firma_adi,
         email_verified=False,
-        verification_code=verification_code
+        verification_code=verification_code,
+        # New profile fields
+        ad=user_create.ad,
+        soyad=user_create.soyad,
+        sehir=user_create.sehir,
+        dogum_tarihi=user_create.dogum_tarihi,
+        profil_resmi=user_create.profil_resmi,
+        telefon=user_create.telefon
     )
     
     doc = user.model_dump()
@@ -110,6 +117,12 @@ async def register(user_create: UserCreate):
         role=user.role,
         firma_adi=user.firma_adi,
         email_verified=user.email_verified,
+        ad=user.ad,
+        soyad=user.soyad,
+        sehir=user.sehir,
+        dogum_tarihi=user.dogum_tarihi,
+        profil_resmi=user.profil_resmi,
+        telefon=user.telefon,
         created_at=user.created_at
     )
 
@@ -192,6 +205,12 @@ async def login(user_login: UserLogin):
             role=user["role"],
             firma_adi=user.get("firma_adi"),
             email_verified=user.get("email_verified", False),
+            ad=user.get("ad"),
+            soyad=user.get("soyad"),
+            sehir=user.get("sehir"),
+            dogum_tarihi=user.get("dogum_tarihi"),
+            profil_resmi=user.get("profil_resmi"),
+            telefon=user.get("telefon"),
             created_at=datetime.fromisoformat(user["created_at"]) if isinstance(user["created_at"], str) else user["created_at"]
         )
     )
@@ -205,6 +224,12 @@ async def get_me(current_user: dict = Depends(get_current_user)):
         role=current_user["role"],
         firma_adi=current_user.get("firma_adi"),
         email_verified=current_user.get("email_verified", False),
+        ad=current_user.get("ad"),
+        soyad=current_user.get("soyad"),
+        sehir=current_user.get("sehir"),
+        dogum_tarihi=current_user.get("dogum_tarihi"),
+        profil_resmi=current_user.get("profil_resmi"),
+        telefon=current_user.get("telefon"),
         created_at=datetime.fromisoformat(current_user["created_at"]) if isinstance(current_user["created_at"], str) else current_user["created_at"]
     )
 
@@ -217,3 +242,68 @@ async def logout(current_user: dict = Depends(get_current_user)):
     )
     return {"message": "Başarıyla çıkış yapıldı"}
 
+from pydantic import BaseModel
+from typing import Optional
+
+class ProfileUpdate(BaseModel):
+    ad: Optional[str] = None
+    soyad: Optional[str] = None
+    sehir: Optional[str] = None
+    dogum_tarihi: Optional[str] = None
+    telefon: Optional[str] = None
+
+class PasswordChange(BaseModel):
+    current_password: str
+    new_password: str
+    new_password_confirm: str
+
+@router.put("/profile")
+async def update_profile(profile_data: ProfileUpdate, current_user: dict = Depends(get_current_user)):
+    """Update user profile information"""
+    update_data = {}
+    
+    if profile_data.ad is not None:
+        update_data["ad"] = profile_data.ad
+    if profile_data.soyad is not None:
+        update_data["soyad"] = profile_data.soyad
+    if profile_data.sehir is not None:
+        update_data["sehir"] = profile_data.sehir
+    if profile_data.dogum_tarihi is not None:
+        update_data["dogum_tarihi"] = profile_data.dogum_tarihi
+    if profile_data.telefon is not None:
+        update_data["telefon"] = profile_data.telefon
+    
+    if update_data:
+        await db.users.update_one(
+            {"id": current_user["id"]},
+            {"$set": update_data}
+        )
+    
+    return {"message": "Profil bilgileri güncellendi"}
+
+@router.put("/change-password")
+async def change_password(password_data: PasswordChange, current_user: dict = Depends(get_current_user)):
+    """Change user password"""
+    # Verify current password
+    user = await db.users.find_one({"id": current_user["id"]}, {"_id": 0})
+    if not user:
+        raise HTTPException(status_code=404, detail="Kullanıcı bulunamadı")
+    
+    if not verify_password(password_data.current_password, user["password"]):
+        raise HTTPException(status_code=400, detail="Mevcut şifre hatalı")
+    
+    # Validate new password
+    if password_data.new_password != password_data.new_password_confirm:
+        raise HTTPException(status_code=400, detail="Yeni şifreler eşleşmiyor")
+    
+    if len(password_data.new_password) < 6:
+        raise HTTPException(status_code=400, detail="Yeni şifre en az 6 karakter olmalıdır")
+    
+    # Update password
+    new_password_hash = get_password_hash(password_data.new_password)
+    await db.users.update_one(
+        {"id": current_user["id"]},
+        {"$set": {"password": new_password_hash}}
+    )
+    
+    return {"message": "Şifre başarıyla değiştirildi"}

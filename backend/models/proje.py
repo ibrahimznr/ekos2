@@ -7,6 +7,7 @@ class Proje(BaseModel):
     model_config = ConfigDict(extra="ignore")
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     proje_adi: str
+    firma_adi: Optional[str] = None  # Mevcut verilerle uyumluluk için isteğe bağlı
     proje_kodu: Optional[str] = None
     lokasyon: Optional[str] = None
     baslangic_tarihi: Optional[str] = None
@@ -17,6 +18,7 @@ class Proje(BaseModel):
 
 class ProjeCreate(BaseModel):
     proje_adi: str
+    firma_adi: str  # Zorunlu alan
     proje_kodu: str
     lokasyon: Optional[str] = None
     baslangic_tarihi: Optional[str] = None
