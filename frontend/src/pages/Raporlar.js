@@ -315,12 +315,12 @@ const Raporlar = () => {
       setLoading(false);
       
       if (filtered.length > 0) {
-        toast.success(`Proje raporları: ${filtered.length} rapor bulundu`);
+        showNotification('success', `Proje raporları: ${filtered.length} rapor bulundu`);
       } else {
-        toast.info('Bu proje için henüz rapor oluşturulmamış');
+        showNotification('info', 'Bu proje için henüz rapor oluşturulmamış');
       }
     } catch (error) {
-      toast.error('Raporlar yüklenemedi');
+      showNotification('error', 'Raporlar yüklenemedi');
       setLoading(false);
     }
   };
