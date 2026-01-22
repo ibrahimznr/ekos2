@@ -75,6 +75,15 @@ const ProjeRaporlar = () => {
     applyFilters();
   }, [searchTerm, kategoriFilter, uygunlukFilter, raporlar]);
 
+  // Custom notification helper functions
+  const showNotification = (type, title, message) => {
+    setNotification({ open: true, type, title, message });
+  };
+
+  const closeNotification = () => {
+    setNotification({ ...notification, open: false });
+  };
+
   const fetchProjeAndRaporlar = async () => {
     setLoading(true);
     try {
@@ -89,10 +98,10 @@ const ProjeRaporlar = () => {
     } catch (error) {
       console.error('Error fetching project data:', error);
       if (error.response?.status === 404) {
-        toast.error('Proje bulunamadı');
+        showNotification('error', 'Hata', 'Proje bulunamadı');
         navigate('/');
       } else {
-        toast.error('Veriler yüklenemedi');
+        showNotification('error', 'Hata', 'Veriler yüklenemedi');
       }
     } finally {
       setLoading(false);
