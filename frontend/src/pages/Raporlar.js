@@ -221,17 +221,17 @@ const Raporlar = () => {
 
   const handleZipDownload = async () => {
     if (selectedRaporlar.length === 0) {
-      toast.error('Lütfen indirmek için en az bir rapor seçin');
+      showNotification('warning', 'Lütfen indirmek için en az bir rapor seçin');
       return;
     }
 
     if (selectedRaporlar.length > 100) {
-      toast.error('En fazla 100 rapor seçilebilir');
+      showNotification('warning', 'En fazla 100 rapor seçilebilir');
       return;
     }
 
     setZipLoading(true);
-    const loadingToast = toast.loading(`${selectedRaporlar.length} rapor hazırlanıyor...`);
+    toast.loading(`${selectedRaporlar.length} rapor hazırlanıyor...`);
 
     try {
       const token = localStorage.getItem('token');
