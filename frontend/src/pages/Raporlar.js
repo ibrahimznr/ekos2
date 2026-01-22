@@ -825,6 +825,14 @@ const Raporlar = () => {
             setSelectedRapor(null);
           }}
           rapor={selectedRapor}
+          onEdit={(rapor) => {
+            setShowDetailModal(false);
+            handleEditRapor(rapor);
+          }}
+          onDelete={(raporId) => {
+            setShowDetailModal(false);
+            handleDeleteClick(raporId);
+          }}
         />
       )}
 
