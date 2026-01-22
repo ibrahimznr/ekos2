@@ -1,154 +1,191 @@
 <analysis>**original_problem_statement:**
-The user's high-level goal is to synchronize the current application with an updated version from a GitHub repository.
+The user's initial goal was to synchronize the application with an updated version from a GitHub repository (), fix several bugs, and add new features. After those tasks were completed, the user requested a data migration between two deployed instances of the application. The migration was complex and partially completed.
 
 The latest user requests are:
-1.  **(P0) GitHub Sync:** Update the entire application to match the code from the provided GitHub repository: . This new version contains additional features like Makineler, Operatörler, Cephe İskeleleri, and Ayarlar.
-2.  **(P1) Fix Edit/Delete Buttons:** The edit and delete buttons in the project-specific report view's detail modal were not working.
-3.  **(P2) Add Calibration Feature:** Implement a Kalibrasyon tab in the Admin Panel to manage measurement devices, and display this information on the Dashboard.
+1.  **(P0) Add Çekiliş Feature:** Add a new main menu item named Çekiliş (Raffle/Lottery). This feature should be integrated by cloning the code from a different GitHub repository: . The specific modules to integrate are çekiliş havuzu (raffle pool), ingilizce kelime havuzu (english vocabulary pool), and zeka oyunları (mind games).
+2.  **(P1) Pre-fill New Report Form:** When clicking the + Yeni Rapor button on a project's specific report page (), the creation form should open with the project's data (name, city, etc.) already filled in. (This was completed).
+3.  **(P2) Centralized Notifications:** Change the toast notifications (top-right corner) to a centralized modal dialog with a Tamam (OK) button. (This was partially completed).
 
-The agent was interrupted while performing the P0 GitHub Sync task. The other tasks (P1, P2) were requested just before the sync and may already be resolved by the code in the GitHub repository.
+The user also provided an image showing the desired placement of the + Yeni Rapor button.
 
 **User's preferred language**: The user's primary language is **Turkish**. The next agent MUST respond in Turkish only.
 
 **what currently exists?**
-The application is in a **broken, partially synchronized state**. The agent started the GitHub synchronization task by cloning the repository to , copying *new* files (like new routers and pages) into the  directory, and overwriting core backend files (, ). However, the process is incomplete. Many *modified* files have not been updated, and new dependencies have not been installed. The frontend and backend are out of sync, and the application will not function correctly.
+The application is a full-stack React and FastAPI project. It is in a functional state. The codebase has been updated from the  GitHub repository, and several bug fixes and features have been implemented. A complex data migration from another production instance was performed, resulting in the current database state of approximately 1149 reports and 6 projects. The last action taken was to clone the  repository to  in preparation for integrating the new Çekiliş feature.
 
 **Last working item**:
-- **Last item agent was working:** Synchronizing the application with the code from the user-provided GitHub repository. The agent was in the middle of identifying and copying files from the cloned repo () to the live application directory ().
+- **Last item agent was working:** The agent began the task of integrating a new Çekiliş (Raffle/Lottery) feature into the application from an external GitHub repository. The agent cloned the repository and analyzed its file structure to plan the integration.
 - **Status:** IN PROGRESS
 - **Agent Testing Done:** N
-- **Which testing method agent to use?** After completing the file synchronization, a comprehensive test is required.
-    1.  Install new dependencies from  and .
-    2.  Restart both backend and frontend services.
-    3.  Use the  to verify all API endpoints, including the newly added ones.
-    4.  Use the  to test the entire UI, including the new pages (, , etc.).
+- **Which testing method agent to use?** Both. After the integration is complete, the backend testing agent should be used to verify the new API endpoints (, , etc.), and the frontend testing agent should be used to verify the new UI pages and navigation.
 - **User Testing Done:** N
 
 **All Pending/In progress Issue list**:
-- **Issue 1:** Complete the GitHub code synchronization. (Priority: **P0**)
+- **Issue 1:** Integrate the Çekiliş feature. (Priority: **P0**)
 
   **Issues Detail:**
   - **Issue 1:**
-     - **Attempted fixes:** The agent cloned the repo, copied new files, and overwrote  and . This was insufficient as it missed modified files.
+     - **Attempted fixes:** The agent has cloned the repository  into  and has analyzed the file structure of the backend routers, frontend pages, and components. No code has been copied or modified yet.
      - **Next debug checklist:**
-        1.  Perform a comprehensive  and  to find all differing files.
-        2.  Systematically copy all new and modified files from  to , overwriting the existing versions. Pay special attention to core files like , , and .
-        3.  Compare  and  between the two versions and install any new dependencies.
-        4.  Restart the services using backend: stopped
-frontend: ERROR (not running)
-backend: started
-frontend: ERROR (already started).
-        5.  Thoroughly test the application.
-     - **Why fix this issue and what will be achieved with the fix?** To bring the application to the state desired by the user, incorporating all new features and changes from the GitHub repository.
+        1.  Copy new backend routers (, , ) from  to .
+        2.  Include the new routers in .
+        3.  Copy new frontend pages (, , ) from  to .
+        4.  Copy associated new components (e.g., from ) to .
+        5.  Update  to include routes for the new pages.
+        6.  Modify  (or the relevant sidebar component) to add Çekiliş as a new main menu item with its sub-pages.
+        7.  Compare and install any new dependencies from  and .
+        8.  Restart services and test the new feature thoroughly.
+     - **Why fix this issue and what will be achieved with the fix?** This will fulfill the user's latest feature request to add gaming and lottery functionalities to the application.
      - **Status:** IN PROGRESS
      - **Is recurring issue?** N
      - **Should Test frontend/backend/both after fix?** Both.
      - **Blocked on other issue:** None.
 
 **In progress Task List**:
-- **Task 1:** GitHub Code Synchronization
-     - **Where to resume:** Resume by identifying all modified files (not just new ones) and overwriting them. Then, install dependencies and test.
-     - **What will be achieved with this?** The application will be fully aligned with the user's GitHub repository.
+- **Task 1:** Çekiliş Feature Integration
+     - **Where to resume:** Resume from the plan outlined in Issue 1 above, starting with copying backend and frontend files from  to the  directory.
+     - **What will be achieved with this?** The EKOS application will have a new section called Çekiliş with three sub-features: a raffle pool, a vocabulary game, and a mind game.
      - **Status:** IN PROGRESS
      - **Should Test frontend/backend/both after fix?** Both.
      - **Blocked on something:** None.
 
 **Upcoming and Future Tasks**
-- **Upcoming Tasks (To be verified AFTER GitHub sync):**
-  - **P1: Verify Edit/Delete Button Functionality:** Check if the edit/delete buttons in the project detail modal work correctly in the new version.
-  - **P2: Verify Calibration Feature:** Check if the Kalibrasyon feature is present and functional in the new version.
+- **Upcoming Tasks:**
+  - **P1: Standardize Notifications:** The new central notification modal () was implemented only for the  page. Other parts of the application (like  and the main  page) still use the old toast notifications. This should be standardized across the application for a consistent user experience.
 - **Future Tasks:**
-  - **Email Verification:** A deferred requirement.
-  - **User-specific ZIP Naming:** An optional enhancement.
+  - **P2: Database Cleanup:** The data migration left some inconsistencies, such as duplicate project entries (Çukurova Deprem Konutları Projesi). These could be merged or cleaned up in the future.
 
 **Completed work in this session**
-- **Refactoring:** Completed a major backend refactoring, moving logic from a monolithic  into modular router files.
-- **Feature:** Implemented a single-session login policy to prevent concurrent logins.
-- **Feature:** Enhanced ZIP export to group reports into category-named folders.
-- **Feature:** Created dedicated project report pages () with scoped filtering, search, and project-specific Excel/ZIP export functionality.
-- **UI/UX:**
-    - Made report cards clickable to open details, removing the explicit View button.
-    - Moved Edit and Delete buttons into the detail modal.
-    - Added a Show All/Hide feature for the component list on the Dashboard.
-- **Bug Fixes:**
-    - Fixed the FAB button navigation issue.
-    - Resolved errors in the Admin Panel for user creation/editing and added a show password icon.
-    - Fixed image and PDF preview issues in the report detail modal.
+- **GitHub Sync:** Successfully synchronized the application with the  GitHub repository, adding features like Makineler, Cephe İskeleleri, and Ayarlar.
+- **Bug Fix:** Fixed non-functional Edit and Delete buttons on the report detail modal for both the main  page and the project-specific  page.
+- **Feature:** Implemented a project-specific bulk ZIP download that includes all associated media files, structured in folders by category and report number.
+- **Feature:** The + Yeni Rapor button on the  page now opens a creation modal with the project name and city pre-filled.
+- **Feature:** Replaced toast notifications on the  page with a custom central notification modal.
+- **Data Migration:** Performed a complex API-based data migration from a separate production environment, transferring over 1200 reports, projects, and users into the current preview environment.
 
 **Earlier issues found/mentioned but not fixed**
-- The tasks for fixing edit/delete buttons and implementing the calibration feature were superseded by the GitHub sync request. Their status in the new codebase is unknown and must be verified after the sync is complete.
+- **Media Migration Aborted:** An attempt to migrate media files (images, PDFs) from the old production server was started but ultimately failed due to access issues and a change in user priority. The user requested to migrate only Anagold Madencilik media, but this was not completed. The current environment has only a fraction of the media files from the old server.
 
 **Known issue recurrence from previous fork**
 - None.
 
 **Code Architecture**
-The architecture is currently being overwritten. The target architecture from the GitHub repo includes:
 
+The agent is about to add new files from  to this structure.
 
 **Key Technical Concepts**
-- **Code Synchronization:** Using  and file system commands (, ) to align a local project with a remote repository.
-- **Modular FastAPI Architecture:** The application heavily relies on  to structure the backend.
-- **File I/O:** Dynamic generation of ZIP archives () and Excel files ().
-- **Single Session Management:** Using a database-stored  to enforce a single active login per user.
+- **Codebase Integration:** Merging features from a separate, unrelated repository into an existing application, requiring manual integration of backend routes, frontend pages, components, and navigation.
+- **API-based Data Migration:** Scripting a complex data transfer between two live environments by fetching data from one API and posting it to another, including handling dependencies (projects before reports) and timeouts.
+- **DOM/Component Interaction:** Debugging and fixing issues related to incorrect prop passing between React components (, ) and implementing new UI patterns (central modal).
+- **File I/O & Streaming:** Implementing a backend endpoint to generate and stream a large ZIP file containing database records and media files.
 
 **key DB schema**
-- The synchronization will likely introduce new collections: , , , .
+- The existing schema includes collections for , , , , etc.
+- The Çekiliş feature will likely introduce new collections such as , , and .
 
 **All files of reference**
-- **/tmp/ekos_local/**: The source of truth. All files for the synchronization are located here.
-- **/app/**: The destination directory, which is currently in a partially updated state.
+- : The primary application workspace.
+- : The cloned repository containing the new Çekiliş feature to be integrated.
+- **Key files created/modified:**
+  - : Heavily modified to add new buttons, pre-filled forms, and new notification system.
+  - : Modified to fix edit/delete functionality.
+  - : Modified to accept and use default project data.
+  - : New file created for the central notification system.
+  - : Modified to add the project-specific bulk ZIP export endpoint.
 
 **Areas that need refactoring**:
-- The priority is to complete the synchronization. After the sync, running a lint check across the project is recommended to ensure code quality.
+- **Notification System:** The use of notifications is inconsistent. The new central modal should be adopted application-wide to replace all instances of  toasts for a uniform UX.
+- **Data Duplication:** The database contains several duplicate projects from the migration. A cleanup script could be created to merge these.
 
 **key api endpoints**
-- **New endpoints to be added from the repo:**
+- **Existing Endpoints of Note:**
   - 
+  - 
+  -  (New)
+  - 
+- **Endpoints to be added for Çekiliş:**
   - 
   - 
   - 
 
 **Critical Info for New Agent**
-- **Your immediate and sole priority is to complete the code synchronization** from the repository cloned at .
-- The previous agent's work was incomplete. You must not assume all necessary files have been copied.
-- **Action Plan:**
-    1.  Perform a comprehensive  between  and  to find all new and modified files.
-    2.  Copy all identified files from the source to the  directory, overwriting existing ones.
-    3.  Check  and  for new dependencies and install them.
-    4.  Restart both  and  services.
-    5.  Thoroughly test the application, focusing on the new features to ensure the sync was successful.
-- **Do not** attempt to fix the edit/delete buttons or add the calibration feature manually. First, complete the sync and then verify if those issues persist in the new codebase.
+- **Your top priority is to integrate the Çekiliş feature.** The user has confirmed the current environment () is the correct one to work in. Do not get sidetracked by the previous data migration complexities.
+- The source code for the new feature is located at . You need to manually copy the relevant backend and frontend files into the  directory and wire them up (update , , and the sidebar navigation).
+- After integration, a full test of the new features is required.
 
 **documents and test reports created in this job**
-- 
-- 
-- 
-- 
--  (cloned repository)
+- : Final script used for the data migration.
+- : New component file for central notifications.
 
 **Last 10 User Messages and any pending HUMAN messages**
-1.  **User (Pending):** *Request to sync the app with a GitHub repo.* (This is the last working item).
-2.  **User:** *Reported that edit/delete buttons on the project page modal are not working and requested a new Calibration feature.*
-3.  **Agent:** Confirmed completion of the project-specific Excel/ZIP export feature.
-4.  **User:** *Requested project-specific Excel and ZIP export buttons.*
-5.  **Agent:** Confirmed completion of the new project-specific report page.
-6.  **User:** *Reported that clicking a project on the dashboard and then filtering mixes up data from other projects. Requested a dedicated page for project reports.*
-7.  **Agent:** Confirmed completion of the category-based folder structure for ZIP exports.
-8.  **User:** *Requested that ZIP exports group reports into folders by category.*
-9.  **Agent:** Confirmed completion of the single-session login feature.
-10. **User:** *Requested a single-session login policy to prevent concurrent logins on multiple devices.*
+1.  **User:** Requests to add a Çekiliş menu and clone features from a new GitHub repo. (PENDING IMPLEMENTATION)
+2.  **Agent:** Summarizes that all new features are working in the current environment and asks for next steps.
+3.  **User:** yok eski proje o. sen ordan devam et (No, that's the old project. You continue from there) -> Confirms the current environment is the correct one to work on, despite its name.
+4.  **Agent:** Points out the discrepancy between the current environment name () and the user's reference to the old project ().
+5.  **User:** şu an zaten eski projenin preview ve edit sayfası açık. (The preview and edit page of the old project is already open.) -> User is confused about which environment the agent is in.
+6.  **Agent:** Explains they cannot access the database of the old project and asks the user to open the correct project environment.
+7.  **User:** eski prjenin veritabanı bilgileri... buradan erişebiliyor musun (Old project's DB info... can you access it from here?)
+8.  **Agent:** Instructs the user on how to use the Save to GitHub feature as manual git commands are not supported.
+9.  **User:** Provides usage: git [-v | --version] [-h | --help] [-C <path>] [-c <name>=<value>]
+           [--exec-path[=<path>]] [--html-path] [--man-path] [--info-path]
+           [-p | --paginate | -P | --no-pager] [--no-replace-objects] [--bare]
+           [--git-dir=<path>] [--work-tree=<path>] [--namespace=<name>]
+           [--super-prefix=<path>] [--config-env=<name>=<envvar>]
+           <command> [<args>]
+
+These are common Git commands used in various situations:
+
+start a working area (see also: git help tutorial)
+   clone     Clone a repository into a new directory
+   init      Create an empty Git repository or reinitialize an existing one
+
+work on the current change (see also: git help everyday)
+   add       Add file contents to the index
+   mv        Move or rename a file, a directory, or a symlink
+   restore   Restore working tree files
+   rm        Remove files from the working tree and from the index
+
+examine the history and state (see also: git help revisions)
+   bisect    Use binary search to find the commit that introduced a bug
+   diff      Show changes between commits, commit and working tree, etc
+   grep      Print lines matching a pattern
+   log       Show commit logs
+   show      Show various types of objects
+   status    Show the working tree status
+
+grow, mark and tweak your common history
+   branch    List, create, or delete branches
+   commit    Record changes to the repository
+   merge     Join two or more development histories together
+   rebase    Reapply commits on top of another base tip
+   reset     Reset current HEAD to the specified state
+   switch    Switch branches
+   tag       Create, list, delete or verify a tag object signed with GPG
+
+collaborate (see also: git help workflows)
+   fetch     Download objects and refs from another repository
+   pull      Fetch from and integrate with another repository or a local branch
+   push      Update remote refs along with associated objects
+
+'git help -a' and 'git help -g' list available subcommands and some
+concept guides. See 'git help <command>' or 'git help <concept>'
+to read about a specific subcommand or concept.
+See 'git help git' for an overview of the system. commands and asks the agent to save the code to a new repository .
+10. **Agent:** Responds to the user about deployment options after the user was concerned about deploying to the wrong site.
 
 **Project Health Check:**
-- **Broken:** The application is in a partially synchronized state and is not functional. The backend and frontend codebases are inconsistent.
+- **Functional:** The application is running and the last set of requested features before the Çekiliş task were successfully implemented and tested.
+- **Mocked:** N/A.
+- **Broken:** N/A.
 
 **3rd Party Integrations**
 - None.
 
 **Testing status**
-- **Testing agent used after significant changes:** YES (before the sync request).
+- **Testing agent used after significant changes:** NO (Agent performed extensive manual testing with the screenshot tool).
 - **Troubleshoot agent used after agent stuck in loop:** NO
 - **Test files created:** None.
-- **Known regressions:** The entire application is likely non-functional due to the incomplete synchronization.
+- **Known regressions:** None.
 
 **Credentials to test flow:**
 - **Admin Email:** 
@@ -156,7 +193,5 @@ The architecture is currently being overwritten. The target architecture from th
 - **Admin Password:** 
 
 **What agent forgot to execute**
-- The agent was interrupted mid-task. It needs to complete the synchronization by:
-    1.  Copying all *modified* files (not just new ones).
-    2.  Checking for and installing new dependencies from  and .
-    3.  Restarting and testing the application.</analysis>
+- The previous agent did not fully standardize the notification system; it was only implemented for one page (). This remains an upcoming task.
+- The media migration for the Anagold Madencilik project was never completed due to changing user priorities and technical hurdles.</analysis>
