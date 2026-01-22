@@ -76,6 +76,23 @@ async def delete_proje(proje_id: str, current_user: dict = Depends(get_current_u
         raise HTTPException(status_code=404, detail="Proje bulunamadı")
     return {"message": "Proje silindi"}
 
+# Migration endpoint - projeyi ID ile birlikte oluştur
+@router.post("/migrate")
+async def migrate_proje(proje_data: ProjeMigration, current_user: dict = Depends(get_current_user)):
+    """Migration için proje oluştur - ID dahil tüm verilerle"""
+    if current_user["role"] != "admin":
+        raise HTTPException(status_code=403, detail="Bu işlem için yetkiniz yok")
+    
+    doc = proje_data.model_dump()
+    if doc.get('created_at') is None:
+        doc['created_at'] = datetime.now().isoformat()
+    
+    # Eğer aynı ID'li proje varsa sil
+    await db.projeler.delete_one({"id": doc['id']})
+    
+    await db.projeler.insert_one(doc)
+    return {"message": "Proje aktarıldı", "id": doc['id']}
+
 @router.post("/bulk-delete")
 async def bulk_delete_projeler(proje_ids: List[str], current_user: dict = Depends(get_current_user)):
     if current_user["role"] != "admin":
