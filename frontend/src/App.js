@@ -111,6 +111,55 @@ function App() {
                 </ProtectedRoute>
               }
             />
+            {/* Çekiliş Routes */}
+            <Route
+              path="/cekilis"
+              element={
+                <ProtectedRoute>
+                  <DrawsListPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/cekilis/olustur"
+              element={
+                <ProtectedRoute>
+                  <CreateDrawPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/cekilis/:drawId"
+              element={
+                <ProtectedRoute>
+                  <DrawDetailPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/cekilis/:drawId/sonuclar"
+              element={
+                <ProtectedRoute>
+                  <DrawResultsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/kelime-havuzu"
+              element={
+                <ProtectedRoute>
+                  <VocabularyPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/zeka-oyunu"
+              element={
+                <ProtectedRoute>
+                  <MindReaderGame />
+                </ProtectedRoute>
+              }
+            />
           </Routes>
         </BrowserRouter>
         <Toaster position="top-right" richColors />
