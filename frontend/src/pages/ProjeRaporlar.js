@@ -197,7 +197,7 @@ const ProjeRaporlar = () => {
     }
   };
 
-  // ZIP Export - Sadece bu projenin raporları
+  // ZIP Export - Projeye ait tüm raporlar ve medya dosyaları
   const handleZipExport = async () => {
     if (raporlar.length === 0) {
       toast.error('İndirilecek rapor bulunamadı');
@@ -205,32 +205,50 @@ const ProjeRaporlar = () => {
     }
     
     setExporting(true);
+    const loadingToast = toast.loading(`${raporlar.length} rapor ve medya dosyaları hazırlanıyor...`);
+    
     try {
       const token = localStorage.getItem('token');
-      const rapor_ids = raporlar.map(r => r.id);
       
-      const response = await axios.post(`${API}/raporlar/zip-export`, 
-        { rapor_ids },
+      // Proje bazlı ZIP endpoint'ini kullan - tüm medya dahil
+      const response = await axios.get(`${API}/raporlar/proje-zip-export/${projeId}`, 
         {
           headers: { Authorization: `Bearer ${token}` },
           responseType: 'blob',
+          timeout: 300000, // 5 dakika timeout (büyük dosyalar için)
         }
       );
+
+      // Dosya adını response header'dan al
+      const contentDisposition = response.headers['content-disposition'];
+      let filename = `${proje?.proje_adi || 'Proje'}_Raporlar.zip`;
+      
+      if (contentDisposition) {
+        const filenameMatch = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
+        if (filenameMatch && filenameMatch[1]) {
+          filename = filenameMatch[1].replace(/['"]/g, '');
+        }
+      }
 
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
       link.href = url;
-      const projeName = proje?.proje_adi?.replace(/[^a-zA-Z0-9ğüşöçıİĞÜŞÖÇ\s]/g, '') || 'Proje';
-      link.setAttribute('download', `${projeName}_Raporlar.zip`);
+      link.setAttribute('download', filename);
       document.body.appendChild(link);
       link.click();
       link.parentNode.removeChild(link);
       window.URL.revokeObjectURL(url);
       
-      toast.success('ZIP dosyası indirildi');
+      toast.dismiss(loadingToast);
+      toast.success('Proje ZIP dosyası indirildi (tüm medya dahil)');
     } catch (error) {
+      toast.dismiss(loadingToast);
       console.error('ZIP export error:', error);
-      toast.error('ZIP indirme başarısız');
+      if (error.code === 'ECONNABORTED') {
+        toast.error('İndirme zaman aşımına uğradı. Dosya boyutu çok büyük olabilir.');
+      } else {
+        toast.error(error.response?.data?.detail || 'ZIP indirme başarısız');
+      }
     } finally {
       setExporting(false);
     }
