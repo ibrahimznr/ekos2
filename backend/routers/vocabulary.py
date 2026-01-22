@@ -48,9 +48,10 @@ class SentencePractice(BaseModel):
 @router.post("")
 async def add_word(word_data: WordCreate, current_user=Depends(get_current_user)):
     """Yeni kelime ekle"""
+    user_id = current_user.get("username") or current_user.get("email", "").split("@")[0]
     # Check if word already exists for this user
     existing = await db.vocabulary.find_one({
-        "user_id": current_user.username,
+        "user_id": user_id,
         "word": word_data.word.lower()
     })
     
@@ -59,7 +60,7 @@ async def add_word(word_data: WordCreate, current_user=Depends(get_current_user)
     
     word_dict = {
         "id": str(uuid.uuid4()),
-        "user_id": current_user.username,
+        "user_id": user_id,
         "word": word_data.word.lower(),
         "meaning": word_data.meaning,
         "sentence": word_data.sentence or "",
@@ -79,8 +80,9 @@ async def add_word(word_data: WordCreate, current_user=Depends(get_current_user)
 @router.get("")
 async def list_words(current_user=Depends(get_current_user)):
     """Tüm kelimeleri listele"""
+    user_id = current_user.get("username") or current_user.get("email", "").split("@")[0]
     words = await db.vocabulary.find(
-        {"user_id": current_user.username},
+        {"user_id": user_id},
         {"_id": 0}
     ).sort("added_date", -1).to_list(length=None)
     
@@ -95,9 +97,10 @@ async def list_words(current_user=Depends(get_current_user)):
 @router.get("/search")
 async def search_word(q: str = Query(..., min_length=1), current_user=Depends(get_current_user)):
     """Kelime ara (fuzzy matching ile)"""
+    user_id = current_user.get("username") or current_user.get("email", "").split("@")[0]
     # Exact match
     word = await db.vocabulary.find_one({
-        "user_id": current_user.username,
+        "user_id": user_id,
         "word": q.lower()
     }, {"_id": 0})
     
@@ -113,7 +116,7 @@ async def search_word(q: str = Query(..., min_length=1), current_user=Depends(ge
     
     # Fuzzy match
     all_words = await db.vocabulary.find(
-        {"user_id": current_user.username},
+        {"user_id": user_id},
         {"_id": 0, "word": 1, "meaning": 1}
     ).to_list(length=None)
     
@@ -124,7 +127,7 @@ async def search_word(q: str = Query(..., min_length=1), current_user=Depends(ge
     if matches:
         for match in matches:
             word_data = await db.vocabulary.find_one({
-                "user_id": current_user.username,
+                "user_id": user_id,
                 "word": match
             }, {"_id": 0})
             if word_data:
@@ -143,8 +146,9 @@ async def search_word(q: str = Query(..., min_length=1), current_user=Depends(ge
 @router.get("/quiz/generate")
 async def generate_quiz(current_user=Depends(get_current_user)):
     """5 soruluk quiz oluştur"""
+    user_id = current_user.get("username") or current_user.get("email", "").split("@")[0]
     words = await db.vocabulary.find(
-        {"user_id": current_user.username},
+        {"user_id": user_id},
         {"_id": 0}
     ).to_list(length=None)
     
@@ -171,13 +175,14 @@ async def generate_quiz(current_user=Depends(get_current_user)):
 @router.post("/quiz/submit")
 async def submit_quiz(quiz_data: QuizSubmit, current_user=Depends(get_current_user)):
     """Quiz cevaplarını değerlendir"""
+    user_id = current_user.get("username") or current_user.get("email", "").split("@")[0]
     score = 0
     results = []
     
     for answer in quiz_data.answers:
         word = await db.vocabulary.find_one({
             "id": answer.word_id,
-            "user_id": current_user.username
+            "user_id": user_id
         }, {"_id": 0})
         
         if not word:
@@ -216,6 +221,7 @@ async def submit_quiz(quiz_data: QuizSubmit, current_user=Depends(get_current_us
 @router.post("/practice/sentence")
 async def practice_sentence(practice_data: SentencePractice, current_user=Depends(get_current_user)):
     """Cümle pratiği - cümleyi analiz et"""
+    user_id = current_user.get("username") or current_user.get("email", "").split("@")[0]
     sentence = practice_data.sentence.strip()
     
     if not sentence:
@@ -223,7 +229,7 @@ async def practice_sentence(practice_data: SentencePractice, current_user=Depend
     
     # Get 3 random words
     words = await db.vocabulary.find(
-        {"user_id": current_user.username},
+        {"user_id": user_id},
         {"_id": 0}
     ).to_list(length=None)
     
@@ -290,8 +296,9 @@ def analyze_sentence(sentence: str, target_words: List[str]) -> List[str]:
 @router.get("/statistics")
 async def get_statistics(current_user=Depends(get_current_user)):
     """Kelime istatistiklerini getir"""
+    user_id = current_user.get("username") or current_user.get("email", "").split("@")[0]
     words = await db.vocabulary.find(
-        {"user_id": current_user.username},
+        {"user_id": user_id},
         {"_id": 0}
     ).to_list(length=None)
     
@@ -348,9 +355,10 @@ async def get_statistics(current_user=Depends(get_current_user)):
 @router.get("/{word_id}")
 async def get_word(word_id: str, current_user=Depends(get_current_user)):
     """Belirli bir kelimeyi getir"""
+    user_id = current_user.get("username") or current_user.get("email", "").split("@")[0]
     word = await db.vocabulary.find_one({
         "id": word_id,
-        "user_id": current_user.username
+        "user_id": user_id
     }, {"_id": 0})
     
     if not word:
@@ -366,10 +374,11 @@ async def get_word(word_id: str, current_user=Depends(get_current_user)):
 @router.put("/{word_id}")
 async def update_word(word_id: str, update_data: WordUpdate, current_user=Depends(get_current_user)):
     """Kelimeyi güncelle"""
+    user_id = current_user.get("username") or current_user.get("email", "").split("@")[0]
     # Check if word exists
     existing = await db.vocabulary.find_one({
         "id": word_id,
-        "user_id": current_user.username
+        "user_id": user_id
     })
     
     if not existing:
@@ -380,7 +389,7 @@ async def update_word(word_id: str, update_data: WordUpdate, current_user=Depend
     
     if update_dict:
         await db.vocabulary.update_one(
-            {"id": word_id, "user_id": current_user.username},
+            {"id": word_id, "user_id": user_id},
             {"$set": update_dict}
         )
     
@@ -391,9 +400,10 @@ async def update_word(word_id: str, update_data: WordUpdate, current_user=Depend
 @router.delete("/{word_id}")
 async def delete_word(word_id: str, current_user=Depends(get_current_user)):
     """Kelimeyi sil"""
+    user_id = current_user.get("username") or current_user.get("email", "").split("@")[0]
     result = await db.vocabulary.delete_one({
         "id": word_id,
-        "user_id": current_user.username
+        "user_id": user_id
     })
     
     if result.deleted_count == 0:
