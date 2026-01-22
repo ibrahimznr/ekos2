@@ -915,6 +915,15 @@ const Raporlar = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Notification Modal */}
+      <NotificationModal
+        open={notification.open}
+        onClose={closeNotification}
+        type={notification.type}
+        title={notification.title}
+        message={notification.message}
+      />
     </Layout>
   );
 };
