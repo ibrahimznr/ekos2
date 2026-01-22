@@ -40,7 +40,9 @@ from routers import (
     ayarlar_router,
     makineler_router,
     operatorler_router,
-    cephe_iskeleleri_router
+    cephe_iskeleleri_router,
+    draws_router,
+    vocabulary_router
 )
 
 ROOT_DIR = Path(__file__).parent

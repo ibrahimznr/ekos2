@@ -13,6 +13,8 @@ from .ayarlar import router as ayarlar_router
 from .makineler import router as makineler_router
 from .operatorler import router as operatorler_router
 from .cephe_iskeleleri import router as cephe_iskeleleri_router
+from .draws import router as draws_router
+from .vocabulary import router as vocabulary_router
 
 __all__ = [
     'auth_router',
@@ -29,5 +31,7 @@ __all__ = [
     'ayarlar_router',
     'makineler_router',
     'operatorler_router',
-    'cephe_iskeleleri_router'
+    'cephe_iskeleleri_router',
+    'draws_router',
+    'vocabulary_router'
 ]
