@@ -36,7 +36,11 @@ from routers import (
     projeler_router,
     iskele_router,
     static_router,
-    kalibrasyon_router
+    kalibrasyon_router,
+    ayarlar_router,
+    makineler_router,
+    operatorler_router,
+    cephe_iskeleleri_router
 )
 
 ROOT_DIR = Path(__file__).parent
@@ -72,9 +76,13 @@ api_router.include_router(projeler_router)
 api_router.include_router(kalibrasyon_router)
 api_router.include_router(iskele_router)
 api_router.include_router(static_router)
+api_router.include_router(makineler_router)
+api_router.include_router(operatorler_router)
+api_router.include_router(cephe_iskeleleri_router)
 
 # Include the main API router
 app.include_router(api_router)
+app.include_router(ayarlar_router)
 
 # CORS Middleware
 app.add_middleware(
@@ -112,12 +120,12 @@ async def startup_db():
         logger.warning(f"Index creation error (may already exist): {e}")
     
     # Create default admin if not exists
-    admin_exists = await db.users.find_one({"email": "admin@ekipman.com"})
+    admin_exists = await db.users.find_one({"email": "ibrahimznrmak@gmail.com"})
     if not admin_exists:
         admin = User(
-            username="admin",
-            email="admin@ekipman.com",
-            password=get_password_hash("admin123"),
+            username="miharbirnz",
+            email="ibrahimznrmak@gmail.com",
+            password=get_password_hash("Szd.dl_34"),
             role="admin",
             email_verified=True
         )
