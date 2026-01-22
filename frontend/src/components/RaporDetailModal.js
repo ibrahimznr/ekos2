@@ -77,6 +77,44 @@ const RaporDetailModal = ({ open, onClose, rapor, onEdit, onDelete }) => {
     }
   };
 
+  const fetchShareInfo = async () => {
+    try {
+      const response = await axios.get(`${API}/raporlar/public/${rapor.id}/share-info`, {
+        headers: { Authorization: `Bearer ${getToken()}` },
+      });
+      setShareInfo(response.data);
+      setShowQrModal(true);
+    } catch (error) {
+      toast.error('Paylaşım bilgileri alınamadı');
+    }
+  };
+
+  const copyToClipboard = async (text) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      toast.success('Link kopyalandı!');
+    } catch (error) {
+      toast.error('Link kopyalanamadı');
+    }
+  };
+
+  const openPublicLink = () => {
+    if (shareInfo?.public_url) {
+      window.open(shareInfo.public_url, '_blank');
+    }
+  };
+
+  const downloadQrCode = () => {
+    if (shareInfo?.qr_code_url) {
+      const link = document.createElement('a');
+      link.href = shareInfo.qr_code_url;
+      link.download = `rapor_${rapor.rapor_no}_qr.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  };
+
   const uploadFile = async (file) => {
     // Check file size (100MB limit for practical use)
     if (file.size > 100 * 1024 * 1024) {
