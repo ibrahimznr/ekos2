@@ -24,10 +24,33 @@ EKOS is an equipment control automation system for managing inspection reports, 
 - Single-session login enforcement
 - ZIP export with category-based folder structure
 - Project-specific report filtering and export
+- **NEW:** Project-based bulk ZIP export with all media files
 
 ---
 
 ## What's Been Implemented
+
+### January 22, 2026 - Project ZIP Export with Media
+**Feature: Proje Bazlı Toplu ZIP İndirme (Medya Dahil)** ✅
+- Added new backend endpoint: `GET /api/raporlar/proje-zip-export/{proje_id}`
+- Downloads ALL reports and media files for a specific project
+- ZIP structure organized by category and report number:
+  ```
+  ProjeAdi_Raporlar/
+  ├── proje_ozet.txt (project summary with statistics)
+  ├── Kategori_A/
+  │   ├── RaporNo_001/
+  │   │   ├── bilgi.txt (report details)
+  │   │   ├── image1.jpg
+  │   │   └── report.pdf
+  │   └── RaporNo_002/
+  ├── Kategori_B/
+  │   └── RaporNo_003/
+  └── ...
+  ```
+- Frontend button: "Toplu ZIP (Medya Dahil)" in ProjeRaporlar page
+- Loading state with progress toast message
+- 5-minute timeout for large projects
 
 ### January 22, 2026 - GitHub Synchronization Complete
 **P0 Task: GitHub Code Synchronization** ✅
@@ -96,6 +119,19 @@ All critical tasks completed.
 
 ---
 
+## API Endpoints
+
+### New Endpoint
+- `GET /api/raporlar/proje-zip-export/{proje_id}` - Download all project reports with media as ZIP
+
+### Existing Endpoints
+- `POST /api/raporlar/zip-export` - Download selected reports as ZIP
+- `POST /api/excel/export` - Export reports to Excel
+- `GET /api/raporlar?proje_id={id}` - Get reports for a project
+- `GET /api/projeler/{id}` - Get project details
+
+---
+
 ## Test Credentials
 - **Admin Email:** ibrahimznrmak@gmail.com
 - **Admin Username:** miharbirnz
@@ -112,21 +148,23 @@ All critical tasks completed.
 │   │   ├── makine.py, operator.py, cephe_iskelesi.py
 │   │   └── kalibrasyon.py, iskele_bileseni.py
 │   ├── routers/
-│   │   ├── auth.py, users.py, raporlar.py, projeler.py
-│   │   ├── makineler.py, operatorler.py, cephe_iskeleleri.py
-│   │   ├── ayarlar.py, kalibrasyon.py, iskele.py
-│   │   ├── files.py, excel.py, dashboard.py
+│   │   ├── auth.py, users.py, raporlar.py (updated - new ZIP endpoint)
+│   │   ├── projeler.py, makineler.py, operatorler.py
+│   │   ├── cephe_iskeleleri.py, ayarlar.py, kalibrasyon.py
+│   │   ├── iskele.py, files.py, excel.py, dashboard.py
 │   │   └── kategoriler.py, static.py
 │   └── server.py
 ├── frontend/
 │   ├── src/
 │   │   ├── pages/
-│   │   │   ├── Dashboard.js, Raporlar.js, ProjeRaporlar.js
+│   │   │   ├── Dashboard.js, Raporlar.js
+│   │   │   ├── ProjeRaporlar.js (updated - new ZIP button)
 │   │   │   ├── AdminPanel.js, Login.js, Register.js
 │   │   │   ├── Makineler.js, CepheIskeleleri.js, Ayarlar.js
 │   │   │   └── IskeleBilesenleri.js
 │   │   └── components/
-│   │       ├── Layout.js, RaporModal.js, RaporDetailModal.js
+│   │       ├── Layout.js, RaporModal.js
+│   │       ├── RaporDetailModal.js (fixed - onEdit/onDelete props)
 │   │       └── ...
 │   └── package.json
 └── memory/
