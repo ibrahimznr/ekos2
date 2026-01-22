@@ -1,5 +1,5 @@
-from fastapi import APIRouter, HTTPException, Depends
-from fastapi.responses import StreamingResponse
+from fastapi import APIRouter, HTTPException, Depends, Request
+from fastapi.responses import StreamingResponse, Response
 from pydantic import BaseModel
 from typing import List, Optional
 from datetime import datetime, timezone
@@ -9,6 +9,8 @@ import os
 import zipfile
 import shutil
 import tempfile
+import qrcode
+from qrcode.constants import ERROR_CORRECT_M
 
 from models import Rapor, RaporCreate, RaporUpdate
 from routers.auth import get_current_user
