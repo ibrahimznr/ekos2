@@ -22,6 +22,31 @@ router = APIRouter(prefix="/raporlar", tags=["Raporlar"])
 class ZipExportRequest(BaseModel):
     rapor_ids: List[str]
 
+# Migration için model
+class RaporMigration(BaseModel):
+    id: str
+    rapor_no: str
+    proje_id: str
+    proje_adi: Optional[str] = ""
+    sehir: Optional[str] = ""
+    sehir_kodu: Optional[str] = ""
+    ekipman_adi: Optional[str] = ""
+    kategori: Optional[str] = ""
+    alt_kategori: Optional[str] = ""
+    firma: Optional[str] = ""
+    lokasyon: Optional[str] = ""
+    marka_model: Optional[str] = ""
+    seri_no: Optional[str] = ""
+    periyot: Optional[str] = ""
+    gecerlilik_tarihi: Optional[str] = ""
+    aciklama: Optional[str] = ""
+    uygunluk: Optional[str] = ""
+    durum: Optional[str] = "Aktif"
+    created_by: Optional[str] = ""
+    created_by_username: Optional[str] = ""
+    created_at: Optional[str] = None
+    updated_at: Optional[str] = None
+
 @router.get("", response_model=List[Rapor])
 async def get_raporlar(
     arama: Optional[str] = None,
