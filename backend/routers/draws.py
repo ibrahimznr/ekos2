@@ -37,10 +37,11 @@ class ParticipantCreate(BaseModel):
 async def create_draw(draw_data: DrawCreate, current_user=Depends(get_current_user)):
     """Yeni çekiliş oluştur"""
     draw_id = str(uuid.uuid4())
+    user_id = current_user.get("username") or current_user.get("email", "").split("@")[0]
     
     draw_dict = {
         "id": draw_id,
-        "user_id": current_user.username,
+        "user_id": user_id,
         "name": draw_data.name,
         "main_count": draw_data.main_count,
         "backup_count": draw_data.backup_count,
@@ -61,8 +62,9 @@ async def create_draw(draw_data: DrawCreate, current_user=Depends(get_current_us
 @router.get("")
 async def list_draws(current_user=Depends(get_current_user)):
     """Kullanıcının tüm çekilişlerini listele"""
+    user_id = current_user.get("username") or current_user.get("email", "").split("@")[0]
     draws = await db.draws.find(
-        {"user_id": current_user.username},
+        {"user_id": user_id},
         {"_id": 0}
     ).sort("created_at", -1).to_list(length=None)
     
@@ -78,8 +80,9 @@ async def list_draws(current_user=Depends(get_current_user)):
 @router.get("/{draw_id}")
 async def get_draw(draw_id: str, current_user=Depends(get_current_user)):
     """Çekiliş detayını getir"""
+    user_id = current_user.get("username") or current_user.get("email", "").split("@")[0]
     draw = await db.draws.find_one(
-        {"id": draw_id, "user_id": current_user.username},
+        {"id": draw_id, "user_id": user_id},
         {"_id": 0}
     )
     
@@ -97,7 +100,8 @@ async def get_draw(draw_id: str, current_user=Depends(get_current_user)):
 @router.post("/{draw_id}/participants")
 async def add_participant(draw_id: str, participant_data: ParticipantCreate, current_user=Depends(get_current_user)):
     """Çekilişe manuel katılımcı ekle"""
-    draw = await db.draws.find_one({"id": draw_id, "user_id": current_user.username})
+    user_id = current_user.get("username") or current_user.get("email", "").split("@")[0]
+    draw = await db.draws.find_one({"id": draw_id, "user_id": user_id})
     if not draw:
         raise HTTPException(status_code=404, detail="Çekiliş bulunamadı")
     
