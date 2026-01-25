@@ -123,6 +123,52 @@ const Dashboard = () => {
     setSelectedFirma('all');
   };
 
+  // Export filtered data to Excel
+  const handleExportFilteredExcel = async () => {
+    setExcelLoading(true);
+    try {
+      const response = await api.post('/excel/export-filtered', {
+        proje_id: selectedProje,
+        sehir: selectedIl,
+        firma: selectedFirma
+      }, {
+        responseType: 'blob',
+        timeout: 30000
+      });
+      
+      // Get filename from response headers or create default
+      const contentDisposition = response.headers['content-disposition'];
+      let filename = `dashboard_raporlar_${new Date().toISOString().split('T')[0]}.xlsx`;
+      
+      if (contentDisposition) {
+        const filenameMatch = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
+        if (filenameMatch && filenameMatch[1]) {
+          filename = filenameMatch[1].replace(/['"]/g, '');
+        }
+      }
+      
+      // Download the file
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', filename);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+      
+      toast.success(`${filteredStats?.total_raporlar || 0} rapor Excel'e aktarıldı`);
+    } catch (error) {
+      if (error.response?.status === 404) {
+        toast.error('Filtrelere uyan rapor bulunamadı');
+      } else {
+        toast.error('Excel indirme başarısız');
+      }
+    } finally {
+      setExcelLoading(false);
+    }
+  };
+
   useEffect(() => {
     // Check if user has access to dashboard
     const user = JSON.parse(localStorage.getItem('user') || '{}');
