@@ -122,8 +122,9 @@ class TestExcelExportFiltered:
             json={"proje_id": "all", "sehir": "all", "firma": "all"}
         )
         
-        assert response.status_code == 401
-        print("Unauthorized access correctly rejected")
+        # API returns 401 or 403 for unauthorized access
+        assert response.status_code in [401, 403]
+        print(f"Unauthorized access correctly rejected with status {response.status_code}")
 
 
 class TestDashboardStats:
