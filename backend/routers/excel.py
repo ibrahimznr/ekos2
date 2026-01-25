@@ -103,7 +103,7 @@ async def export_excel_selected(request: ExcelExportRequest, current_user: dict 
 
 @router.post("/export-filtered")
 async def export_excel_filtered(request: FilteredExcelExportRequest, current_user: dict = Depends(get_current_user)):
-    """Filtrelenmiş raporları Excel'e aktar"""
+    """Filtrelenmiş raporları Dashboard görünümünde Excel'e aktar"""
     
     # Build query based on filters
     query = {}
@@ -119,9 +119,210 @@ async def export_excel_filtered(request: FilteredExcelExportRequest, current_use
     if not raporlar:
         raise HTTPException(status_code=404, detail="Filtrelere uyan rapor bulunamadı")
     
+    # Calculate statistics
+    today = datetime.now(timezone.utc)
+    current_month = today.month
+    current_year = today.year
+    
+    total_count = len(raporlar)
+    uygun_count = len([r for r in raporlar if r.get('uygunluk') == 'Uygun'])
+    uygun_degil_count = len([r for r in raporlar if r.get('uygunluk') == 'Uygun Değil'])
+    
+    # This month's reports
+    monthly_count = 0
+    for r in raporlar:
+        created_at = r.get('created_at')
+        if created_at:
+            if isinstance(created_at, str):
+                try:
+                    created_at = datetime.fromisoformat(created_at.replace('Z', '+00:00'))
+                except:
+                    continue
+            if created_at.month == current_month and created_at.year == current_year:
+                monthly_count += 1
+    
+    # Category distribution
+    kategori_map = {}
+    for r in raporlar:
+        kategori = r.get('kategori')
+        if kategori:
+            kategori_map[kategori] = kategori_map.get(kategori, 0) + 1
+    
+    kategori_list = sorted(kategori_map.items(), key=lambda x: x[1], reverse=True)
+    
+    # Create workbook
     wb = Workbook()
-    ws = wb.active
-    ws.title = "Filtrelenmiş Raporlar"
+    
+    # ===== DASHBOARD SHEET =====
+    ws_dashboard = wb.active
+    ws_dashboard.title = "Dashboard"
+    
+    # Hide gridlines
+    ws_dashboard.sheet_view.showGridLines = False
+    
+    # Set column widths for card layout
+    for col in range(1, 20):
+        ws_dashboard.column_dimensions[get_column_letter(col)].width = 5
+    
+    # Row heights
+    ws_dashboard.row_dimensions[1].height = 20
+    ws_dashboard.row_dimensions[2].height = 25
+    ws_dashboard.row_dimensions[3].height = 15
+    ws_dashboard.row_dimensions[4].height = 50
+    ws_dashboard.row_dimensions[5].height = 20
+    ws_dashboard.row_dimensions[6].height = 20
+    
+    # Define colors
+    blue_border = Side(style='medium', color='1e40af')
+    purple_border = Side(style='medium', color='7c3aed')
+    green_border = Side(style='medium', color='16a34a')
+    red_border = Side(style='medium', color='dc2626')
+    
+    blue_fill = PatternFill(start_color='dbeafe', end_color='dbeafe', fill_type='solid')
+    purple_fill = PatternFill(start_color='ede9fe', end_color='ede9fe', fill_type='solid')
+    green_fill = PatternFill(start_color='dcfce7', end_color='dcfce7', fill_type='solid')
+    red_fill = PatternFill(start_color='fee2e2', end_color='fee2e2', fill_type='solid')
+    
+    white_fill = PatternFill(start_color='FFFFFF', end_color='FFFFFF', fill_type='solid')
+    
+    # Apply white background to entire visible area
+    for row in range(1, 35):
+        for col in range(1, 20):
+            ws_dashboard.cell(row=row, column=col).fill = white_fill
+    
+    # Title
+    title_cell = ws_dashboard.cell(row=2, column=2, value="EKOS Dashboard Raporu")
+    title_cell.font = Font(bold=True, size=18, color='1e40af')
+    ws_dashboard.merge_cells('B2:R2')
+    
+    # Filter info
+    filter_info = []
+    if request.proje_id and request.proje_id != 'all':
+        proje = await db.projeler.find_one({"id": request.proje_id}, {"_id": 0})
+        if proje:
+            filter_info.append(f"Proje: {proje.get('proje_adi', '')}")
+    if request.sehir and request.sehir != 'all':
+        filter_info.append(f"İl: {request.sehir}")
+    if request.firma and request.firma != 'all':
+        filter_info.append(f"Firma: {request.firma}")
+    
+    filter_text = " | ".join(filter_info) if filter_info else "Tüm Veriler"
+    filter_cell = ws_dashboard.cell(row=3, column=2, value=f"Filtreler: {filter_text}")
+    filter_cell.font = Font(size=10, color='6b7280', italic=True)
+    ws_dashboard.merge_cells('B3:R3')
+    
+    # Date
+    date_cell = ws_dashboard.cell(row=3, column=15, value=f"Oluşturma: {today.strftime('%d.%m.%Y %H:%M')}")
+    date_cell.font = Font(size=9, color='9ca3af')
+    date_cell.alignment = Alignment(horizontal='right')
+    
+    # Helper function to create card
+    def create_card(start_row, start_col, end_col, title, value, border_color, fill_color, text_color):
+        # Title row
+        title_cell = ws_dashboard.cell(row=start_row, column=start_col, value=title)
+        title_cell.font = Font(bold=True, size=10, color='374151')
+        title_cell.alignment = Alignment(horizontal='center', vertical='center')
+        
+        # Value row  
+        value_cell = ws_dashboard.cell(row=start_row + 1, column=start_col, value=value)
+        value_cell.font = Font(bold=True, size=28, color=text_color)
+        value_cell.alignment = Alignment(horizontal='center', vertical='center')
+        
+        # Merge cells for title and value
+        ws_dashboard.merge_cells(start_row=start_row, start_column=start_col, end_row=start_row, end_column=end_col)
+        ws_dashboard.merge_cells(start_row=start_row + 1, start_column=start_col, end_row=start_row + 1, end_column=end_col)
+        
+        # Apply fill and border to all cells in card
+        border = Border(left=border_color, right=border_color, top=border_color, bottom=border_color)
+        for row in range(start_row, start_row + 2):
+            for col in range(start_col, end_col + 1):
+                cell = ws_dashboard.cell(row=row, column=col)
+                cell.fill = fill_color
+                # Apply border only to edge cells
+                left = border_color if col == start_col else None
+                right = border_color if col == end_col else None
+                top = border_color if row == start_row else None
+                bottom = border_color if row == start_row + 1 else None
+                cell.border = Border(left=left, right=right, top=top, bottom=bottom)
+    
+    # Create stat cards (Row 5-6)
+    # Card 1: Toplam Rapor (Blue)
+    create_card(5, 2, 5, "Toplam Rapor", total_count, blue_border, blue_fill, '1e40af')
+    
+    # Card 2: Bu Ay (Purple)
+    create_card(5, 7, 10, "Bu Ay", monthly_count, purple_border, purple_fill, '7c3aed')
+    
+    # Card 3: Uygun (Green)
+    create_card(5, 12, 15, "Uygun", uygun_count, green_border, green_fill, '16a34a')
+    
+    # Card 4: Uygun Değil (Red)
+    create_card(5, 17, 20, "Uygun Değil", uygun_degil_count, red_border, red_fill, 'dc2626')
+    
+    # Kategori Dağılımı section
+    kategori_title = ws_dashboard.cell(row=9, column=2, value="Kategori Dağılımı")
+    kategori_title.font = Font(bold=True, size=14, color='1f2937')
+    ws_dashboard.merge_cells('B9:H9')
+    
+    # Kategori table header
+    header_fill = PatternFill(start_color='f3f4f6', end_color='f3f4f6', fill_type='solid')
+    header_border = Border(
+        bottom=Side(style='thin', color='d1d5db')
+    )
+    
+    ws_dashboard.cell(row=11, column=2, value="Kategori").font = Font(bold=True, size=11, color='374151')
+    ws_dashboard.cell(row=11, column=2).fill = header_fill
+    ws_dashboard.cell(row=11, column=2).border = header_border
+    ws_dashboard.merge_cells('B11:G11')
+    
+    ws_dashboard.cell(row=11, column=8, value="Adet").font = Font(bold=True, size=11, color='374151')
+    ws_dashboard.cell(row=11, column=8).fill = header_fill
+    ws_dashboard.cell(row=11, column=8).border = header_border
+    ws_dashboard.cell(row=11, column=8).alignment = Alignment(horizontal='center')
+    
+    ws_dashboard.cell(row=11, column=9, value="Oran").font = Font(bold=True, size=11, color='374151')
+    ws_dashboard.cell(row=11, column=9).fill = header_fill
+    ws_dashboard.cell(row=11, column=9).border = header_border
+    ws_dashboard.cell(row=11, column=9).alignment = Alignment(horizontal='center')
+    ws_dashboard.merge_cells('I11:J11')
+    
+    # Kategori data
+    row_colors = ['e0e7ff', 'ddd6fe', 'dcfce7', 'fef3c7', 'fee2e2', 'e0f2fe']
+    for idx, (kategori, count) in enumerate(kategori_list[:10]):  # Top 10 categories
+        row_num = 12 + idx
+        percentage = round((count / total_count) * 100) if total_count > 0 else 0
+        
+        color = row_colors[idx % len(row_colors)]
+        row_fill = PatternFill(start_color=color, end_color=color, fill_type='solid')
+        
+        # Kategori name
+        kat_cell = ws_dashboard.cell(row=row_num, column=2, value=kategori)
+        kat_cell.font = Font(size=10, color='374151')
+        kat_cell.fill = row_fill
+        ws_dashboard.merge_cells(start_row=row_num, start_column=2, end_row=row_num, end_column=7)
+        
+        # Count
+        count_cell = ws_dashboard.cell(row=row_num, column=8, value=count)
+        count_cell.font = Font(size=10, color='374151', bold=True)
+        count_cell.fill = row_fill
+        count_cell.alignment = Alignment(horizontal='center')
+        
+        # Percentage
+        pct_cell = ws_dashboard.cell(row=row_num, column=9, value=f"%{percentage}")
+        pct_cell.font = Font(size=10, color='6b7280')
+        pct_cell.fill = row_fill
+        pct_cell.alignment = Alignment(horizontal='center')
+        ws_dashboard.merge_cells(start_row=row_num, start_column=9, end_row=row_num, end_column=10)
+    
+    # Set wider columns for readability
+    ws_dashboard.column_dimensions['B'].width = 8
+    ws_dashboard.column_dimensions['C'].width = 8
+    ws_dashboard.column_dimensions['D'].width = 8
+    ws_dashboard.column_dimensions['E'].width = 8
+    ws_dashboard.column_dimensions['H'].width = 8
+    ws_dashboard.column_dimensions['I'].width = 8
+    
+    # ===== RAPORLAR (DATA) SHEET =====
+    ws_data = wb.create_sheet("Raporlar")
     
     headers = [
         "Rapor No", "Ekipman Adı", "Kategori", "Firma", "Lokasyon",
@@ -129,49 +330,50 @@ async def export_excel_filtered(request: FilteredExcelExportRequest, current_use
         "Geçerlilik Tarihi", "Uygunluk", "Proje", "Şehir", "Açıklama", "Oluşturma Tarihi"
     ]
     
-    header_fill = PatternFill(start_color="217346", end_color="217346", fill_type="solid")
-    header_font = Font(color="FFFFFF", bold=True)
+    data_header_fill = PatternFill(start_color="217346", end_color="217346", fill_type="solid")
+    data_header_font = Font(color="FFFFFF", bold=True)
     
     for col, header in enumerate(headers, 1):
-        cell = ws.cell(row=1, column=col, value=header)
-        cell.fill = header_fill
-        cell.font = header_font
+        cell = ws_data.cell(row=1, column=col, value=header)
+        cell.fill = data_header_fill
+        cell.font = data_header_font
         cell.alignment = Alignment(horizontal="center", vertical="center")
     
     for row_idx, rapor in enumerate(raporlar, 2):
-        ws.cell(row=row_idx, column=1, value=rapor.get("rapor_no", ""))
-        ws.cell(row=row_idx, column=2, value=rapor.get("ekipman_adi", ""))
-        ws.cell(row=row_idx, column=3, value=rapor.get("kategori", ""))
-        ws.cell(row=row_idx, column=4, value=rapor.get("firma", ""))
-        ws.cell(row=row_idx, column=5, value=rapor.get("lokasyon", ""))
-        ws.cell(row=row_idx, column=6, value=rapor.get("marka_model", ""))
-        ws.cell(row=row_idx, column=7, value=rapor.get("seri_no", ""))
-        ws.cell(row=row_idx, column=8, value=rapor.get("alt_kategori", ""))
-        ws.cell(row=row_idx, column=9, value=rapor.get("periyot", ""))
-        ws.cell(row=row_idx, column=10, value=rapor.get("gecerlilik_tarihi", ""))
-        ws.cell(row=row_idx, column=11, value=rapor.get("uygunluk", ""))
-        ws.cell(row=row_idx, column=12, value=rapor.get("proje_adi", ""))
-        ws.cell(row=row_idx, column=13, value=rapor.get("sehir", ""))
-        ws.cell(row=row_idx, column=14, value=rapor.get("aciklama", ""))
+        ws_data.cell(row=row_idx, column=1, value=rapor.get("rapor_no", ""))
+        ws_data.cell(row=row_idx, column=2, value=rapor.get("ekipman_adi", ""))
+        ws_data.cell(row=row_idx, column=3, value=rapor.get("kategori", ""))
+        ws_data.cell(row=row_idx, column=4, value=rapor.get("firma", ""))
+        ws_data.cell(row=row_idx, column=5, value=rapor.get("lokasyon", ""))
+        ws_data.cell(row=row_idx, column=6, value=rapor.get("marka_model", ""))
+        ws_data.cell(row=row_idx, column=7, value=rapor.get("seri_no", ""))
+        ws_data.cell(row=row_idx, column=8, value=rapor.get("alt_kategori", ""))
+        ws_data.cell(row=row_idx, column=9, value=rapor.get("periyot", ""))
+        ws_data.cell(row=row_idx, column=10, value=rapor.get("gecerlilik_tarihi", ""))
+        ws_data.cell(row=row_idx, column=11, value=rapor.get("uygunluk", ""))
+        ws_data.cell(row=row_idx, column=12, value=rapor.get("proje_adi", ""))
+        ws_data.cell(row=row_idx, column=13, value=rapor.get("sehir", ""))
+        ws_data.cell(row=row_idx, column=14, value=rapor.get("aciklama", ""))
         created_at = rapor.get("created_at", "")
         if isinstance(created_at, str):
             try:
-                created_at = datetime.fromisoformat(created_at)
+                created_at = datetime.fromisoformat(created_at.replace('Z', '+00:00'))
             except:
                 created_at = None
-        ws.cell(row=row_idx, column=15, value=created_at.strftime("%Y-%m-%d %H:%M") if created_at else "")
+        ws_data.cell(row=row_idx, column=15, value=created_at.strftime("%Y-%m-%d %H:%M") if created_at else "")
     
-    for col in ws.columns:
+    # Auto-fit columns in data sheet
+    for col in ws_data.columns:
         max_length = 0
         column = col[0].column_letter
         for cell in col:
             try:
                 if len(str(cell.value)) > max_length:
-                    max_length = len(cell.value)
+                    max_length = len(str(cell.value))
             except (TypeError, AttributeError):
                 pass
         adjusted_width = min(max_length + 2, 50)
-        ws.column_dimensions[column].width = adjusted_width
+        ws_data.column_dimensions[column].width = adjusted_width
     
     excel_file = io.BytesIO()
     wb.save(excel_file)
@@ -179,6 +381,21 @@ async def export_excel_filtered(request: FilteredExcelExportRequest, current_use
     
     # Create filename with filter info
     filter_parts = []
+    if request.proje_id and request.proje_id != 'all':
+        filter_parts.append("proje")
+    if request.sehir and request.sehir != 'all':
+        filter_parts.append(request.sehir)
+    if request.firma and request.firma != 'all':
+        filter_parts.append("firma")
+    
+    filter_suffix = "_".join(filter_parts) if filter_parts else "tum"
+    filename = f"dashboard_{filter_suffix}_{total_count}_adet.xlsx"
+    
+    return StreamingResponse(
+        excel_file,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": f"attachment; filename={filename}"}
+    )
     if request.proje_id and request.proje_id != 'all':
         filter_parts.append("proje")
     if request.sehir and request.sehir != 'all':
