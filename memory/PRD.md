@@ -32,6 +32,15 @@ EKOS is an equipment control automation system for managing inspection reports, 
 
 ## What's Been Implemented
 
+### January 25, 2026 - Dashboard Excel Export with Filters
+
+**Dashboard Filtreleme ve Excel Export** ✅
+- Dashboard'a "Excel Raporu Oluştur" butonu eklendi (yeşil gradient, FileSpreadsheet ikonu)
+- Filtreli Excel export API endpoint'i oluşturuldu (`POST /api/excel/export-filtered`)
+- Kategori Dağılımı grafiği artık filtrelere göre güncelleniyor (filteredStats)
+- Proje, İl, Firma filtreleri Excel export'a tam entegre
+- Test sonuçları: Backend %100 (10/10), Frontend %100
+
 ### January 25, 2026 - QR Code & Language Support
 
 **P0: Raporlara Özel Bağlantı ve QR Kodu** ✅
