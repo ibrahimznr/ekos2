@@ -1,16 +1,20 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import Layout from '@/components/Layout';
 import RaporModal from '@/components/RaporModal';
-import { FileText, CheckCircle2, XCircle, Calendar, TrendingUp, AlertTriangle, Plus, FolderKanban, ChevronDown, ChevronUp, Gauge } from 'lucide-react';
+import { FileText, CheckCircle2, XCircle, Calendar, TrendingUp, AlertTriangle, Plus, FolderKanban, ChevronDown, ChevronUp, Gauge, Filter, X, SlidersHorizontal } from 'lucide-react';
 import { toast } from 'sonner';
 import api from '@/utils/api';
 
 const Dashboard = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [stats, setStats] = useState(null);
+  const [allRaporlar, setAllRaporlar] = useState([]);
   const [projeler, setProjeler] = useState([]);
   const [kalibrasyonCihazlari, setKalibrasyonCihazlari] = useState([]);
   const [showKalibrasyonPopup, setShowKalibrasyonPopup] = useState(false);
@@ -19,6 +23,104 @@ const Dashboard = () => {
   const [filteredRaporlar, setFilteredRaporlar] = useState([]);
   const [filterType, setFilterType] = useState(null);
   const [showAllBilesenler, setShowAllBilesenler] = useState(false);
+  
+  // Filter states
+  const [showFilters, setShowFilters] = useState(false);
+  const [selectedProje, setSelectedProje] = useState('all');
+  const [selectedIl, setSelectedIl] = useState('all');
+  const [selectedFirma, setSelectedFirma] = useState('all');
+
+  // Get unique cities and companies from reports
+  const { uniqueIller, uniqueFirmalar } = useMemo(() => {
+    const iller = new Set();
+    const firmalar = new Set();
+    
+    allRaporlar.forEach(rapor => {
+      if (rapor.sehir) iller.add(rapor.sehir);
+      if (rapor.firma) firmalar.add(rapor.firma);
+    });
+    
+    return {
+      uniqueIller: Array.from(iller).sort(),
+      uniqueFirmalar: Array.from(firmalar).sort()
+    };
+  }, [allRaporlar]);
+
+  // Filter reports based on selected filters
+  const filteredStats = useMemo(() => {
+    if (!stats || !allRaporlar.length) return stats;
+    
+    // If no filters selected, return original stats
+    if (selectedProje === 'all' && selectedIl === 'all' && selectedFirma === 'all') {
+      return stats;
+    }
+    
+    // Filter reports
+    const filtered = allRaporlar.filter(rapor => {
+      if (selectedProje !== 'all' && rapor.proje_id !== selectedProje) return false;
+      if (selectedIl !== 'all' && rapor.sehir !== selectedIl) return false;
+      if (selectedFirma !== 'all' && rapor.firma !== selectedFirma) return false;
+      return true;
+    });
+    
+    // Calculate filtered stats
+    const today = new Date();
+    const thirtyDaysLater = new Date();
+    thirtyDaysLater.setDate(today.getDate() + 30);
+    
+    const currentMonth = today.getMonth();
+    const currentYear = today.getFullYear();
+    
+    const uygunCount = filtered.filter(r => r.uygunluk === 'Uygun').length;
+    const uygunDegilCount = filtered.filter(r => r.uygunluk === 'Uygun Değil').length;
+    
+    const monthlyCount = filtered.filter(r => {
+      const createdAt = new Date(r.created_at);
+      return createdAt.getMonth() === currentMonth && createdAt.getFullYear() === currentYear;
+    }).length;
+    
+    const expiredCount = filtered.filter(r => {
+      if (!r.gecerlilik_tarihi) return false;
+      return new Date(r.gecerlilik_tarihi) < today;
+    }).length;
+    
+    const expiring30Days = filtered.filter(r => {
+      if (!r.gecerlilik_tarihi) return false;
+      const expiryDate = new Date(r.gecerlilik_tarihi);
+      return expiryDate >= today && expiryDate <= thirtyDaysLater;
+    }).length;
+    
+    // Calculate category distribution
+    const kategoriMap = {};
+    filtered.forEach(r => {
+      if (r.kategori) {
+        kategoriMap[r.kategori] = (kategoriMap[r.kategori] || 0) + 1;
+      }
+    });
+    
+    const kategoriDagilim = Object.entries(kategoriMap)
+      .map(([kategori, count]) => ({ kategori, count }))
+      .sort((a, b) => b.count - a.count);
+    
+    return {
+      ...stats,
+      total_raporlar: filtered.length,
+      monthly_raporlar: monthlyCount,
+      uygun_count: uygunCount,
+      uygun_degil_count: uygunDegilCount,
+      expired_count: expiredCount,
+      expiring_30_days: expiring30Days,
+      kategori_dagilim: kategoriDagilim
+    };
+  }, [stats, allRaporlar, selectedProje, selectedIl, selectedFirma]);
+
+  const hasActiveFilters = selectedProje !== 'all' || selectedIl !== 'all' || selectedFirma !== 'all';
+
+  const clearFilters = () => {
+    setSelectedProje('all');
+    setSelectedIl('all');
+    setSelectedFirma('all');
+  };
 
   useEffect(() => {
     // Check if user has access to dashboard
