@@ -580,11 +580,11 @@ const Dashboard = () => {
               <CardTitle className="text-lg">Kategori Dağılımı</CardTitle>
             </CardHeader>
             <CardContent>
-              {stats?.kategori_dagilim && stats.kategori_dagilim.length > 0 ? (
+              {filteredStats?.kategori_dagilim && filteredStats.kategori_dagilim.length > 0 ? (
                 <div className="space-y-3">
-                  {stats.kategori_dagilim.map((item, index) => {
-                    const percentage = stats.total_raporlar > 0
-                      ? Math.round((item.count / stats.total_raporlar) * 100)
+                  {filteredStats.kategori_dagilim.map((item, index) => {
+                    const percentage = filteredStats.total_raporlar > 0
+                      ? Math.round((item.count / filteredStats.total_raporlar) * 100)
                       : 0;
 
                     const colors = [
