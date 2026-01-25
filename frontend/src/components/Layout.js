@@ -34,30 +34,30 @@ const Layout = ({ children }) => {
 
   // Dashboard only for admin and inspector
   if (user.role === 'admin' || user.role === 'inspector') {
-    navItems.push({ path: '/', label: 'Dashboard', shortLabel: 'Ana', icon: LayoutDashboard });
+    navItems.push({ path: '/', label: t('nav.dashboard'), shortLabel: 'Ana', icon: LayoutDashboard });
   }
 
   // Raporlar for everyone
-  navItems.push({ path: '/raporlar', label: 'Raporlar', shortLabel: 'Raporlar', icon: FileText });
+  navItems.push({ path: '/raporlar', label: t('nav.reports'), shortLabel: 'Raporlar', icon: FileText });
 
   // İskele Bileşenleri - admin and inspector
   if (user.role === 'admin' || user.role === 'inspector') {
-    navItems.push({ path: '/iskele-bilesenleri', label: 'İskele Bileşenleri', shortLabel: 'İskele', icon: Building2 });
+    navItems.push({ path: '/iskele-bilesenleri', label: t('nav.scaffoldComponents'), shortLabel: 'İskele', icon: Building2 });
   }
 
   // Makineler - admin and inspector
   if (user.role === 'admin' || user.role === 'inspector') {
-    navItems.push({ path: '/makineler', label: 'Makineler', shortLabel: 'Makineler', icon: Truck });
+    navItems.push({ path: '/makineler', label: t('nav.machines'), shortLabel: 'Makineler', icon: Truck });
   }
 
   // Cephe İskeleleri - admin and inspector
   if (user.role === 'admin' || user.role === 'inspector') {
-    navItems.push({ path: '/cephe-iskeleleri', label: 'Cephe İskeleleri', shortLabel: 'Cephe', icon: Building2 });
+    navItems.push({ path: '/cephe-iskeleleri', label: t('nav.facadeScaffolding'), shortLabel: 'Cephe', icon: Building2 });
   }
 
   // Admin panel only for admin
   if (user.role === 'admin') {
-    navItems.push({ path: '/admin', label: 'Yönetim Paneli', shortLabel: 'Yönetim', icon: Shield });
+    navItems.push({ path: '/admin', label: t('nav.adminPanel'), shortLabel: 'Yönetim', icon: Shield });
   }
 
   const isActive = (path) => location.pathname === path;
