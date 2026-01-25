@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Depends, UploadFile, File, Form
+from fastapi import APIRouter, HTTPException, Depends, UploadFile, File, Form, Query
 from fastapi.responses import StreamingResponse
 from typing import List, Optional
 from datetime import datetime, timezone
@@ -21,6 +21,12 @@ router = APIRouter(prefix="/excel", tags=["Excel"])
 # Request model for selective export
 class ExcelExportRequest(BaseModel):
     rapor_ids: List[str]
+
+# Request model for filtered export
+class FilteredExcelExportRequest(BaseModel):
+    proje_id: Optional[str] = None
+    sehir: Optional[str] = None
+    firma: Optional[str] = None
 
 @router.post("/export")
 async def export_excel_selected(request: ExcelExportRequest, current_user: dict = Depends(get_current_user)):
