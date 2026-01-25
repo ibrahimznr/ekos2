@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import Layout from '@/components/Layout';
 import RaporModal from '@/components/RaporModal';
-import { FileText, CheckCircle2, XCircle, Calendar, TrendingUp, AlertTriangle, Plus, FolderKanban, ChevronDown, ChevronUp, Gauge, Filter, X, SlidersHorizontal } from 'lucide-react';
+import { FileText, CheckCircle2, XCircle, Calendar, TrendingUp, AlertTriangle, Plus, FolderKanban, ChevronDown, ChevronUp, Gauge, Filter, X, SlidersHorizontal, FileSpreadsheet, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import api from '@/utils/api';
 
