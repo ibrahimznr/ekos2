@@ -149,8 +149,29 @@ async def export_excel_filtered(request: FilteredExcelExportRequest, current_use
         kategori = r.get('kategori')
         if kategori:
             kategori_map[kategori] = kategori_map.get(kategori, 0) + 1
-    
     kategori_list = sorted(kategori_map.items(), key=lambda x: x[1], reverse=True)
+    
+    # Firma distribution
+    firma_map = {}
+    firma_uygun_map = {}
+    firma_uygun_degil_map = {}
+    for r in raporlar:
+        firma = r.get('firma')
+        if firma:
+            firma_map[firma] = firma_map.get(firma, 0) + 1
+            if r.get('uygunluk') == 'Uygun':
+                firma_uygun_map[firma] = firma_uygun_map.get(firma, 0) + 1
+            elif r.get('uygunluk') == 'Uygun Değil':
+                firma_uygun_degil_map[firma] = firma_uygun_degil_map.get(firma, 0) + 1
+    firma_list = sorted(firma_map.items(), key=lambda x: x[1], reverse=True)
+    
+    # Proje distribution
+    proje_map = {}
+    for r in raporlar:
+        proje_adi = r.get('proje_adi')
+        if proje_adi:
+            proje_map[proje_adi] = proje_map.get(proje_adi, 0) + 1
+    proje_list = sorted(proje_map.items(), key=lambda x: x[1], reverse=True)
     
     # Create workbook
     wb = Workbook()
@@ -162,17 +183,9 @@ async def export_excel_filtered(request: FilteredExcelExportRequest, current_use
     # Hide gridlines
     ws_dashboard.sheet_view.showGridLines = False
     
-    # Set column widths for card layout
-    for col in range(1, 20):
+    # Set column widths
+    for col in range(1, 30):
         ws_dashboard.column_dimensions[get_column_letter(col)].width = 5
-    
-    # Row heights
-    ws_dashboard.row_dimensions[1].height = 20
-    ws_dashboard.row_dimensions[2].height = 25
-    ws_dashboard.row_dimensions[3].height = 15
-    ws_dashboard.row_dimensions[4].height = 50
-    ws_dashboard.row_dimensions[5].height = 20
-    ws_dashboard.row_dimensions[6].height = 20
     
     # Define colors
     blue_border = Side(style='medium', color='1e40af')
@@ -184,18 +197,18 @@ async def export_excel_filtered(request: FilteredExcelExportRequest, current_use
     purple_fill = PatternFill(start_color='ede9fe', end_color='ede9fe', fill_type='solid')
     green_fill = PatternFill(start_color='dcfce7', end_color='dcfce7', fill_type='solid')
     red_fill = PatternFill(start_color='fee2e2', end_color='fee2e2', fill_type='solid')
-    
     white_fill = PatternFill(start_color='FFFFFF', end_color='FFFFFF', fill_type='solid')
+    header_fill = PatternFill(start_color='f3f4f6', end_color='f3f4f6', fill_type='solid')
     
-    # Apply white background to entire visible area
-    for row in range(1, 35):
-        for col in range(1, 20):
+    # Apply white background
+    for row in range(1, 70):
+        for col in range(1, 30):
             ws_dashboard.cell(row=row, column=col).fill = white_fill
     
     # Title
     title_cell = ws_dashboard.cell(row=2, column=2, value="EKOS Dashboard Raporu")
     title_cell.font = Font(bold=True, size=18, color='1e40af')
-    ws_dashboard.merge_cells('B2:R2')
+    ws_dashboard.merge_cells('B2:Z2')
     
     # Filter info
     filter_info = []
@@ -211,31 +224,25 @@ async def export_excel_filtered(request: FilteredExcelExportRequest, current_use
     filter_text = " | ".join(filter_info) if filter_info else "Tüm Veriler"
     filter_cell = ws_dashboard.cell(row=3, column=2, value=f"Filtreler: {filter_text}  |  Oluşturma: {today.strftime('%d.%m.%Y %H:%M')}")
     filter_cell.font = Font(size=10, color='6b7280', italic=True)
-    ws_dashboard.merge_cells('B3:R3')
+    ws_dashboard.merge_cells('B3:Z3')
     
     # Helper function to create card
     def create_card(start_row, start_col, end_col, title, value, border_color, fill_color, text_color):
-        # Title row
         title_cell = ws_dashboard.cell(row=start_row, column=start_col, value=title)
         title_cell.font = Font(bold=True, size=10, color='374151')
         title_cell.alignment = Alignment(horizontal='center', vertical='center')
         
-        # Value row  
         value_cell = ws_dashboard.cell(row=start_row + 1, column=start_col, value=value)
         value_cell.font = Font(bold=True, size=28, color=text_color)
         value_cell.alignment = Alignment(horizontal='center', vertical='center')
         
-        # Merge cells for title and value
         ws_dashboard.merge_cells(start_row=start_row, start_column=start_col, end_row=start_row, end_column=end_col)
         ws_dashboard.merge_cells(start_row=start_row + 1, start_column=start_col, end_row=start_row + 1, end_column=end_col)
         
-        # Apply fill and border to all cells in card
-        border = Border(left=border_color, right=border_color, top=border_color, bottom=border_color)
         for row in range(start_row, start_row + 2):
             for col in range(start_col, end_col + 1):
                 cell = ws_dashboard.cell(row=row, column=col)
                 cell.fill = fill_color
-                # Apply border only to edge cells
                 left = border_color if col == start_col else None
                 right = border_color if col == end_col else None
                 top = border_color if row == start_row else None
@@ -243,80 +250,142 @@ async def export_excel_filtered(request: FilteredExcelExportRequest, current_use
                 cell.border = Border(left=left, right=right, top=top, bottom=bottom)
     
     # Create stat cards (Row 5-6)
-    # Card 1: Toplam Rapor (Blue)
     create_card(5, 2, 5, "Toplam Rapor", total_count, blue_border, blue_fill, '1e40af')
-    
-    # Card 2: Bu Ay (Purple)
     create_card(5, 7, 10, "Bu Ay", monthly_count, purple_border, purple_fill, '7c3aed')
-    
-    # Card 3: Uygun (Green)
     create_card(5, 12, 15, "Uygun", uygun_count, green_border, green_fill, '16a34a')
-    
-    # Card 4: Uygun Değil (Red)
     create_card(5, 17, 20, "Uygun Değil", uygun_degil_count, red_border, red_fill, 'dc2626')
     
-    # Kategori Dağılımı section
-    kategori_title = ws_dashboard.cell(row=9, column=2, value="Kategori Dağılımı")
-    kategori_title.font = Font(bold=True, size=14, color='1f2937')
-    ws_dashboard.merge_cells('B9:H9')
+    # ===== DISTRIBUTION TABLES =====
+    row_colors = ['e0e7ff', 'ddd6fe', 'dcfce7', 'fef3c7', 'fee2e2', 'e0f2fe', 'fce7f3', 'ecfccb']
     
-    # Kategori table header
-    header_fill = PatternFill(start_color='f3f4f6', end_color='f3f4f6', fill_type='solid')
-    header_border = Border(
-        bottom=Side(style='thin', color='d1d5db')
-    )
-    
-    ws_dashboard.cell(row=11, column=2, value="Kategori").font = Font(bold=True, size=11, color='374151')
-    ws_dashboard.cell(row=11, column=2).fill = header_fill
-    ws_dashboard.cell(row=11, column=2).border = header_border
-    ws_dashboard.merge_cells('B11:G11')
-    
-    ws_dashboard.cell(row=11, column=8, value="Adet").font = Font(bold=True, size=11, color='374151')
-    ws_dashboard.cell(row=11, column=8).fill = header_fill
-    ws_dashboard.cell(row=11, column=8).border = header_border
-    ws_dashboard.cell(row=11, column=8).alignment = Alignment(horizontal='center')
-    
-    ws_dashboard.cell(row=11, column=9, value="Oran").font = Font(bold=True, size=11, color='374151')
-    ws_dashboard.cell(row=11, column=9).fill = header_fill
-    ws_dashboard.cell(row=11, column=9).border = header_border
-    ws_dashboard.cell(row=11, column=9).alignment = Alignment(horizontal='center')
-    ws_dashboard.merge_cells('I11:J11')
-    
-    # Kategori data
-    row_colors = ['e0e7ff', 'ddd6fe', 'dcfce7', 'fef3c7', 'fee2e2', 'e0f2fe']
-    for idx, (kategori, count) in enumerate(kategori_list[:10]):  # Top 10 categories
-        row_num = 12 + idx
-        percentage = round((count / total_count) * 100) if total_count > 0 else 0
+    def create_distribution_table(start_row, start_col, title, data_list, max_items=10):
+        # Title
+        t_cell = ws_dashboard.cell(row=start_row, column=start_col, value=title)
+        t_cell.font = Font(bold=True, size=12, color='1f2937')
+        ws_dashboard.merge_cells(start_row=start_row, start_column=start_col, end_row=start_row, end_column=start_col + 5)
         
-        color = row_colors[idx % len(row_colors)]
-        row_fill = PatternFill(start_color=color, end_color=color, fill_type='solid')
+        # Headers
+        ws_dashboard.cell(row=start_row + 2, column=start_col, value="Ad").font = Font(bold=True, size=10, color='374151')
+        ws_dashboard.cell(row=start_row + 2, column=start_col).fill = header_fill
+        ws_dashboard.merge_cells(start_row=start_row + 2, start_column=start_col, end_row=start_row + 2, end_column=start_col + 3)
         
-        # Kategori name
-        kat_cell = ws_dashboard.cell(row=row_num, column=2, value=kategori)
-        kat_cell.font = Font(size=10, color='374151')
-        kat_cell.fill = row_fill
-        ws_dashboard.merge_cells(start_row=row_num, start_column=2, end_row=row_num, end_column=7)
+        ws_dashboard.cell(row=start_row + 2, column=start_col + 4, value="Adet").font = Font(bold=True, size=10, color='374151')
+        ws_dashboard.cell(row=start_row + 2, column=start_col + 4).fill = header_fill
+        ws_dashboard.cell(row=start_row + 2, column=start_col + 4).alignment = Alignment(horizontal='center')
         
-        # Count
-        count_cell = ws_dashboard.cell(row=row_num, column=8, value=count)
-        count_cell.font = Font(size=10, color='374151', bold=True)
-        count_cell.fill = row_fill
-        count_cell.alignment = Alignment(horizontal='center')
+        ws_dashboard.cell(row=start_row + 2, column=start_col + 5, value="Oran").font = Font(bold=True, size=10, color='374151')
+        ws_dashboard.cell(row=start_row + 2, column=start_col + 5).fill = header_fill
+        ws_dashboard.cell(row=start_row + 2, column=start_col + 5).alignment = Alignment(horizontal='center')
         
-        # Percentage
-        pct_cell = ws_dashboard.cell(row=row_num, column=9, value=f"%{percentage}")
-        pct_cell.font = Font(size=10, color='6b7280')
-        pct_cell.fill = row_fill
-        pct_cell.alignment = Alignment(horizontal='center')
-        ws_dashboard.merge_cells(start_row=row_num, start_column=9, end_row=row_num, end_column=10)
+        # Data rows
+        for idx, (name, count) in enumerate(data_list[:max_items]):
+            row_num = start_row + 3 + idx
+            percentage = round((count / total_count) * 100) if total_count > 0 else 0
+            color = row_colors[idx % len(row_colors)]
+            row_fill = PatternFill(start_color=color, end_color=color, fill_type='solid')
+            
+            name_cell = ws_dashboard.cell(row=row_num, column=start_col, value=name[:25] if len(name) > 25 else name)
+            name_cell.font = Font(size=9, color='374151')
+            name_cell.fill = row_fill
+            ws_dashboard.merge_cells(start_row=row_num, start_column=start_col, end_row=row_num, end_column=start_col + 3)
+            
+            count_cell = ws_dashboard.cell(row=row_num, column=start_col + 4, value=count)
+            count_cell.font = Font(size=9, color='374151', bold=True)
+            count_cell.fill = row_fill
+            count_cell.alignment = Alignment(horizontal='center')
+            
+            pct_cell = ws_dashboard.cell(row=row_num, column=start_col + 5, value=f"%{percentage}")
+            pct_cell.font = Font(size=9, color='6b7280')
+            pct_cell.fill = row_fill
+            pct_cell.alignment = Alignment(horizontal='center')
     
-    # Set wider columns for readability
-    ws_dashboard.column_dimensions['B'].width = 8
-    ws_dashboard.column_dimensions['C'].width = 8
-    ws_dashboard.column_dimensions['D'].width = 8
-    ws_dashboard.column_dimensions['E'].width = 8
-    ws_dashboard.column_dimensions['H'].width = 8
-    ws_dashboard.column_dimensions['I'].width = 8
+    # Kategori Dağılımı (Row 9, Col B)
+    create_distribution_table(9, 2, "Kategori Dağılımı", kategori_list, 10)
+    
+    # Firma Dağılımı (Row 9, Col I)
+    create_distribution_table(9, 9, "Firmalara Göre Dağılım", firma_list, 10)
+    
+    # Proje Dağılımı (Row 9, Col P)
+    create_distribution_table(9, 16, "Projelere Göre Dağılım", proje_list, 10)
+    
+    # ===== PIE CHART DATA (Hidden Sheet) =====
+    ws_chart_data = wb.create_sheet("ChartData")
+    
+    # Uygunluk pie chart data
+    ws_chart_data.cell(row=1, column=1, value="Uygunluk")
+    ws_chart_data.cell(row=1, column=2, value="Adet")
+    ws_chart_data.cell(row=2, column=1, value="Uygun")
+    ws_chart_data.cell(row=2, column=2, value=uygun_count)
+    ws_chart_data.cell(row=3, column=1, value="Uygun Değil")
+    ws_chart_data.cell(row=3, column=2, value=uygun_degil_count)
+    
+    # Firma Uygunluk data (Top 5 firms)
+    ws_chart_data.cell(row=5, column=1, value="Firma")
+    ws_chart_data.cell(row=5, column=2, value="Uygun")
+    ws_chart_data.cell(row=5, column=3, value="Uygun Değil")
+    
+    top_firmalar = firma_list[:5]
+    for idx, (firma, count) in enumerate(top_firmalar):
+        row = 6 + idx
+        ws_chart_data.cell(row=row, column=1, value=firma[:20] if len(firma) > 20 else firma)
+        ws_chart_data.cell(row=row, column=2, value=firma_uygun_map.get(firma, 0))
+        ws_chart_data.cell(row=row, column=3, value=firma_uygun_degil_map.get(firma, 0))
+    
+    # Hide the chart data sheet
+    ws_chart_data.sheet_state = 'hidden'
+    
+    # ===== CREATE PIE CHART FOR UYGUNLUK =====
+    pie_uygunluk = PieChart()
+    pie_uygunluk.title = "Uygunluk Durumu"
+    
+    labels_uygunluk = Reference(ws_chart_data, min_col=1, min_row=2, max_row=3)
+    data_uygunluk = Reference(ws_chart_data, min_col=2, min_row=1, max_row=3)
+    pie_uygunluk.add_data(data_uygunluk, titles_from_data=True)
+    pie_uygunluk.set_categories(labels_uygunluk)
+    
+    pie_uygunluk.dataLabels = DataLabelList()
+    pie_uygunluk.dataLabels.showPercent = True
+    pie_uygunluk.dataLabels.showVal = True
+    pie_uygunluk.dataLabels.showCatName = False
+    
+    pie_uygunluk.width = 12
+    pie_uygunluk.height = 8
+    
+    # Add pie chart to dashboard
+    ws_dashboard.add_chart(pie_uygunluk, "W9")
+    
+    # ===== PIE CHART FOR FIRMA UYGUNLUK (Stacked Bar Alternative) =====
+    # Create a second pie chart showing firma distribution
+    if len(top_firmalar) > 0:
+        pie_firma = PieChart()
+        pie_firma.title = "En Çok Rapor Olan Firmalar"
+        
+        # Use firma_list data for pie
+        ws_chart_data.cell(row=15, column=1, value="Firma")
+        ws_chart_data.cell(row=15, column=2, value="Toplam")
+        for idx, (firma, count) in enumerate(top_firmalar):
+            row = 16 + idx
+            ws_chart_data.cell(row=row, column=1, value=firma[:15] if len(firma) > 15 else firma)
+            ws_chart_data.cell(row=row, column=2, value=count)
+        
+        labels_firma = Reference(ws_chart_data, min_col=1, min_row=16, max_row=15 + len(top_firmalar))
+        data_firma = Reference(ws_chart_data, min_col=2, min_row=15, max_row=15 + len(top_firmalar))
+        pie_firma.add_data(data_firma, titles_from_data=True)
+        pie_firma.set_categories(labels_firma)
+        
+        pie_firma.dataLabels = DataLabelList()
+        pie_firma.dataLabels.showPercent = True
+        pie_firma.dataLabels.showVal = False
+        pie_firma.dataLabels.showCatName = True
+        
+        pie_firma.width = 12
+        pie_firma.height = 8
+        
+        ws_dashboard.add_chart(pie_firma, "W22")
+    
+    # Set wider columns for distribution tables
+    for col in ['B', 'C', 'D', 'E', 'F', 'G', 'I', 'J', 'K', 'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'U']:
+        ws_dashboard.column_dimensions[col].width = 7
     
     # ===== RAPORLAR (DATA) SHEET =====
     ws_data = wb.create_sheet("Raporlar")
@@ -359,7 +428,7 @@ async def export_excel_filtered(request: FilteredExcelExportRequest, current_use
                 created_at = None
         ws_data.cell(row=row_idx, column=15, value=created_at.strftime("%Y-%m-%d %H:%M") if created_at else "")
     
-    # Auto-fit columns in data sheet
+    # Auto-fit columns
     for col in ws_data.columns:
         max_length = 0
         column = col[0].column_letter
@@ -376,7 +445,7 @@ async def export_excel_filtered(request: FilteredExcelExportRequest, current_use
     wb.save(excel_file)
     excel_file.seek(0)
     
-    # Create filename with filter info
+    # Create filename
     filter_parts = []
     if request.proje_id and request.proje_id != 'all':
         filter_parts.append("proje")
