@@ -134,7 +134,17 @@ const Dashboard = () => {
     fetchStats();
     fetchKalibrasyonCihazlari();
     fetchProjeler();
+    fetchAllRaporlar();
   }, [navigate]);
+
+  const fetchAllRaporlar = async () => {
+    try {
+      const response = await api.get('/raporlar');
+      setAllRaporlar(response.data);
+    } catch (error) {
+      console.error('Raporlar yüklenemedi');
+    }
+  };
 
   const fetchStats = async (retryCount = 0) => {
     try {
