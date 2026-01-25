@@ -248,10 +248,6 @@ const Dashboard = () => {
     );
   }
 
-  const uygunlukYuzdesi = stats?.total_raporlar > 0
-    ? Math.round((stats.uygun_count / stats.total_raporlar) * 100)
-    : 0;
-
   return (
     <Layout>
       <div className="space-y-6 animate-fade-in">
