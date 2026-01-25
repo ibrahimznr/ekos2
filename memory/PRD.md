@@ -32,6 +32,27 @@ EKOS is an equipment control automation system for managing inspection reports, 
 
 ## What's Been Implemented
 
+### January 25, 2026 - QR Code & Language Support
+
+**P0: Raporlara Özel Bağlantı ve QR Kodu** ✅
+- Public rapor görüntüleme sayfası (`/rapor/{rapor_id}`)
+- QR kod oluşturma endpoint (`/api/raporlar/public/{id}/qr`)
+- Rapor detay modal'ına "Paylaş" butonu eklendi
+- Link kopyalama ve QR kod indirme özellikleri
+- Public sayfada rapor bilgileri ve medya dosyaları görüntüleme
+
+**P1: TR/EN Dil Desteği** ✅
+- `react-i18next` kütüphanesi entegrasyonu
+- Türkçe ve İngilizce çeviri dosyaları (`/src/i18n/locales/`)
+- Dil seçici bileşeni (`LanguageSelector.js`)
+- Login/Register sayfalarında dil seçici (sağ üst köşe)
+- Sidebar'da dil seçici
+- Menü isimleri çevriliyor (Dashboard, Reports, Settings vb.)
+- Dil tercihi localStorage'da saklanıyor
+
+**Bug Fix: Excel Export** ✅
+- `/api/excel/export` → `/api/excel/export-all` endpoint düzeltildi
+
 ### January 22, 2026 - Çekiliş (Raffle) Feature Integration ✅
 **P0 Task: Çekiliş Özelliği Entegrasyonu** ✅
 - Added 3 new sub-modules from external repository (`cekilix_local`)
