@@ -356,15 +356,12 @@ const Raporlar = () => {
         responseType: 'blob',
       });
       
-      const url = window.URL.createObjectURL(new Blob([response.data]));
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', `raporlar_${new Date().toISOString().split('T')[0]}.xlsx`);
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
+      const filename = `raporlar_${new Date().toISOString().split('T')[0]}.xlsx`;
+      const saved = await downloadExcel(new Blob([response.data]), filename);
       
-      showNotification('success', 'Excel dosyası indirildi');
+      if (saved) {
+        showNotification('success', 'Excel dosyası indirildi');
+      }
     } catch (error) {
       showNotification('error', 'Excel export başarısız');
     }
