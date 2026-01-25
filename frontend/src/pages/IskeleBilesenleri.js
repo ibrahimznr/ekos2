@@ -149,15 +149,12 @@ const IskeleBilesenleri = () => {
         responseType: 'blob',
       });
 
-      const url = window.URL.createObjectURL(new Blob([response.data]));
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', `iskele_bilesenleri_${new Date().toISOString().split('T')[0]}.xlsx`);
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
+      const filename = `iskele_bilesenleri_${new Date().toISOString().split('T')[0]}.xlsx`;
+      const saved = await downloadExcel(new Blob([response.data]), filename);
 
-      toast.success('Excel dosyası indirildi');
+      if (saved) {
+        toast.success('Excel dosyası indirildi');
+      }
     } catch (error) {
       toast.error('Excel dışa aktarma başarısız');
     }
