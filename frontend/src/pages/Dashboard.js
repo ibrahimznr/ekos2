@@ -29,6 +29,7 @@ const Dashboard = () => {
   const [selectedProje, setSelectedProje] = useState('all');
   const [selectedIl, setSelectedIl] = useState('all');
   const [selectedFirma, setSelectedFirma] = useState('all');
+  const [excelLoading, setExcelLoading] = useState(false);
 
   // Get unique cities and companies from reports
   const { uniqueIller, uniqueFirmalar } = useMemo(() => {
