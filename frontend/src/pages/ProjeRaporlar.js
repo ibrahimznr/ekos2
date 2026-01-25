@@ -192,17 +192,14 @@ const ProjeRaporlar = () => {
         }
       );
 
-      const url = window.URL.createObjectURL(new Blob([response.data]));
-      const link = document.createElement('a');
-      link.href = url;
       const projeName = proje?.proje_adi?.replace(/[^a-zA-Z0-9ğüşöçıİĞÜŞÖÇ\s]/g, '') || 'Proje';
-      link.setAttribute('download', `${projeName}_Raporlar.xlsx`);
-      document.body.appendChild(link);
-      link.click();
-      link.parentNode.removeChild(link);
-      window.URL.revokeObjectURL(url);
+      const filename = `${projeName}_Raporlar.xlsx`;
       
-      showNotification('success', 'Başarılı', 'Excel dosyası başarıyla indirildi');
+      const saved = await downloadExcel(new Blob([response.data]), filename);
+      
+      if (saved) {
+        showNotification('success', 'Başarılı', 'Excel dosyası başarıyla indirildi');
+      }
     } catch (error) {
       console.error('Excel export error:', error);
       showNotification('error', 'Hata', 'Excel dışa aktarma başarısız');
@@ -244,16 +241,11 @@ const ProjeRaporlar = () => {
         }
       }
 
-      const url = window.URL.createObjectURL(new Blob([response.data]));
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', filename);
-      document.body.appendChild(link);
-      link.click();
-      link.parentNode.removeChild(link);
-      window.URL.revokeObjectURL(url);
+      const saved = await downloadZip(new Blob([response.data]), filename);
       
-      showNotification('success', 'Başarılı', 'Proje ZIP dosyası başarıyla indirildi (tüm medya dahil)');
+      if (saved) {
+        showNotification('success', 'Başarılı', 'Proje ZIP dosyası başarıyla indirildi (tüm medya dahil)');
+      }
     } catch (error) {
       console.error('ZIP export error:', error);
       if (error.code === 'ECONNABORTED') {
