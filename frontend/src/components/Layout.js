@@ -150,7 +150,7 @@ const Layout = ({ children }) => {
               }`} />
               {sidebarOpen && (
                 <>
-                  <span className="font-medium flex-1 text-left">Çekiliş</span>
+                  <span className="font-medium flex-1 text-left">{t('nav.raffle')}</span>
                   <ChevronDown className={`h-4 w-4 transition-transform ${cekilisOpen ? 'rotate-180' : ''}`} />
                 </>
               )}
@@ -169,7 +169,7 @@ const Layout = ({ children }) => {
                   data-testid="nav-cekilis-havuzu"
                 >
                   <Trophy className="h-4 w-4 flex-shrink-0" />
-                  <span className="text-sm">Çekiliş Havuzu</span>
+                  <span className="text-sm">{t('nav.rafflePool')}</span>
                 </button>
                 <button
                   onClick={() => navigate('/kelime-havuzu')}
@@ -181,7 +181,7 @@ const Layout = ({ children }) => {
                   data-testid="nav-kelime-havuzu"
                 >
                   <BookOpen className="h-4 w-4 flex-shrink-0" />
-                  <span className="text-sm">İngilizce Kelime Havuzu</span>
+                  <span className="text-sm">{t('nav.vocabularyPool')}</span>
                 </button>
                 <button
                   onClick={() => navigate('/zeka-oyunu')}
@@ -193,7 +193,7 @@ const Layout = ({ children }) => {
                   data-testid="nav-zeka-oyunu"
                 >
                   <Brain className="h-4 w-4 flex-shrink-0" />
-                  <span className="text-sm">Zeka Oyunları</span>
+                  <span className="text-sm">{t('nav.mindGames')}</span>
                 </button>
               </div>
             )}
