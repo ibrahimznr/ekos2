@@ -28,6 +28,7 @@ import IskeleBileseniModal from '@/components/IskeleBileseniModal';
 import IskeleBileseniOnizlemeModal from '@/components/IskeleBileseniOnizlemeModal';
 import IskeleBileseniExcelImportModal from '@/components/IskeleBileseniExcelImportModal';
 import { toast } from 'sonner';
+import { downloadExcel } from '@/utils/fileDownload';
 import { 
   Plus, 
   Search, 
