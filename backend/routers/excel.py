@@ -8,7 +8,8 @@ import io
 import uuid
 
 from openpyxl import Workbook, load_workbook
-from openpyxl.styles import Font, PatternFill, Alignment
+from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+from openpyxl.utils import get_column_letter
 
 from models import Rapor
 from routers.auth import get_current_user
