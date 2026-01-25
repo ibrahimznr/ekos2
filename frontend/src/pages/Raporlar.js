@@ -355,7 +355,7 @@ const Raporlar = () => {
   const handleExportExcel = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get(`${API}/excel/export`, {
+      const response = await axios.get(`${API}/excel/export-all`, {
         headers: { Authorization: `Bearer ${token}` },
         responseType: 'blob',
       });
