@@ -9,6 +9,7 @@ import RaporModal from '@/components/RaporModal';
 import { FileText, CheckCircle2, XCircle, Calendar, TrendingUp, AlertTriangle, Plus, FolderKanban, ChevronDown, ChevronUp, Gauge, Filter, X, SlidersHorizontal, FileSpreadsheet, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import api from '@/utils/api';
+import { downloadExcel } from '@/utils/fileDownload';
 
 const Dashboard = () => {
   const { t } = useTranslation();
