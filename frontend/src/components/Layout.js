@@ -208,12 +208,25 @@ const Layout = ({ children }) => {
               ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-md'
               : 'text-gray-700 hover:bg-gray-100'
               } ${!sidebarOpen ? 'justify-center' : ''}`}
-            title={!sidebarOpen ? 'Ayarlar' : ''}
+            title={!sidebarOpen ? t('nav.settings') : ''}
             data-testid="nav-ayarlar"
           >
             <Settings className={`h-5 w-5 flex-shrink-0 ${isActive('/ayarlar') ? 'text-white' : 'text-gray-500'}`} />
-            {sidebarOpen && <span className="font-medium">Ayarlar</span>}
+            {sidebarOpen && <span className="font-medium">{t('nav.settings')}</span>}
           </button>
+        </div>
+
+        {/* Language Selector */}
+        <div className="px-3 pb-1">
+          {sidebarOpen ? (
+            <div className="flex items-center justify-center">
+              <LanguageSelector variant="default" />
+            </div>
+          ) : (
+            <div className="flex justify-center">
+              <LanguageSelector variant="minimal" />
+            </div>
+          )}
         </div>
 
         {/* User Section */}
@@ -226,7 +239,7 @@ const Layout = ({ children }) => {
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-gray-800 truncate">{user.username || user.email?.split('@')[0]}</p>
                 <p className="text-xs text-gray-500">
-                  {user.role === 'admin' ? 'Yönetici' : user.role === 'inspector' ? 'Müfettiş' : 'Görüntüleyici'}
+                  {user.role === 'admin' ? t('auth.manager') : user.role === 'inspector' ? 'Inspector' : 'Viewer'}
                 </p>
               </div>
             </div>
@@ -241,11 +254,11 @@ const Layout = ({ children }) => {
           <button
             onClick={handleLogout}
             className={`w-full flex items-center gap-3 px-3 py-3 rounded-lg text-red-600 hover:bg-red-50 transition-colors ${!sidebarOpen ? 'justify-center' : ''}`}
-            title={!sidebarOpen ? 'Çıkış Yap' : ''}
+            title={!sidebarOpen ? t('auth.logout') : ''}
             data-testid="logout-button"
           >
             <LogOut className="h-5 w-5 flex-shrink-0" />
-            {sidebarOpen && <span className="font-medium">Çıkış Yap</span>}
+            {sidebarOpen && <span className="font-medium">{t('auth.logout')}</span>}
           </button>
         </div>
       </aside>
