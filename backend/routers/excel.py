@@ -396,21 +396,6 @@ async def export_excel_filtered(request: FilteredExcelExportRequest, current_use
         media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         headers={"Content-Disposition": f"attachment; filename={filename}"}
     )
-    if request.proje_id and request.proje_id != 'all':
-        filter_parts.append("proje")
-    if request.sehir and request.sehir != 'all':
-        filter_parts.append(request.sehir)
-    if request.firma and request.firma != 'all':
-        filter_parts.append("firma")
-    
-    filter_suffix = "_".join(filter_parts) if filter_parts else "tum"
-    filename = f"raporlar_{filter_suffix}_{len(raporlar)}_adet.xlsx"
-    
-    return StreamingResponse(
-        excel_file,
-        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        headers={"Content-Disposition": f"attachment; filename={filename}"}
-    )
 
 @router.get("/export-all")
 async def export_excel(current_user: dict = Depends(get_current_user)):
