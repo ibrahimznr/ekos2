@@ -100,6 +100,100 @@ async def export_excel_selected(request: ExcelExportRequest, current_user: dict 
         headers={"Content-Disposition": f"attachment; filename=raporlar_{len(raporlar)}_adet.xlsx"}
     )
 
+@router.post("/export-filtered")
+async def export_excel_filtered(request: FilteredExcelExportRequest, current_user: dict = Depends(get_current_user)):
+    """Filtrelenmiş raporları Excel'e aktar"""
+    
+    # Build query based on filters
+    query = {}
+    if request.proje_id and request.proje_id != 'all':
+        query["proje_id"] = request.proje_id
+    if request.sehir and request.sehir != 'all':
+        query["sehir"] = request.sehir
+    if request.firma and request.firma != 'all':
+        query["firma"] = request.firma
+    
+    raporlar = await db.raporlar.find(query, {"_id": 0}).to_list(10000)
+    
+    if not raporlar:
+        raise HTTPException(status_code=404, detail="Filtrelere uyan rapor bulunamadı")
+    
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Filtrelenmiş Raporlar"
+    
+    headers = [
+        "Rapor No", "Ekipman Adı", "Kategori", "Firma", "Lokasyon",
+        "Marka/Model", "Seri No", "Alt Kategori", "Periyot",
+        "Geçerlilik Tarihi", "Uygunluk", "Proje", "Şehir", "Açıklama", "Oluşturma Tarihi"
+    ]
+    
+    header_fill = PatternFill(start_color="217346", end_color="217346", fill_type="solid")
+    header_font = Font(color="FFFFFF", bold=True)
+    
+    for col, header in enumerate(headers, 1):
+        cell = ws.cell(row=1, column=col, value=header)
+        cell.fill = header_fill
+        cell.font = header_font
+        cell.alignment = Alignment(horizontal="center", vertical="center")
+    
+    for row_idx, rapor in enumerate(raporlar, 2):
+        ws.cell(row=row_idx, column=1, value=rapor.get("rapor_no", ""))
+        ws.cell(row=row_idx, column=2, value=rapor.get("ekipman_adi", ""))
+        ws.cell(row=row_idx, column=3, value=rapor.get("kategori", ""))
+        ws.cell(row=row_idx, column=4, value=rapor.get("firma", ""))
+        ws.cell(row=row_idx, column=5, value=rapor.get("lokasyon", ""))
+        ws.cell(row=row_idx, column=6, value=rapor.get("marka_model", ""))
+        ws.cell(row=row_idx, column=7, value=rapor.get("seri_no", ""))
+        ws.cell(row=row_idx, column=8, value=rapor.get("alt_kategori", ""))
+        ws.cell(row=row_idx, column=9, value=rapor.get("periyot", ""))
+        ws.cell(row=row_idx, column=10, value=rapor.get("gecerlilik_tarihi", ""))
+        ws.cell(row=row_idx, column=11, value=rapor.get("uygunluk", ""))
+        ws.cell(row=row_idx, column=12, value=rapor.get("proje_adi", ""))
+        ws.cell(row=row_idx, column=13, value=rapor.get("sehir", ""))
+        ws.cell(row=row_idx, column=14, value=rapor.get("aciklama", ""))
+        created_at = rapor.get("created_at", "")
+        if isinstance(created_at, str):
+            try:
+                created_at = datetime.fromisoformat(created_at)
+            except:
+                created_at = None
+        ws.cell(row=row_idx, column=15, value=created_at.strftime("%Y-%m-%d %H:%M") if created_at else "")
+    
+    for col in ws.columns:
+        max_length = 0
+        column = col[0].column_letter
+        for cell in col:
+            try:
+                if len(str(cell.value)) > max_length:
+                    max_length = len(cell.value)
+            except (TypeError, AttributeError):
+                pass
+        adjusted_width = min(max_length + 2, 50)
+        ws.column_dimensions[column].width = adjusted_width
+    
+    excel_file = io.BytesIO()
+    wb.save(excel_file)
+    excel_file.seek(0)
+    
+    # Create filename with filter info
+    filter_parts = []
+    if request.proje_id and request.proje_id != 'all':
+        filter_parts.append("proje")
+    if request.sehir and request.sehir != 'all':
+        filter_parts.append(request.sehir)
+    if request.firma and request.firma != 'all':
+        filter_parts.append("firma")
+    
+    filter_suffix = "_".join(filter_parts) if filter_parts else "tum"
+    filename = f"raporlar_{filter_suffix}_{len(raporlar)}_adet.xlsx"
+    
+    return StreamingResponse(
+        excel_file,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": f"attachment; filename={filename}"}
+    )
+
 @router.get("/export-all")
 async def export_excel(current_user: dict = Depends(get_current_user)):
     """Tüm raporları Excel'e aktar"""
