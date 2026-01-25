@@ -313,13 +313,27 @@ const Dashboard = () => {
             </CardTitle>
           </CardHeader>
           <CardContent className="pt-0">
-            <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3">
+            <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
               <Button
                 onClick={() => setShowRaporModal(true)}
                 className="bg-gradient-to-r from-blue-700 to-blue-600 hover:from-blue-800 hover:to-blue-700 text-white w-full justify-start h-11"
+                data-testid="new-report-btn"
               >
                 <Plus className="h-4 w-4 mr-2 flex-shrink-0" />
                 <span className="truncate">{t('dashboard.newReport')}</span>
+              </Button>
+              <Button
+                onClick={handleExportFilteredExcel}
+                disabled={excelLoading}
+                className="bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 text-white w-full justify-start h-11"
+                data-testid="export-excel-btn"
+              >
+                {excelLoading ? (
+                  <Loader2 className="h-4 w-4 mr-2 flex-shrink-0 animate-spin" />
+                ) : (
+                  <FileSpreadsheet className="h-4 w-4 mr-2 flex-shrink-0" />
+                )}
+                <span className="truncate">{excelLoading ? 'İndiriliyor...' : 'Excel Raporu Oluştur'}</span>
               </Button>
               <Button
                 onClick={() => navigate('/admin')}
@@ -332,7 +346,7 @@ const Dashboard = () => {
               <Button
                 onClick={() => navigate('/raporlar')}
                 variant="outline"
-                className="border-blue-600 text-blue-700 hover:bg-blue-50 w-full justify-start h-11 xs:col-span-2 lg:col-span-1"
+                className="border-blue-600 text-blue-700 hover:bg-blue-50 w-full justify-start h-11"
               >
                 <FileText className="h-4 w-4 mr-2 flex-shrink-0" />
                 <span className="truncate">{t('dashboard.viewAllReports')}</span>
