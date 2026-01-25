@@ -266,7 +266,7 @@ const Dashboard = () => {
           <CardHeader className="pb-2 sm:pb-4">
             <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
               <Plus className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" />
-              Hızlı İşlemler
+              {t('dashboard.quickActions')}
             </CardTitle>
           </CardHeader>
           <CardContent className="pt-0">
@@ -276,7 +276,7 @@ const Dashboard = () => {
                 className="bg-gradient-to-r from-blue-700 to-blue-600 hover:from-blue-800 hover:to-blue-700 text-white w-full justify-start h-11"
               >
                 <Plus className="h-4 w-4 mr-2 flex-shrink-0" />
-                <span className="truncate">Yeni Rapor</span>
+                <span className="truncate">{t('dashboard.newReport')}</span>
               </Button>
               <Button
                 onClick={() => navigate('/admin')}
@@ -284,7 +284,7 @@ const Dashboard = () => {
                 className="border-indigo-600 text-indigo-700 hover:bg-indigo-50 w-full justify-start h-11"
               >
                 <FolderKanban className="h-4 w-4 mr-2 flex-shrink-0" />
-                <span className="truncate">Projeler</span>
+                <span className="truncate">{t('projects.title')}</span>
               </Button>
               <Button
                 onClick={() => navigate('/raporlar')}
@@ -292,10 +292,131 @@ const Dashboard = () => {
                 className="border-blue-600 text-blue-700 hover:bg-blue-50 w-full justify-start h-11 xs:col-span-2 lg:col-span-1"
               >
                 <FileText className="h-4 w-4 mr-2 flex-shrink-0" />
-                <span className="truncate">Tüm Raporlar</span>
+                <span className="truncate">{t('dashboard.viewAllReports')}</span>
               </Button>
             </div>
           </CardContent>
+        </Card>
+
+        {/* Gelişmiş Filtreleme Paneli */}
+        <Card className="shadow-md border border-gray-200">
+          <CardHeader className="pb-0">
+            <button
+              onClick={() => setShowFilters(!showFilters)}
+              className="w-full flex items-center justify-between py-2 hover:bg-gray-50 rounded-lg transition-colors -mx-2 px-2"
+            >
+              <div className="flex items-center gap-2">
+                <SlidersHorizontal className="h-5 w-5 text-indigo-600" />
+                <span className="font-semibold text-gray-800">Gelişmiş Filtreleme</span>
+                {hasActiveFilters && (
+                  <span className="px-2 py-0.5 text-xs font-medium bg-indigo-100 text-indigo-700 rounded-full">
+                    Aktif
+                  </span>
+                )}
+              </div>
+              <ChevronDown className={`h-5 w-5 text-gray-500 transition-transform ${showFilters ? 'rotate-180' : ''}`} />
+            </button>
+          </CardHeader>
+          
+          {showFilters && (
+            <CardContent className="pt-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                {/* Proje Seç */}
+                <div className="space-y-1.5">
+                  <label className="text-sm font-medium text-gray-700">Proje Seç</label>
+                  <Select value={selectedProje} onValueChange={setSelectedProje}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Tüm Projeler" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Tüm Projeler</SelectItem>
+                      {projeler.map(proje => (
+                        <SelectItem key={proje.id} value={proje.id}>
+                          {proje.proje_adi}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* İl Seç */}
+                <div className="space-y-1.5">
+                  <label className="text-sm font-medium text-gray-700">İl Seç</label>
+                  <Select value={selectedIl} onValueChange={setSelectedIl}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Tüm İller" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Tüm İller</SelectItem>
+                      {uniqueIller.map(il => (
+                        <SelectItem key={il} value={il}>
+                          {il}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Firma Adı */}
+                <div className="space-y-1.5">
+                  <label className="text-sm font-medium text-gray-700">Firma Adı</label>
+                  <Select value={selectedFirma} onValueChange={setSelectedFirma}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Tüm Firmalar" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Tüm Firmalar</SelectItem>
+                      {uniqueFirmalar.map(firma => (
+                        <SelectItem key={firma} value={firma}>
+                          {firma}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Filtreleri Temizle */}
+                <div className="flex items-end">
+                  <Button
+                    variant="outline"
+                    onClick={clearFilters}
+                    disabled={!hasActiveFilters}
+                    className={`w-full h-10 ${hasActiveFilters ? 'border-red-300 text-red-600 hover:bg-red-50' : 'border-gray-200 text-gray-400'}`}
+                  >
+                    <X className="h-4 w-4 mr-2" />
+                    Filtreleri Temizle
+                  </Button>
+                </div>
+              </div>
+
+              {/* Active Filter Summary */}
+              {hasActiveFilters && (
+                <div className="mt-4 p-3 bg-indigo-50 rounded-lg border border-indigo-100">
+                  <div className="flex items-center gap-2 text-sm text-indigo-700">
+                    <Filter className="h-4 w-4" />
+                    <span className="font-medium">Aktif Filtreler:</span>
+                    <div className="flex flex-wrap gap-2">
+                      {selectedProje !== 'all' && (
+                        <span className="px-2 py-0.5 bg-indigo-100 rounded text-xs">
+                          Proje: {projeler.find(p => p.id === selectedProje)?.proje_adi}
+                        </span>
+                      )}
+                      {selectedIl !== 'all' && (
+                        <span className="px-2 py-0.5 bg-indigo-100 rounded text-xs">
+                          İl: {selectedIl}
+                        </span>
+                      )}
+                      {selectedFirma !== 'all' && (
+                        <span className="px-2 py-0.5 bg-indigo-100 rounded text-xs">
+                          Firma: {selectedFirma}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          )}
         </Card>
 
         {/* Stats Grid - 2 cols on mobile */}
@@ -303,12 +424,14 @@ const Dashboard = () => {
           {/* Total Reports */}
           <Card className="card-hover border-l-4 border-l-blue-600 shadow-md" data-testid="total-reports-card">
             <CardHeader className="flex flex-row items-center justify-between pb-1 sm:pb-2 p-3 sm:p-4">
-              <CardTitle className="text-xs sm:text-sm font-medium text-gray-600">Toplam</CardTitle>
+              <CardTitle className="text-xs sm:text-sm font-medium text-gray-600">{t('dashboard.totalReports')}</CardTitle>
               <FileText className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" />
             </CardHeader>
             <CardContent className="p-3 sm:p-4 pt-0">
-              <div className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800">{stats?.total_raporlar || 0}</div>
-              <p className="text-xs text-gray-500 mt-1 hidden sm:block">Sistemdeki tüm raporlar</p>
+              <div className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800">{filteredStats?.total_raporlar || 0}</div>
+              <p className="text-xs text-gray-500 mt-1 hidden sm:block">
+                {hasActiveFilters ? 'Filtrelenmiş sonuç' : 'Sistemdeki tüm raporlar'}
+              </p>
             </CardContent>
           </Card>
 
@@ -319,7 +442,7 @@ const Dashboard = () => {
               <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 text-purple-600" />
             </CardHeader>
             <CardContent className="p-3 sm:p-4 pt-0">
-              <div className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800">{stats?.monthly_raporlar || 0}</div>
+              <div className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800">{filteredStats?.monthly_raporlar || 0}</div>
               <p className="text-xs text-gray-500 mt-1 hidden sm:block">Oluşturulan rapor</p>
             </CardContent>
           </Card>
@@ -327,23 +450,25 @@ const Dashboard = () => {
           {/* Uygun Reports */}
           <Card className="card-hover border-l-4 border-l-green-600 shadow-md" data-testid="approved-reports-card">
             <CardHeader className="flex flex-row items-center justify-between pb-1 sm:pb-2 p-3 sm:p-4">
-              <CardTitle className="text-xs sm:text-sm font-medium text-gray-600">Uygun</CardTitle>
+              <CardTitle className="text-xs sm:text-sm font-medium text-gray-600">{t('reports.compliant')}</CardTitle>
               <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5 text-green-600" />
             </CardHeader>
             <CardContent className="p-3 sm:p-4 pt-0">
-              <div className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800">{stats?.uygun_count || 0}</div>
-              <p className="text-xs text-gray-500 mt-1 hidden sm:block">%{uygunlukYuzdesi} uygunluk</p>
+              <div className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800">{filteredStats?.uygun_count || 0}</div>
+              <p className="text-xs text-gray-500 mt-1 hidden sm:block">
+                %{filteredStats?.total_raporlar > 0 ? Math.round((filteredStats.uygun_count / filteredStats.total_raporlar) * 100) : 0} uygunluk
+              </p>
             </CardContent>
           </Card>
 
           {/* Uygun Değil Reports */}
           <Card className="card-hover border-l-4 border-l-red-600 shadow-md" data-testid="rejected-reports-card">
             <CardHeader className="flex flex-row items-center justify-between pb-1 sm:pb-2 p-3 sm:p-4">
-              <CardTitle className="text-xs sm:text-sm font-medium text-gray-600">Uygun Değil</CardTitle>
+              <CardTitle className="text-xs sm:text-sm font-medium text-gray-600">{t('reports.nonCompliant')}</CardTitle>
               <XCircle className="h-4 w-4 sm:h-5 sm:w-5 text-red-600" />
             </CardHeader>
             <CardContent className="p-3 sm:p-4 pt-0">
-              <div className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800">{stats?.uygun_degil_count || 0}</div>
+              <div className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800">{filteredStats?.uygun_degil_count || 0}</div>
               <p className="text-xs text-gray-500 mt-1 hidden sm:block">Dikkat gerekiyor</p>
             </CardContent>
           </Card>
