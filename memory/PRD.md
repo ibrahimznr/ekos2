@@ -184,6 +184,7 @@ All critical tasks completed.
 - `POST /api/raporlar/zip-export` - Download selected reports as ZIP
 - `GET /api/raporlar/proje-zip-export/{proje_id}` - Download project reports with media
 - `POST /api/excel/export` - Export reports to Excel
+- `POST /api/excel/export-filtered` - Export filtered reports to Excel (Proje, İl, Firma filters)
 
 ---
 
