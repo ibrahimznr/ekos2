@@ -207,14 +207,9 @@ async def export_excel_filtered(request: FilteredExcelExportRequest, current_use
         filter_info.append(f"Firma: {request.firma}")
     
     filter_text = " | ".join(filter_info) if filter_info else "Tüm Veriler"
-    filter_cell = ws_dashboard.cell(row=3, column=2, value=f"Filtreler: {filter_text}")
+    filter_cell = ws_dashboard.cell(row=3, column=2, value=f"Filtreler: {filter_text}  |  Oluşturma: {today.strftime('%d.%m.%Y %H:%M')}")
     filter_cell.font = Font(size=10, color='6b7280', italic=True)
     ws_dashboard.merge_cells('B3:R3')
-    
-    # Date
-    date_cell = ws_dashboard.cell(row=3, column=15, value=f"Oluşturma: {today.strftime('%d.%m.%Y %H:%M')}")
-    date_cell.font = Font(size=9, color='9ca3af')
-    date_cell.alignment = Alignment(horizontal='right')
     
     # Helper function to create card
     def create_card(start_row, start_col, end_col, title, value, border_color, fill_color, text_color):
