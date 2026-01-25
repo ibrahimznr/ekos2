@@ -148,17 +148,12 @@ const Dashboard = () => {
         }
       }
       
-      // Download the file
-      const url = window.URL.createObjectURL(new Blob([response.data]));
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', filename);
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      window.URL.revokeObjectURL(url);
+      // Download with Save As dialog
+      const saved = await downloadExcel(new Blob([response.data]), filename);
       
-      toast.success(`${filteredStats?.total_raporlar || 0} rapor Excel'e aktarıldı`);
+      if (saved) {
+        toast.success(`${filteredStats?.total_raporlar || 0} rapor Excel'e aktarıldı`);
+      }
     } catch (error) {
       if (error.response?.status === 404) {
         toast.error('Filtrelere uyan rapor bulunamadı');
