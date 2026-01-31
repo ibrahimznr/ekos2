@@ -93,6 +93,11 @@ const AdminPanel = () => {
   const [selectedBilesenAdlari, setSelectedBilesenAdlari] = useState([]);
   const [selectedKalibrasyonlar, setSelectedKalibrasyonlar] = useState([]);
 
+  // Kategori Excel Import state
+  const [showKategoriImportDialog, setShowKategoriImportDialog] = useState(false);
+  const [kategoriImportFile, setKategoriImportFile] = useState(null);
+  const [kategoriImporting, setKategoriImporting] = useState(false);
+
   useEffect(() => {
     const userData = localStorage.getItem('user');
     if (userData) {
