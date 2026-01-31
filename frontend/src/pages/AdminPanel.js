@@ -1593,6 +1593,85 @@ const AdminPanel = () => {
         </DialogContent>
       </Dialog>
 
+      {/* Kategori Excel Import Dialog */}
+      <Dialog open={showKategoriImportDialog} onOpenChange={setShowKategoriImportDialog}>
+        <DialogContent data-testid="import-category-dialog">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <FileSpreadsheet className="h-5 w-5 text-emerald-600" />
+              Kategorileri Excel'den İçe Aktar
+            </DialogTitle>
+            <DialogDescription>
+              Excel dosyası ile toplu kategori ekleyin. Mevcut kategoriler güncellenmez, sadece yeniler eklenir.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <h4 className="font-medium text-blue-800 mb-2">Şablon Formatı</h4>
+              <ul className="text-sm text-blue-700 space-y-1">
+                <li>• <strong>Kategori Adı*</strong> - Zorunlu alan</li>
+                <li>• <strong>Alt Kategoriler</strong> - Virgülle ayrılmış (Vinç, Forklift, Platform)</li>
+                <li>• <strong>Açıklama</strong> - Opsiyonel</li>
+              </ul>
+              <Button
+                variant="link"
+                className="text-blue-600 p-0 h-auto mt-2"
+                onClick={handleDownloadKategoriTemplate}
+              >
+                <Download className="h-4 w-4 mr-1" />
+                Örnek şablonu indir
+              </Button>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="kategori-file">Excel Dosyası Seçin</Label>
+              <Input
+                id="kategori-file"
+                type="file"
+                accept=".xlsx,.xls"
+                onChange={(e) => setKategoriImportFile(e.target.files[0])}
+                data-testid="category-import-file-input"
+              />
+              {kategoriImportFile && (
+                <p className="text-sm text-gray-600">
+                  Seçilen dosya: {kategoriImportFile.name}
+                </p>
+              )}
+            </div>
+          </div>
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                setShowKategoriImportDialog(false);
+                setKategoriImportFile(null);
+              }}
+              disabled={kategoriImporting}
+            >
+              İptal
+            </Button>
+            <Button 
+              onClick={handleKategoriImport}
+              disabled={!kategoriImportFile || kategoriImporting}
+              className="bg-emerald-600 hover:bg-emerald-700"
+              data-testid="submit-category-import-button"
+            >
+              {kategoriImporting ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  İçe Aktarılıyor...
+                </>
+              ) : (
+                <>
+                  <Upload className="h-4 w-4 mr-2" />
+                  İçe Aktar
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       {/* Create Proje Dialog */}
       <Dialog open={showProjeDialog} onOpenChange={setShowProjeDialog}>
         <DialogContent className="max-w-3xl" data-testid="create-project-dialog">
