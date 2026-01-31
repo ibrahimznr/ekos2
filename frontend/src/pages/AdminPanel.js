@@ -307,6 +307,66 @@ const AdminPanel = () => {
     }
   };
 
+  // Kategori Excel şablonu indir
+  const handleDownloadKategoriTemplate = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get(`${API}/kategoriler/excel/template`, {
+        headers: { Authorization: `Bearer ${token}` },
+        responseType: 'blob',
+      });
+      
+      const saved = await downloadExcel(new Blob([response.data]), 'kategori_sablonu.xlsx');
+      if (saved) {
+        toast.success('Şablon indirildi');
+      }
+    } catch (error) {
+      toast.error('Şablon indirilemedi');
+    }
+  };
+
+  // Kategori Excel import
+  const handleKategoriImport = async () => {
+    if (!kategoriImportFile) {
+      toast.error('Lütfen bir dosya seçin');
+      return;
+    }
+
+    setKategoriImporting(true);
+    try {
+      const token = localStorage.getItem('token');
+      const formData = new FormData();
+      formData.append('file', kategoriImportFile);
+
+      const response = await axios.post(`${API}/kategoriler/excel/import`, formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      const { imported_count, skipped_count, errors } = response.data;
+      
+      if (imported_count > 0) {
+        toast.success(`${imported_count} kategori başarıyla eklendi`);
+      }
+      if (skipped_count > 0) {
+        toast.info(`${skipped_count} kategori zaten mevcut (atlandı)`);
+      }
+      if (errors && errors.length > 0) {
+        toast.warning(`${errors.length} satırda hata oluştu`);
+      }
+
+      setShowKategoriImportDialog(false);
+      setKategoriImportFile(null);
+      fetchKategoriler();
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Import başarısız');
+    } finally {
+      setKategoriImporting(false);
+    }
+  };
+
   const handleCreateProje = async () => {
     try {
       const token = localStorage.getItem('token');
