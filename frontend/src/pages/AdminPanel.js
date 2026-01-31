@@ -1029,7 +1029,7 @@ const AdminPanel = () => {
         {/* Kategoriler Section */}
         {activeSection === 'kategoriler' && (
           <div className="space-y-4">
-            <div className="flex justify-between items-center">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
               <div className="flex items-center gap-3">
                 <Checkbox
                   checked={selectedKategoriler.length === kategoriler.length && kategoriler.length > 0}
@@ -1037,7 +1037,7 @@ const AdminPanel = () => {
                 />
                 <p className="text-gray-600">{kategoriler.length} kategori {selectedKategoriler.length > 0 && `(${selectedKategoriler.length} seçili)`}</p>
               </div>
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
                 {selectedKategoriler.length > 0 && (
                   <Button
                     variant="destructive"
@@ -1048,6 +1048,24 @@ const AdminPanel = () => {
                     Seçilenleri Sil ({selectedKategoriler.length})
                   </Button>
                 )}
+                <Button
+                  variant="outline"
+                  onClick={handleDownloadKategoriTemplate}
+                  className="border-green-600 text-green-700 hover:bg-green-50"
+                  data-testid="download-category-template-button"
+                >
+                  <Download className="h-4 w-4 mr-2" />
+                  Şablon İndir
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => setShowKategoriImportDialog(true)}
+                  className="border-emerald-600 text-emerald-700 hover:bg-emerald-50"
+                  data-testid="import-categories-button"
+                >
+                  <Upload className="h-4 w-4 mr-2" />
+                  Excel Import
+                </Button>
                 <Button
                   onClick={() => setShowKategoriDialog(true)}
                   className="bg-gradient-to-r from-blue-700 to-blue-600 hover:from-blue-800 hover:to-blue-700 text-white"
