@@ -573,6 +573,24 @@ const Layout = ({ children }) => {
                 </Button>
               </div>
 
+              {/* Kombinasyonlar Section */}
+              <div className="pt-2 border-t border-gray-200 mt-2">
+                <p className="px-3 py-1 text-xs font-semibold text-amber-600 uppercase">Kombinasyonlar</p>
+                <Button
+                  variant={location.pathname === '/sans-topu-tahmin' ? 'default' : 'ghost'}
+                  onClick={() => {
+                    navigate('/sans-topu-tahmin');
+                    setMobileMenuOpen(false);
+                  }}
+                  className={`w-full justify-start h-12 ${location.pathname === '/sans-topu-tahmin'
+                    ? 'bg-gradient-to-r from-amber-500 to-orange-600 text-white'
+                    : 'text-gray-700 hover:bg-gray-100'}`}
+                >
+                  <Dice5 className="h-5 w-5 mr-3" />
+                  Şans Tobu Tahmin Üretici
+                </Button>
+              </div>
+
               {/* Settings Button */}
               <Button
                 variant={isActive('/ayarlar') ? 'default' : 'ghost'}
