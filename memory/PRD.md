@@ -241,3 +241,47 @@ All critical tasks completed.
 └── memory/
     └── PRD.md
 ```
+
+---
+
+## February 15, 2026 - Kombinasyonlar Module (Şans Topu Tahmin Üretici)
+
+**Yeni Özellik: Şans Topu Tahmin Üretici** ✅
+- Sidebar'a "Kombinasyonlar" dropdown menüsü eklendi (Çekiliş altına)
+- `/sans-topu-tahmin` sayfası oluşturuldu
+- Rastgele kombinasyon üretme sistemi (1 milyon adet)
+- Kombinasyon arama özelliği (5,12,23,27,34+8 formatı)
+- Örnek tahminler tablosu (5 rastgele kombinasyon)
+- Excel export özelliği (maks 100.000 satır)
+- Şans Topu kuralları bilgi kutusu
+
+**API Endpoints:**
+- `GET /api/kombinasyonlar/stats` - Toplam kombinasyon sayısı
+- `POST /api/kombinasyonlar/generate` - Yeni kombinasyonlar üret
+- `POST /api/kombinasyonlar/clear` - Önbelleği temizle
+- `POST /api/kombinasyonlar/search` - Kombinasyon ara
+- `GET /api/kombinasyonlar/sample` - Rastgele örnekler
+- `GET /api/kombinasyonlar/export-excel` - Excel export
+
+**Test Sonuçları:**
+- Backend: %100 (21/21 test geçti)
+- Frontend: %100 (tüm özellikler çalışıyor)
+- Test dosyası: `/app/backend/tests/test_kombinasyonlar.py`
+
+---
+
+## Prioritized Backlog
+
+### P0 (Critical)
+- [x] ~~Şans Topu Tahmin Üretici~~ (TAMAMLANDI)
+
+### P1 (High Priority)  
+- [ ] Veri tutarsızlığı hatası - Dashboard filtreleme sayısı backend ile uyumsuz
+- [ ] Bildirim sistemini standartlaştırma (eski sonner toast'ları kaldırma)
+
+### P2 (Medium Priority)
+- [ ] Uluslararasılaştırma (TR/EN) - i18n framework mevcut ama metinler Türkçe hardcoded
+- [ ] Veritabanı temizliği (tekrarlanan proje kayıtları)
+
+### P3 (Low Priority)
+- [ ] Medya dosyaları migrasyonu
