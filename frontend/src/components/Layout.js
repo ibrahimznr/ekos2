@@ -428,6 +428,89 @@ const Layout = ({ children }) => {
 
       {/* Main Content */}
       <main className={`flex-1 transition-all duration-300 ${sidebarOpen ? 'md:ml-64' : 'md:ml-20'} mt-14 md:mt-0`}>
+        
+        {/* Desktop Sticky Header */}
+        <header className={`hidden md:flex sticky top-0 z-30 bg-white/95 backdrop-blur-sm border-b border-gray-200 shadow-sm h-14 items-center justify-between px-6`}>
+          {/* Left side - Date and Time */}
+          <div className="flex items-center gap-3 text-gray-600">
+            <Calendar className="h-4 w-4 text-blue-600" />
+            <span className="text-sm font-medium">{formatDate(currentTime)}</span>
+          </div>
+
+          {/* Right side - Notifications, Admin Panel, User */}
+          <div className="flex items-center gap-4">
+            {/* Notifications */}
+            <button 
+              className="relative p-2 rounded-lg hover:bg-gray-100 transition-colors"
+              title="Bildirimler"
+            >
+              <Bell className="h-5 w-5 text-gray-600" />
+              {/* Notification badge - can be dynamic later */}
+              <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+            </button>
+
+            {/* Admin Panel Link - Only for admin */}
+            {user.role === 'admin' && (
+              <button
+                onClick={() => navigate('/admin')}
+                className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-colors ${
+                  location.pathname === '/admin' 
+                    ? 'bg-blue-100 text-blue-700' 
+                    : 'hover:bg-gray-100 text-gray-600'
+                }`}
+                title="Yönetim Paneli"
+              >
+                <Shield className="h-4 w-4" />
+                <span className="text-sm font-medium">Yönetim Paneli</span>
+              </button>
+            )}
+
+            {/* User Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors">
+                  <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-blue-500 rounded-full flex items-center justify-center">
+                    <User className="h-4 w-4 text-white" />
+                  </div>
+                  <span className="text-sm font-medium text-gray-700">{user.username || user.email?.split('@')[0]}</span>
+                  <ChevronDown className="h-4 w-4 text-gray-500" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <div className="px-3 py-2 border-b border-gray-100">
+                  <p className="text-sm font-medium text-gray-800">{user.username || user.email?.split('@')[0]}</p>
+                  <p className="text-xs text-gray-500">{user.email}</p>
+                  <p className="text-xs text-blue-600 font-medium mt-1">
+                    {user.role === 'admin' ? 'Yönetici' : user.role === 'inspector' ? 'Müfettiş' : 'Görüntüleyici'}
+                  </p>
+                </div>
+                <DropdownMenuItem 
+                  className="cursor-pointer"
+                  onClick={() => navigate('/ayarlar')}
+                >
+                  <UserCircle className="h-4 w-4 mr-2" />
+                  Profil Ayarları
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  className="cursor-pointer"
+                  onClick={() => navigate('/ayarlar')}
+                >
+                  <Settings className="h-4 w-4 mr-2" />
+                  Hesap Bilgileri
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem 
+                  className="cursor-pointer text-red-600 focus:text-red-600 focus:bg-red-50"
+                  onClick={handleLogout}
+                >
+                  <LogOut className="h-4 w-4 mr-2" />
+                  Çıkış Yap
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </header>
+
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           {children}
         </div>
