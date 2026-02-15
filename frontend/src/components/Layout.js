@@ -3,13 +3,23 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { LayoutDashboard, FileText, Shield, LogOut, Menu, X, Building2, User, Plus, ChevronLeft, ChevronRight, Settings, Truck, Trophy, BookOpen, Brain, ChevronDown, Bell, Calendar, Clock, UserCircle } from 'lucide-react';
+import { LayoutDashboard, FileText, Shield, LogOut, Menu, X, Building2, User, Plus, ChevronLeft, ChevronRight, Settings, Truck, Trophy, BookOpen, Brain, ChevronDown, Bell, Calendar, Clock, UserCircle, MessageSquare, Send, Check, CheckCheck, Trash2, Loader2, Mail } from 'lucide-react';
 import { toast } from 'sonner';
 import api from '@/utils/api';
 import LanguageSelector from '@/components/LanguageSelector';
@@ -26,13 +36,108 @@ const Layout = ({ children }) => {
   const [currentTime, setCurrentTime] = React.useState(new Date());
   const user = JSON.parse(localStorage.getItem('user') || '{}');
 
-  // Update time every minute
+  // Notification states
+  const [notifications, setNotifications] = React.useState([]);
+  const [unreadCount, setUnreadCount] = React.useState(0);
+  const [notificationsOpen, setNotificationsOpen] = React.useState(false);
+  const [selectedNotification, setSelectedNotification] = React.useState(null);
+  const [showNotificationDetail, setShowNotificationDetail] = React.useState(false);
+
+  // Feedback modal states
+  const [showFeedbackModal, setShowFeedbackModal] = React.useState(false);
+  const [feedbackMessage, setFeedbackMessage] = React.useState('');
+  const [sendingFeedback, setSendingFeedback] = React.useState(false);
+
+  // Fetch notifications
+  const fetchNotifications = React.useCallback(async () => {
+    try {
+      const [notifResponse, countResponse] = await Promise.all([
+        api.get('/notifications'),
+        api.get('/notifications/unread-count')
+      ]);
+      setNotifications(notifResponse.data);
+      setUnreadCount(countResponse.data.count);
+    } catch (error) {
+      console.error('Failed to fetch notifications:', error);
+    }
+  }, []);
+
+  // Update time every minute and fetch notifications
   React.useEffect(() => {
     const timer = setInterval(() => {
       setCurrentTime(new Date());
     }, 60000);
-    return () => clearInterval(timer);
-  }, []);
+
+    // Fetch notifications on mount and every 30 seconds
+    fetchNotifications();
+    const notifTimer = setInterval(fetchNotifications, 30000);
+
+    return () => {
+      clearInterval(timer);
+      clearInterval(notifTimer);
+    };
+  }, [fetchNotifications]);
+
+  // Mark notification as read
+  const handleMarkAsRead = async (notificationId) => {
+    try {
+      await api.put(`/notifications/${notificationId}/read`);
+      fetchNotifications();
+    } catch (error) {
+      console.error('Failed to mark as read:', error);
+    }
+  };
+
+  // Mark all as read
+  const handleMarkAllAsRead = async () => {
+    try {
+      await api.put('/notifications/mark-all-read');
+      fetchNotifications();
+      toast.success('Tüm bildirimler okundu olarak işaretlendi');
+    } catch (error) {
+      toast.error('İşlem başarısız');
+    }
+  };
+
+  // Delete notification
+  const handleDeleteNotification = async (notificationId) => {
+    try {
+      await api.delete(`/notifications/${notificationId}`);
+      fetchNotifications();
+      setShowNotificationDetail(false);
+    } catch (error) {
+      toast.error('Bildirim silinemedi');
+    }
+  };
+
+  // View notification detail
+  const handleViewNotification = (notification) => {
+    setSelectedNotification(notification);
+    setShowNotificationDetail(true);
+    if (!notification.is_read) {
+      handleMarkAsRead(notification.id);
+    }
+  };
+
+  // Send feedback
+  const handleSendFeedback = async () => {
+    if (!feedbackMessage.trim()) {
+      toast.error('Lütfen bir mesaj yazın');
+      return;
+    }
+
+    setSendingFeedback(true);
+    try {
+      await api.post('/notifications/feedback', { message: feedbackMessage });
+      toast.success('Geri bildiriminiz gönderildi');
+      setShowFeedbackModal(false);
+      setFeedbackMessage('');
+    } catch (error) {
+      toast.error('Geri bildirim gönderilemedi');
+    } finally {
+      setSendingFeedback(false);
+    }
+  };
 
   // Format date in Turkish
   const formatDate = (date) => {
@@ -43,6 +148,32 @@ const Layout = ({ children }) => {
     const hours = date.getHours().toString().padStart(2, '0');
     const minutes = date.getMinutes().toString().padStart(2, '0');
     return `${day} ${month} ${year}, ${hours}:${minutes}`;
+  };
+
+  // Format notification date
+  const formatNotificationDate = (dateStr) => {
+    const date = new Date(dateStr);
+    const now = new Date();
+    const diff = now - date;
+    const minutes = Math.floor(diff / 60000);
+    const hours = Math.floor(diff / 3600000);
+    const days = Math.floor(diff / 86400000);
+
+    if (minutes < 1) return 'Az önce';
+    if (minutes < 60) return `${minutes} dk önce`;
+    if (hours < 24) return `${hours} saat önce`;
+    if (days < 7) return `${days} gün önce`;
+    return date.toLocaleDateString('tr-TR');
+  };
+
+  // Get notification icon based on type
+  const getNotificationIcon = (type) => {
+    switch (type) {
+      case 'new_user': return <User className="h-4 w-4 text-green-600" />;
+      case 'feedback': return <MessageSquare className="h-4 w-4 text-blue-600" />;
+      case 'message': return <Mail className="h-4 w-4 text-purple-600" />;
+      default: return <Bell className="h-4 w-4 text-gray-600" />;
+    }
   };
 
   const handleLogout = async () => {
