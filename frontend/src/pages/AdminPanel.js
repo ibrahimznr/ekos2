@@ -375,6 +375,77 @@ const AdminPanel = () => {
     }
   };
 
+  // Fetch users for message dialog
+  const fetchUsersForMessage = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get(`${API}/notifications/users-for-message`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setAllUsersForMessage(response.data);
+    } catch (error) {
+      console.error('Failed to fetch users:', error);
+    }
+  };
+
+  // Open message dialog
+  const handleOpenMessageDialog = () => {
+    fetchUsersForMessage();
+    setShowMessageDialog(true);
+  };
+
+  // Toggle recipient selection
+  const toggleRecipient = (userId) => {
+    setSelectedRecipients(prev => 
+      prev.includes(userId) 
+        ? prev.filter(id => id !== userId)
+        : [...prev, userId]
+    );
+  };
+
+  // Select/Deselect all recipients
+  const toggleAllRecipients = () => {
+    if (selectedRecipients.length === allUsersForMessage.length) {
+      setSelectedRecipients([]);
+    } else {
+      setSelectedRecipients(allUsersForMessage.map(u => u.id));
+    }
+  };
+
+  // Send admin message
+  const handleSendAdminMessage = async () => {
+    if (!messageContent.trim()) {
+      toast.error('Lütfen bir mesaj yazın');
+      return;
+    }
+    if (selectedRecipients.length === 0) {
+      toast.error('Lütfen en az bir alıcı seçin');
+      return;
+    }
+
+    setSendingMessage(true);
+    try {
+      const token = localStorage.getItem('token');
+      await axios.post(`${API}/notifications/admin-message`, {
+        title: messageTitle || 'Yönetimden Mesaj',
+        message: messageContent,
+        recipient_ids: selectedRecipients
+      }, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      toast.success(`${selectedRecipients.length} kullanıcıya mesaj gönderildi`);
+      setShowMessageDialog(false);
+      setMessageTitle('');
+      setMessageContent('');
+      setSelectedRecipients([]);
+    } catch (error) {
+      toast.error('Mesaj gönderilemedi');
+    } finally {
+      setSendingMessage(false);
+    }
+  };
+
   const handleCreateProje = async () => {
     try {
       const token = localStorage.getItem('token');
