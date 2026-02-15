@@ -357,6 +357,49 @@ const Layout = ({ children }) => {
               </div>
             )}
           </div>
+
+          {/* Kombinasyonlar Dropdown */}
+          <div className="pt-2 border-t border-gray-200 mt-2">
+            <button
+              onClick={() => setKombinasyonlarOpen(!kombinasyonlarOpen)}
+              className={`w-full flex items-center gap-3 px-3 py-3 rounded-lg transition-all duration-200 ${
+                location.pathname.startsWith('/sans-topu')
+                  ? 'bg-gradient-to-r from-amber-500 to-orange-600 text-white shadow-md'
+                  : 'text-gray-700 hover:bg-gray-100'
+              } ${!sidebarOpen ? 'justify-center' : ''}`}
+              title={!sidebarOpen ? 'Kombinasyonlar' : ''}
+              data-testid="nav-kombinasyonlar"
+            >
+              <Dices className={`h-5 w-5 flex-shrink-0 ${
+                location.pathname.startsWith('/sans-topu')
+                  ? 'text-white' : 'text-amber-500'
+              }`} />
+              {sidebarOpen && (
+                <>
+                  <span className="font-medium flex-1 text-left">Kombinasyonlar</span>
+                  <ChevronDown className={`h-4 w-4 transition-transform ${kombinasyonlarOpen ? 'rotate-180' : ''}`} />
+                </>
+              )}
+            </button>
+
+            {/* Submenu */}
+            {sidebarOpen && kombinasyonlarOpen && (
+              <div className="ml-4 mt-1 space-y-1">
+                <button
+                  onClick={() => navigate('/sans-topu-tahmin')}
+                  className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 ${
+                    location.pathname === '/sans-topu-tahmin'
+                      ? 'bg-amber-100 text-amber-700'
+                      : 'text-gray-600 hover:bg-gray-100'
+                  }`}
+                  data-testid="nav-sans-topu-tahmin"
+                >
+                  <Dice5 className="h-4 w-4 flex-shrink-0" />
+                  <span className="text-sm">Şans Topu Tahmin Üretici</span>
+                </button>
+              </div>
+            )}
+          </div>
         </nav>
 
         {/* Settings Button */}
