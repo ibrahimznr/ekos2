@@ -187,7 +187,92 @@ const Dashboard = () => {
     fetchKalibrasyonCihazlari();
     fetchProjeler();
     fetchAllRaporlar();
+    fetchIskeleFilterOptions();
   }, [navigate]);
+
+  // Fetch iskele filter options
+  const fetchIskeleFilterOptions = async () => {
+    try {
+      const response = await api.get('/iskele-bilesenleri/filter-options');
+      setIskeleFilterOptions(response.data);
+    } catch (error) {
+      console.error('İskele filtre seçenekleri yüklenemedi');
+    }
+  };
+
+  // Fetch filtered iskele stats
+  const fetchIskeleFilteredStats = async () => {
+    try {
+      const params = new URLSearchParams();
+      if (iskeleFilterFirma && iskeleFilterFirma !== 'all') params.append('firma', iskeleFilterFirma);
+      if (iskeleFilterProje && iskeleFilterProje !== 'all') params.append('proje_id', iskeleFilterProje);
+      if (iskeleFilterSearch) params.append('bilesen_adi_search', iskeleFilterSearch);
+      
+      const response = await api.get(`/iskele-bilesenleri/stats/filtered?${params.toString()}`);
+      setIskeleFilteredStats(response.data);
+    } catch (error) {
+      console.error('İskele filtrelenmiş istatistikler yüklenemedi');
+    }
+  };
+
+  // Fetch iskele stats when filters change
+  useEffect(() => {
+    const hasFilters = iskeleFilterFirma !== 'all' || iskeleFilterProje !== 'all' || iskeleFilterSearch;
+    if (hasFilters) {
+      const debounce = setTimeout(() => {
+        fetchIskeleFilteredStats();
+      }, 300);
+      return () => clearTimeout(debounce);
+    } else {
+      setIskeleFilteredStats(null);
+    }
+  }, [iskeleFilterFirma, iskeleFilterProje, iskeleFilterSearch]);
+
+  // Export iskele bilesenleri to Excel
+  const handleExportIskeleExcel = async () => {
+    setIskeleExcelLoading(true);
+    try {
+      const response = await api.post('/iskele-bilesenleri/excel/export-filtered', {
+        firma: iskeleFilterFirma,
+        proje_id: iskeleFilterProje,
+        bilesen_adi_search: iskeleFilterSearch
+      }, {
+        responseType: 'blob',
+        timeout: 30000
+      });
+      
+      const contentDisposition = response.headers['content-disposition'];
+      let filename = `iskele_bilesenleri_${new Date().toISOString().split('T')[0]}.xlsx`;
+      
+      if (contentDisposition) {
+        const filenameMatch = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
+        if (filenameMatch && filenameMatch[1]) {
+          filename = filenameMatch[1].replace(/['"]/g, '');
+        }
+      }
+      
+      const saved = await downloadExcel(new Blob([response.data]), filename);
+      if (saved) {
+        const displayStats = iskeleFilteredStats || stats?.iskele_stats;
+        toast.success(`${displayStats?.total || 0} bileşen Excel'e aktarıldı`);
+      }
+    } catch (error) {
+      if (error.response?.status === 404) {
+        toast.error('Filtrelere uyan bileşen bulunamadı');
+      } else {
+        toast.error('Excel indirme başarısız');
+      }
+    } finally {
+      setIskeleExcelLoading(false);
+    }
+  };
+
+  // Clear iskele filters
+  const clearIskeleFilters = () => {
+    setIskeleFilterFirma('all');
+    setIskeleFilterProje('all');
+    setIskeleFilterSearch('');
+  };
 
   const fetchAllRaporlar = async () => {
     try {
