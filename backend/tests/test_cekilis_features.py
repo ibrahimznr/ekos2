@@ -9,7 +9,7 @@ import requests
 import os
 import uuid
 
-BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://ekos-filter-panel.preview.emergentagent.com')
+BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://ekos-reports.preview.emergentagent.com')
 
 # Test credentials
 TEST_EMAIL = "ibrahimznrmak@gmail.com"
