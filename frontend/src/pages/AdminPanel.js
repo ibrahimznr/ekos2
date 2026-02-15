@@ -98,6 +98,14 @@ const AdminPanel = () => {
   const [kategoriImportFile, setKategoriImportFile] = useState(null);
   const [kategoriImporting, setKategoriImporting] = useState(false);
 
+  // Admin Message state
+  const [showMessageDialog, setShowMessageDialog] = useState(false);
+  const [messageTitle, setMessageTitle] = useState('');
+  const [messageContent, setMessageContent] = useState('');
+  const [selectedRecipients, setSelectedRecipients] = useState([]);
+  const [allUsersForMessage, setAllUsersForMessage] = useState([]);
+  const [sendingMessage, setSendingMessage] = useState(false);
+
   useEffect(() => {
     const userData = localStorage.getItem('user');
     if (userData) {
