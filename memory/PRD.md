@@ -250,7 +250,11 @@ All critical tasks completed.
 - Sidebar'a "Kombinasyonlar" dropdown menüsü eklendi (Çekiliş altına)
 - `/sans-topu-tahmin` sayfası oluşturuldu
 - Rastgele kombinasyon üretme sistemi (1 milyon adet)
-- Kombinasyon arama özelliği (5,12,23,27,34+8 formatı)
+- **Görsel Kombinasyon Filtreleme Paneli:**
+  - Ana Sayılar (1-34): Grid formatında, max 5 seçim, yeşil vurgu
+  - Artı Top (1-14): Grid formatında, max 1 seçim (opsiyonel), turuncu vurgu
+  - Yeşil "Filtrele" ve "Temizle" butonları
+  - Bonus seçilmezse tüm bonus değerleri (1-14) ile arama
 - Örnek tahminler tablosu (5 rastgele kombinasyon)
 - Excel export özelliği (maks 100.000 satır)
 - Şans Topu kuralları bilgi kutusu
@@ -259,7 +263,8 @@ All critical tasks completed.
 - `GET /api/kombinasyonlar/stats` - Toplam kombinasyon sayısı
 - `POST /api/kombinasyonlar/generate` - Yeni kombinasyonlar üret
 - `POST /api/kombinasyonlar/clear` - Önbelleği temizle
-- `POST /api/kombinasyonlar/search` - Kombinasyon ara
+- `POST /api/kombinasyonlar/filter` - Görsel filtre ile arama (yeni)
+- `POST /api/kombinasyonlar/search` - Metin formatı ile arama
 - `GET /api/kombinasyonlar/sample` - Rastgele örnekler
 - `GET /api/kombinasyonlar/export-excel` - Excel export
 
