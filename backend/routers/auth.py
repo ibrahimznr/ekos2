@@ -11,6 +11,7 @@ import uuid
 
 from models import User, UserCreate, UserLogin, UserResponse, VerifyEmail, Token
 from database import db
+from routers.notifications import notify_admins_new_user
 
 router = APIRouter(prefix="/auth", tags=["Auth"])
 logger = logging.getLogger(__name__)
