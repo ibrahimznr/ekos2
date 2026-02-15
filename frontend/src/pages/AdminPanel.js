@@ -2013,6 +2013,130 @@ const AdminPanel = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Admin Message Dialog */}
+      <Dialog open={showMessageDialog} onOpenChange={setShowMessageDialog}>
+        <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-hidden flex flex-col">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Send className="h-5 w-5 text-blue-600" />
+              İleti Oluştur
+            </DialogTitle>
+            <DialogDescription>
+              Seçtiğiniz kullanıcılara anlık bildirim gönderin
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4 overflow-y-auto flex-1">
+            <div className="space-y-2">
+              <Label htmlFor="message-title">Başlık</Label>
+              <Input
+                id="message-title"
+                placeholder="Mesaj başlığı (opsiyonel)"
+                value={messageTitle}
+                onChange={(e) => setMessageTitle(e.target.value)}
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="message-content">Mesaj İçeriği *</Label>
+              <Textarea
+                id="message-content"
+                placeholder="Mesajınızı buraya yazın..."
+                value={messageContent}
+                onChange={(e) => setMessageContent(e.target.value)}
+                rows={4}
+                className="resize-none"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label>Alıcılar * ({selectedRecipients.length} seçili)</Label>
+                <Button
+                  variant="link"
+                  className="text-sm p-0 h-auto"
+                  onClick={toggleAllRecipients}
+                >
+                  {selectedRecipients.length === allUsersForMessage.length ? 'Tümünü Kaldır' : 'Tümünü Seç'}
+                </Button>
+              </div>
+              <div className="border rounded-lg max-h-40 overflow-y-auto">
+                {allUsersForMessage.length === 0 ? (
+                  <div className="p-4 text-center text-gray-500 text-sm">
+                    Kullanıcı bulunamadı
+                  </div>
+                ) : (
+                  allUsersForMessage.map((u) => (
+                    <div
+                      key={u.id}
+                      onClick={() => toggleRecipient(u.id)}
+                      className={`flex items-center gap-3 px-3 py-2 cursor-pointer hover:bg-gray-50 border-b last:border-b-0 ${
+                        selectedRecipients.includes(u.id) ? 'bg-blue-50' : ''
+                      }`}
+                    >
+                      <div className={`w-5 h-5 rounded border flex items-center justify-center ${
+                        selectedRecipients.includes(u.id) 
+                          ? 'bg-blue-600 border-blue-600' 
+                          : 'border-gray-300'
+                      }`}>
+                        {selectedRecipients.includes(u.id) && (
+                          <Check className="h-3 w-3 text-white" />
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-gray-800 truncate">
+                          {u.username || u.email?.split('@')[0]}
+                        </p>
+                        <p className="text-xs text-gray-500 truncate">{u.email}</p>
+                      </div>
+                      <span className={`text-xs px-2 py-0.5 rounded ${
+                        u.role === 'admin' 
+                          ? 'bg-purple-100 text-purple-700' 
+                          : u.role === 'inspector' 
+                            ? 'bg-blue-100 text-blue-700' 
+                            : 'bg-gray-100 text-gray-700'
+                      }`}>
+                        {u.role === 'admin' ? 'Admin' : u.role === 'inspector' ? 'Müfettiş' : 'Görüntüleyici'}
+                      </span>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowMessageDialog(false);
+                setMessageTitle('');
+                setMessageContent('');
+                setSelectedRecipients([]);
+              }}
+              disabled={sendingMessage}
+            >
+              İptal
+            </Button>
+            <Button
+              onClick={handleSendAdminMessage}
+              disabled={sendingMessage || !messageContent.trim() || selectedRecipients.length === 0}
+              className="bg-blue-600 hover:bg-blue-700"
+            >
+              {sendingMessage ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Gönderiliyor...
+                </>
+              ) : (
+                <>
+                  <Send className="h-4 w-4 mr-2" />
+                  Gönder ({selectedRecipients.length})
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Layout >
   );
 };
