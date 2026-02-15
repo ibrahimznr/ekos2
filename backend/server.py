@@ -42,7 +42,8 @@ from routers import (
     operatorler_router,
     cephe_iskeleleri_router,
     draws_router,
-    vocabulary_router
+    vocabulary_router,
+    notifications_router
 )
 
 ROOT_DIR = Path(__file__).parent
