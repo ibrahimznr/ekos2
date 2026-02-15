@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import Layout from '@/components/Layout';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import {
   Table,
@@ -17,19 +16,20 @@ import api from '@/utils/api';
 import { downloadExcel } from '@/utils/fileDownload';
 import {
   Database,
-  Search,
   FileSpreadsheet,
   Trash2,
   Loader2,
   RefreshCw,
   Sparkles,
-  CircleDot,
   Target,
   Hash,
   AlertCircle,
   CheckCircle2,
   XCircle,
-  Dice5
+  Dice5,
+  Filter,
+  RotateCcw,
+  ListFilter
 } from 'lucide-react';
 
 const SansTopuTahmin = () => {
@@ -38,12 +38,15 @@ const SansTopuTahmin = () => {
   const [loading, setLoading] = useState(false);
   const [generating, setGenerating] = useState(false);
   const [clearing, setClearing] = useState(false);
-  const [searching, setSearching] = useState(false);
+  const [filtering, setFiltering] = useState(false);
   const [exporting, setExporting] = useState(false);
 
-  // Search
-  const [searchQuery, setSearchQuery] = useState('');
-  const [searchResult, setSearchResult] = useState(null);
+  // Filter selections
+  const [selectedMainNumbers, setSelectedMainNumbers] = useState([]);
+  const [selectedBonus, setSelectedBonus] = useState(null);
+
+  // Filter results
+  const [filterResult, setFilterResult] = useState(null);
 
   // Sample combinations
   const [sampleCombinations, setSampleCombinations] = useState([]);
@@ -113,7 +116,7 @@ const SansTopuTahmin = () => {
       const response = await api.post('/kombinasyonlar/clear');
       setTotalCombinations(0);
       setSampleCombinations([]);
-      setSearchResult(null);
+      setFilterResult(null);
       toast.success(response.data.message);
     } catch (error) {
       toast.error('Önbellek temizlenirken hata oluştu');
@@ -122,28 +125,54 @@ const SansTopuTahmin = () => {
     }
   };
 
-  // Search combination
-  const handleSearch = async () => {
-    if (!searchQuery.trim()) {
-      toast.error('Lütfen bir kombinasyon girin');
+  // Toggle main number selection
+  const toggleMainNumber = (num) => {
+    setSelectedMainNumbers(prev => {
+      if (prev.includes(num)) {
+        return prev.filter(n => n !== num);
+      } else if (prev.length < 5) {
+        return [...prev, num].sort((a, b) => a - b);
+      }
+      return prev;
+    });
+  };
+
+  // Toggle bonus selection
+  const toggleBonus = (num) => {
+    setSelectedBonus(prev => prev === num ? null : num);
+  };
+
+  // Clear filter selections
+  const handleClearFilter = () => {
+    setSelectedMainNumbers([]);
+    setSelectedBonus(null);
+    setFilterResult(null);
+  };
+
+  // Filter combinations
+  const handleFilter = async () => {
+    if (selectedMainNumbers.length !== 5) {
+      toast.error('Lütfen tam olarak 5 ana sayı seçin');
       return;
     }
+    
     try {
-      setSearching(true);
-      setSearchResult(null);
-      const response = await api.post('/kombinasyonlar/search', {
-        combination_str: searchQuery
+      setFiltering(true);
+      setFilterResult(null);
+      const response = await api.post('/kombinasyonlar/filter', {
+        main_numbers: selectedMainNumbers,
+        bonus_number: selectedBonus
       });
-      setSearchResult(response.data);
+      setFilterResult(response.data);
       if (response.data.found) {
         toast.success(response.data.message);
       } else {
         toast.info(response.data.message);
       }
     } catch (error) {
-      toast.error('Arama yapılırken hata oluştu');
+      toast.error('Filtreleme yapılırken hata oluştu');
     } finally {
-      setSearching(false);
+      setFiltering(false);
     }
   };
 
@@ -176,6 +205,44 @@ const SansTopuTahmin = () => {
     }
   };
 
+  // Generate number grid (1-34 for main, 1-14 for bonus)
+  const renderNumberGrid = (max, selected, onToggle, maxSelect, isBonus = false) => {
+    const numbers = Array.from({ length: max }, (_, i) => i + 1);
+    
+    return (
+      <div className={`grid gap-2 ${isBonus ? 'grid-cols-7' : 'grid-cols-7 sm:grid-cols-10 md:grid-cols-12 lg:grid-cols-17'}`}>
+        {numbers.map(num => {
+          const isSelected = isBonus ? selected === num : selected.includes(num);
+          const canSelect = isBonus ? true : selected.length < maxSelect || isSelected;
+          
+          return (
+            <button
+              key={num}
+              onClick={() => onToggle(num)}
+              disabled={!canSelect && !isSelected}
+              className={`
+                w-10 h-10 rounded-full font-semibold text-sm
+                transition-all duration-200 
+                border-2
+                ${isSelected 
+                  ? isBonus
+                    ? 'bg-gradient-to-br from-amber-500 to-orange-600 text-white border-amber-600 shadow-lg scale-110'
+                    : 'bg-gradient-to-br from-emerald-500 to-green-600 text-white border-emerald-600 shadow-lg scale-110'
+                  : canSelect
+                    ? 'bg-white hover:bg-gray-50 text-gray-700 border-gray-200 hover:border-gray-400 hover:scale-105'
+                    : 'bg-gray-100 text-gray-400 border-gray-100 cursor-not-allowed'
+                }
+              `}
+              data-testid={`${isBonus ? 'bonus' : 'main'}-number-${num}`}
+            >
+              {num}
+            </button>
+          );
+        })}
+      </div>
+    );
+  };
+
   return (
     <Layout>
       <div className="space-y-6" data-testid="sans-topu-tahmin-page">
@@ -189,7 +256,7 @@ const SansTopuTahmin = () => {
               Şans Topu Tahmin Üretici
             </h1>
             <p className="text-gray-600 mt-1">
-              Rastgele kombinasyon üretin, arayın ve Excel'e aktarın
+              Rastgele kombinasyon üretin, filtreleyin ve Excel'e aktarın
             </p>
           </div>
         </div>
@@ -260,116 +327,181 @@ const SansTopuTahmin = () => {
           </CardContent>
         </Card>
 
-        {/* Search Section */}
+        {/* Combination Filter Panel */}
         <Card className="border-0 shadow-lg">
           <CardHeader className="pb-4">
             <CardTitle className="flex items-center gap-2 text-lg">
-              <Search className="h-5 w-5 text-blue-600" />
-              Kombinasyon Ara
+              <ListFilter className="h-5 w-5 text-emerald-600" />
+              Kombinasyon Filtreleme
             </CardTitle>
             <CardDescription>
-              Format: <code className="bg-gray-100 px-2 py-1 rounded text-sm">5,12,23,27,34+8</code> veya{' '}
-              <code className="bg-gray-100 px-2 py-1 rounded text-sm">5-12-23-27-34-8</code> veya{' '}
-              <code className="bg-gray-100 px-2 py-1 rounded text-sm">5 12 23 27 34 8</code>
+              5 ana sayı seçin (zorunlu) ve opsiyonel olarak 1 artı top seçin
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex flex-col sm:flex-row gap-3">
-              <Input
-                placeholder="Örn: 5,12,23,27,34+8"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                className="flex-1"
-                data-testid="search-input"
-              />
+          <CardContent className="space-y-6">
+            {/* Main Numbers (1-34) */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <h3 className="font-semibold text-gray-800 flex items-center gap-2">
+                  <span className="w-6 h-6 rounded-full bg-gradient-to-br from-emerald-500 to-green-600 flex items-center justify-center text-white text-xs font-bold">5</span>
+                  Ana Sayılar (1-34)
+                </h3>
+                <Badge variant={selectedMainNumbers.length === 5 ? 'default' : 'secondary'} className={selectedMainNumbers.length === 5 ? 'bg-emerald-600' : ''}>
+                  {selectedMainNumbers.length} / 5 seçildi
+                </Badge>
+              </div>
+              <div className="p-4 bg-gray-50 rounded-xl">
+                {renderNumberGrid(34, selectedMainNumbers, toggleMainNumber, 5, false)}
+              </div>
+              {selectedMainNumbers.length > 0 && (
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-sm text-gray-600">Seçilen:</span>
+                  {selectedMainNumbers.map(num => (
+                    <span
+                      key={num}
+                      className="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-500 to-green-600 text-white text-sm flex items-center justify-center font-semibold shadow"
+                    >
+                      {num}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Bonus Number (1-14) */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <h3 className="font-semibold text-gray-800 flex items-center gap-2">
+                  <span className="w-6 h-6 rounded-full bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center text-white text-xs font-bold">+</span>
+                  Artı Top (1-14)
+                  <span className="text-xs font-normal text-gray-500">(opsiyonel)</span>
+                </h3>
+                <Badge variant={selectedBonus ? 'default' : 'outline'} className={selectedBonus ? 'bg-amber-600' : ''}>
+                  {selectedBonus ? `${selectedBonus} seçildi` : 'Seçilmedi'}
+                </Badge>
+              </div>
+              <div className="p-4 bg-gray-50 rounded-xl">
+                {renderNumberGrid(14, selectedBonus, toggleBonus, 1, true)}
+              </div>
+              {!selectedBonus && (
+                <p className="text-sm text-gray-500 italic">
+                  Artı top seçmezseniz, seçilen 5 ana sayı ile eşleşen tüm kombinasyonlar (1-14 arası her bonus) listelenecektir.
+                </p>
+              )}
+            </div>
+
+            {/* Filter Buttons */}
+            <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-gray-100">
               <Button
-                onClick={handleSearch}
-                disabled={searching || totalCombinations === 0}
-                className="bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800"
-                data-testid="search-btn"
+                onClick={handleFilter}
+                disabled={filtering || selectedMainNumbers.length !== 5 || totalCombinations === 0}
+                className="flex-1 bg-gradient-to-r from-emerald-600 to-green-700 hover:from-emerald-700 hover:to-green-800 shadow-md h-12"
+                data-testid="filter-btn"
               >
-                {searching ? (
+                {filtering ? (
                   <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Aranıyor...
+                    <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+                    Filtreleniyor...
                   </>
                 ) : (
                   <>
-                    <Search className="h-4 w-4 mr-2" />
-                    Kombinasyonu Ara
+                    <Filter className="h-5 w-5 mr-2" />
+                    Filtrele
                   </>
                 )}
               </Button>
+              <Button
+                onClick={handleClearFilter}
+                variant="outline"
+                className="h-12"
+                disabled={selectedMainNumbers.length === 0 && !selectedBonus && !filterResult}
+                data-testid="clear-filter-btn"
+              >
+                <RotateCcw className="h-5 w-5 mr-2" />
+                Temizle
+              </Button>
             </div>
-
-            {/* Search Results */}
-            {searchResult && (
-              <div className={`p-4 rounded-lg border ${
-                searchResult.found 
-                  ? 'bg-green-50 border-green-200' 
-                  : 'bg-red-50 border-red-200'
-              }`}>
-                <div className="flex items-start gap-3">
-                  {searchResult.found ? (
-                    <CheckCircle2 className="h-5 w-5 text-green-600 mt-0.5" />
-                  ) : (
-                    <XCircle className="h-5 w-5 text-red-600 mt-0.5" />
-                  )}
-                  <div className="flex-1">
-                    <p className={`font-medium ${
-                      searchResult.found ? 'text-green-800' : 'text-red-800'
-                    }`}>
-                      {searchResult.message}
-                    </p>
-                    
-                    {searchResult.found && searchResult.indices.length > 0 && (
-                      <div className="mt-3">
-                        <p className="text-sm text-gray-600 mb-2">Bulunan Sıralar:</p>
-                        <div className="flex flex-wrap gap-2">
-                          {searchResult.indices.slice(0, 20).map((index) => (
-                            <Badge 
-                              key={index} 
-                              variant="secondary"
-                              className="bg-green-100 text-green-800"
-                            >
-                              #{index.toLocaleString('tr-TR')}
-                            </Badge>
-                          ))}
-                          {searchResult.indices.length > 20 && (
-                            <Badge variant="outline">
-                              +{(searchResult.indices.length - 20).toLocaleString('tr-TR')} daha
-                            </Badge>
-                          )}
-                        </div>
-                      </div>
-                    )}
-
-                    {searchResult.combination && (
-                      <div className="mt-3 p-3 bg-white rounded border">
-                        <p className="text-sm text-gray-600 mb-2">Aranan Kombinasyon:</p>
-                        <div className="flex items-center gap-2 flex-wrap">
-                          {searchResult.combination.slice(0, 5).map((num, i) => (
-                            <span 
-                              key={i}
-                              className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 text-white flex items-center justify-center font-bold shadow-md"
-                            >
-                              {num}
-                            </span>
-                          ))}
-                          <span className="text-gray-400 text-xl mx-1">+</span>
-                          <span className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-500 to-orange-600 text-white flex items-center justify-center font-bold shadow-md">
-                            {searchResult.combination[5]}
-                          </span>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            )}
           </CardContent>
         </Card>
+
+        {/* Filter Results */}
+        {filterResult && (
+          <Card className={`border-0 shadow-lg ${filterResult.found ? 'bg-gradient-to-br from-emerald-50 to-green-50' : 'bg-gradient-to-br from-red-50 to-orange-50'}`}>
+            <CardHeader className="pb-4">
+              <CardTitle className="flex items-center gap-2 text-lg">
+                {filterResult.found ? (
+                  <CheckCircle2 className="h-5 w-5 text-emerald-600" />
+                ) : (
+                  <XCircle className="h-5 w-5 text-red-600" />
+                )}
+                Filtrelenen Kombinasyonlar
+              </CardTitle>
+              <CardDescription>
+                {filterResult.message}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {filterResult.found && filterResult.results.length > 0 ? (
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="w-24">
+                          <Hash className="h-4 w-4 inline mr-1" />
+                          Sıra
+                        </TableHead>
+                        <TableHead>Ana Sayılar</TableHead>
+                        <TableHead className="w-24">Bonus</TableHead>
+                        <TableHead>Format</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {filterResult.results.map((item) => (
+                        <TableRow key={item.index}>
+                          <TableCell className="font-mono font-bold text-gray-700">
+                            #{item.index.toLocaleString('tr-TR')}
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              {item.main_numbers.map((num, i) => (
+                                <span
+                                  key={i}
+                                  className="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-500 to-green-600 text-white text-sm flex items-center justify-center font-semibold shadow"
+                                >
+                                  {num}
+                                </span>
+                              ))}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <span className="w-8 h-8 rounded-full bg-gradient-to-br from-amber-500 to-orange-600 text-white text-sm flex items-center justify-center font-semibold shadow">
+                              {item.bonus_number}
+                            </span>
+                          </TableCell>
+                          <TableCell>
+                            <code className="bg-white px-2 py-1 rounded text-sm font-mono border">
+                              {item.formatted}
+                            </code>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                  {filterResult.total_found > 100 && (
+                    <p className="text-sm text-gray-500 mt-3 text-center">
+                      Toplam {filterResult.total_found.toLocaleString('tr-TR')} sonuçtan ilk 100 tanesi gösteriliyor.
+                    </p>
+                  )}
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <XCircle className="h-12 w-12 mx-auto mb-4 text-red-300" />
+                  <p className="text-gray-600">{filterResult.message}</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
 
         {/* Sample Combinations */}
         <Card className="border-0 shadow-lg">
