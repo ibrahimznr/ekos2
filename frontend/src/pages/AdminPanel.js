@@ -955,6 +955,28 @@ const AdminPanel = () => {
                 </div>
               </CardContent>
             </Card>
+
+            {/* İleti Oluştur Card */}
+            <Card
+              className="cursor-pointer hover:shadow-lg transition-all duration-200 border-l-4 border-l-blue-500 hover:border-l-blue-600"
+              onClick={handleOpenMessageDialog}
+              data-testid="create-message-card"
+            >
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-md">
+                      <Send className="h-6 w-6 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-gray-800 text-lg">İleti Oluştur</h3>
+                      <p className="text-sm text-gray-500">Kullanıcılara mesaj gönder</p>
+                    </div>
+                  </div>
+                  <ChevronRight className="h-5 w-5 text-gray-400" />
+                </div>
+              </CardContent>
+            </Card>
           </div>
         )}
 
