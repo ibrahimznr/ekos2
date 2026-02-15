@@ -33,6 +33,7 @@ const Layout = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = React.useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
   const [cekilisOpen, setCekilisOpen] = React.useState(false);
+  const [kombinasyonlarOpen, setKombinasyonlarOpen] = React.useState(false);
   const [currentTime, setCurrentTime] = React.useState(new Date());
   const user = JSON.parse(localStorage.getItem('user') || '{}');
 
