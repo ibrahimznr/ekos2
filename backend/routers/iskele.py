@@ -387,3 +387,328 @@ async def import_iskele_excel(
     
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Excel dosyası işlenemedi: {str(e)}")
+
+
+# ==================== FİLTRELENMİŞ İSTATİSTİKLER VE EXCEL EXPORT ====================
+
+@router.get("/iskele-bilesenleri/stats/filtered")
+async def get_iskele_bilesenleri_filtered_stats(
+    firma: Optional[str] = Query(None),
+    proje_id: Optional[str] = Query(None),
+    bilesen_adi_search: Optional[str] = Query(None),
+    current_user: dict = Depends(get_current_user)
+):
+    """Filtrelenmiş iskele bileşenleri istatistiklerini getir"""
+    query = {}
+    
+    if firma and firma != 'all':
+        query["firma_adi"] = firma
+    if proje_id and proje_id != 'all':
+        query["proje_id"] = proje_id
+    
+    bilesenleri = await db.iskele_bilesenleri.find(query, {"_id": 0}).to_list(100000)
+    
+    # Apply search filter in Python (for partial match)
+    if bilesen_adi_search:
+        search_lower = bilesen_adi_search.lower()
+        bilesenleri = [b for b in bilesenleri if search_lower in (b.get('bileşen_adi', '') or '').lower()]
+    
+    total = len(bilesenleri)
+    uygun = sum(1 for b in bilesenleri if b.get('uygunluk') == 'Uygun')
+    uygun_degil = sum(1 for b in bilesenleri if b.get('uygunluk') == 'Uygun Değil')
+    uygunluk_orani = round((uygun / total) * 100, 1) if total > 0 else 0
+    
+    # Bileşen dağılımı
+    bilesen_map = {}
+    for b in bilesenleri:
+        adi = b.get('bileşen_adi')
+        if adi:
+            bilesen_map[adi] = bilesen_map.get(adi, 0) + b.get('bileşen_adedi', 1)
+    
+    bilesen_dagilim = [
+        {"bileşen_adi": k, "count": v}
+        for k, v in sorted(bilesen_map.items(), key=lambda x: x[1], reverse=True)
+    ]
+    
+    return {
+        "total": total,
+        "uygun": uygun,
+        "uygun_degil": uygun_degil,
+        "uygunluk_orani": uygunluk_orani,
+        "bilesen_dagilim": bilesen_dagilim
+    }
+
+
+@router.get("/iskele-bilesenleri/filter-options")
+async def get_iskele_filter_options(current_user: dict = Depends(get_current_user)):
+    """Filtreleme için firma ve proje listesini getir"""
+    bilesenleri = await db.iskele_bilesenleri.find({}, {"_id": 0, "firma_adi": 1, "proje_id": 1, "proje_adi": 1}).to_list(100000)
+    
+    firmalar = set()
+    projeler = {}
+    
+    for b in bilesenleri:
+        if b.get('firma_adi'):
+            firmalar.add(b['firma_adi'])
+        if b.get('proje_id') and b.get('proje_adi'):
+            projeler[b['proje_id']] = b['proje_adi']
+    
+    return {
+        "firmalar": sorted(list(firmalar)),
+        "projeler": [{"id": k, "adi": v} for k, v in sorted(projeler.items(), key=lambda x: x[1])]
+    }
+
+
+@router.post("/iskele-bilesenleri/excel/export-filtered")
+async def export_iskele_bilesenleri_filtered(
+    request: IskeleBileseniFilteredExportRequest,
+    current_user: dict = Depends(get_current_user)
+):
+    """Filtrelenmiş iskele bileşenlerini Dashboard görünümünde Excel'e aktar"""
+    query = {}
+    
+    if request.firma and request.firma != 'all':
+        query["firma_adi"] = request.firma
+    if request.proje_id and request.proje_id != 'all':
+        query["proje_id"] = request.proje_id
+    
+    bilesenleri = await db.iskele_bilesenleri.find(query, {"_id": 0}).to_list(100000)
+    
+    # Apply search filter
+    if request.bilesen_adi_search:
+        search_lower = request.bilesen_adi_search.lower()
+        bilesenleri = [b for b in bilesenleri if search_lower in (b.get('bileşen_adi', '') or '').lower()]
+    
+    if not bilesenleri:
+        raise HTTPException(status_code=404, detail="Filtrelere uyan bileşen bulunamadı")
+    
+    # Calculate stats
+    today = datetime.now(timezone.utc)
+    total = len(bilesenleri)
+    uygun = sum(1 for b in bilesenleri if b.get('uygunluk') == 'Uygun')
+    uygun_degil = sum(1 for b in bilesenleri if b.get('uygunluk') == 'Uygun Değil')
+    uygunluk_orani = round((uygun / total) * 100, 1) if total > 0 else 0
+    
+    # Bileşen dağılımı
+    bilesen_map = {}
+    for b in bilesenleri:
+        adi = b.get('bileşen_adi')
+        if adi:
+            bilesen_map[adi] = bilesen_map.get(adi, 0) + b.get('bileşen_adedi', 1)
+    bilesen_list = sorted(bilesen_map.items(), key=lambda x: x[1], reverse=True)
+    
+    # Firma dağılımı
+    firma_map = {}
+    for b in bilesenleri:
+        firma = b.get('firma_adi')
+        if firma:
+            firma_map[firma] = firma_map.get(firma, 0) + b.get('bileşen_adedi', 1)
+    firma_list = sorted(firma_map.items(), key=lambda x: x[1], reverse=True)
+    
+    # Create workbook
+    wb = Workbook()
+    
+    # ===== DASHBOARD SHEET =====
+    ws_dashboard = wb.active
+    ws_dashboard.title = "Dashboard"
+    ws_dashboard.sheet_view.showGridLines = False
+    
+    # Set column widths
+    for col in range(1, 25):
+        ws_dashboard.column_dimensions[get_column_letter(col)].width = 6
+    
+    # Colors
+    teal_border = Side(style='medium', color='0d9488')
+    green_border = Side(style='medium', color='16a34a')
+    red_border = Side(style='medium', color='dc2626')
+    blue_border = Side(style='medium', color='2563eb')
+    
+    teal_fill = PatternFill(start_color='ccfbf1', end_color='ccfbf1', fill_type='solid')
+    green_fill = PatternFill(start_color='dcfce7', end_color='dcfce7', fill_type='solid')
+    red_fill = PatternFill(start_color='fee2e2', end_color='fee2e2', fill_type='solid')
+    blue_fill = PatternFill(start_color='dbeafe', end_color='dbeafe', fill_type='solid')
+    white_fill = PatternFill(start_color='FFFFFF', end_color='FFFFFF', fill_type='solid')
+    header_fill = PatternFill(start_color='f3f4f6', end_color='f3f4f6', fill_type='solid')
+    
+    # White background
+    for row in range(1, 50):
+        for col in range(1, 25):
+            ws_dashboard.cell(row=row, column=col).fill = white_fill
+    
+    # Title
+    title_cell = ws_dashboard.cell(row=2, column=2, value="İskele Bileşenleri Dashboard")
+    title_cell.font = Font(bold=True, size=18, color='0d9488')
+    ws_dashboard.merge_cells('B2:T2')
+    
+    # Filter info
+    filter_info = []
+    if request.firma and request.firma != 'all':
+        filter_info.append(f"Firma: {request.firma}")
+    if request.proje_id and request.proje_id != 'all':
+        proje = await db.projeler.find_one({"id": request.proje_id}, {"_id": 0})
+        if proje:
+            filter_info.append(f"Proje: {proje.get('proje_adi', '')}")
+    if request.bilesen_adi_search:
+        filter_info.append(f"Arama: {request.bilesen_adi_search}")
+    
+    filter_text = " | ".join(filter_info) if filter_info else "Tüm Veriler"
+    filter_cell = ws_dashboard.cell(row=3, column=2, value=f"Filtreler: {filter_text}  |  Oluşturma: {today.strftime('%d.%m.%Y %H:%M')}")
+    filter_cell.font = Font(size=10, color='6b7280', italic=True)
+    ws_dashboard.merge_cells('B3:T3')
+    
+    # Helper function to create card
+    def create_card(start_row, start_col, end_col, title, value, border_color, fill_color, text_color):
+        title_cell = ws_dashboard.cell(row=start_row, column=start_col, value=title)
+        title_cell.font = Font(bold=True, size=10, color='374151')
+        title_cell.alignment = Alignment(horizontal='center', vertical='center')
+        
+        value_cell = ws_dashboard.cell(row=start_row + 1, column=start_col, value=value)
+        value_cell.font = Font(bold=True, size=28, color=text_color)
+        value_cell.alignment = Alignment(horizontal='center', vertical='center')
+        
+        ws_dashboard.merge_cells(start_row=start_row, start_column=start_col, end_row=start_row, end_column=end_col)
+        ws_dashboard.merge_cells(start_row=start_row + 1, start_column=start_col, end_row=start_row + 1, end_column=end_col)
+        
+        for row in range(start_row, start_row + 2):
+            for col in range(start_col, end_col + 1):
+                cell = ws_dashboard.cell(row=row, column=col)
+                cell.fill = fill_color
+                left = border_color if col == start_col else None
+                right = border_color if col == end_col else None
+                top = border_color if row == start_row else None
+                bottom = border_color if row == start_row + 1 else None
+                cell.border = Border(left=left, right=right, top=top, bottom=bottom)
+    
+    # Create stat cards (Row 5-6)
+    create_card(5, 2, 5, "Toplam", total, teal_border, teal_fill, '0d9488')
+    create_card(5, 7, 10, "Uygun", uygun, green_border, green_fill, '16a34a')
+    create_card(5, 12, 15, "Uygun Değil", uygun_degil, red_border, red_fill, 'dc2626')
+    create_card(5, 17, 20, f"Oran (%{uygunluk_orani})", f"{uygunluk_orani}%", blue_border, blue_fill, '2563eb')
+    
+    # Distribution tables
+    row_colors = ['ccfbf1', 'a7f3d0', 'fef3c7', 'fecaca', 'ddd6fe', 'bfdbfe', 'fbcfe8', 'e0e7ff']
+    
+    def create_distribution_table(start_row, start_col, title, data_list, max_items=10):
+        t_cell = ws_dashboard.cell(row=start_row, column=start_col, value=title)
+        t_cell.font = Font(bold=True, size=12, color='1f2937')
+        ws_dashboard.merge_cells(start_row=start_row, start_column=start_col, end_row=start_row, end_column=start_col + 5)
+        
+        ws_dashboard.cell(row=start_row + 2, column=start_col, value="Ad").font = Font(bold=True, size=10, color='374151')
+        ws_dashboard.cell(row=start_row + 2, column=start_col).fill = header_fill
+        ws_dashboard.merge_cells(start_row=start_row + 2, start_column=start_col, end_row=start_row + 2, end_column=start_col + 3)
+        
+        ws_dashboard.cell(row=start_row + 2, column=start_col + 4, value="Adet").font = Font(bold=True, size=10, color='374151')
+        ws_dashboard.cell(row=start_row + 2, column=start_col + 4).fill = header_fill
+        ws_dashboard.cell(row=start_row + 2, column=start_col + 4).alignment = Alignment(horizontal='center')
+        
+        ws_dashboard.cell(row=start_row + 2, column=start_col + 5, value="Oran").font = Font(bold=True, size=10, color='374151')
+        ws_dashboard.cell(row=start_row + 2, column=start_col + 5).fill = header_fill
+        ws_dashboard.cell(row=start_row + 2, column=start_col + 5).alignment = Alignment(horizontal='center')
+        
+        for idx, (name, count) in enumerate(data_list[:max_items]):
+            row_num = start_row + 3 + idx
+            percentage = round((count / total) * 100) if total > 0 else 0
+            color = row_colors[idx % len(row_colors)]
+            row_fill = PatternFill(start_color=color, end_color=color, fill_type='solid')
+            
+            name_cell = ws_dashboard.cell(row=row_num, column=start_col, value=name[:25] if len(name) > 25 else name)
+            name_cell.font = Font(size=9, color='374151')
+            name_cell.fill = row_fill
+            ws_dashboard.merge_cells(start_row=row_num, start_column=start_col, end_row=row_num, end_column=start_col + 3)
+            
+            count_cell = ws_dashboard.cell(row=row_num, column=start_col + 4, value=count)
+            count_cell.font = Font(size=9, color='374151', bold=True)
+            count_cell.fill = row_fill
+            count_cell.alignment = Alignment(horizontal='center')
+            
+            pct_cell = ws_dashboard.cell(row=row_num, column=start_col + 5, value=f"%{percentage}")
+            pct_cell.font = Font(size=9, color='6b7280')
+            pct_cell.fill = row_fill
+            pct_cell.alignment = Alignment(horizontal='center')
+    
+    # Bileşen Dağılımı (Row 9, Col B)
+    create_distribution_table(9, 2, "Bileşen Dağılımı", bilesen_list, 10)
+    
+    # Firma Dağılımı (Row 9, Col I)
+    create_distribution_table(9, 9, "Firma Dağılımı", firma_list, 10)
+    
+    # Pie chart data (hidden sheet)
+    ws_chart_data = wb.create_sheet("ChartData")
+    ws_chart_data.cell(row=1, column=1, value="Uygunluk")
+    ws_chart_data.cell(row=1, column=2, value="Adet")
+    ws_chart_data.cell(row=2, column=1, value="Uygun")
+    ws_chart_data.cell(row=2, column=2, value=uygun)
+    ws_chart_data.cell(row=3, column=1, value="Uygun Değil")
+    ws_chart_data.cell(row=3, column=2, value=uygun_degil)
+    ws_chart_data.sheet_state = 'hidden'
+    
+    # Pie chart
+    pie = PieChart()
+    pie.title = "Uygunluk Durumu"
+    labels = Reference(ws_chart_data, min_col=1, min_row=2, max_row=3)
+    data = Reference(ws_chart_data, min_col=2, min_row=1, max_row=3)
+    pie.add_data(data, titles_from_data=True)
+    pie.set_categories(labels)
+    pie.dataLabels = DataLabelList()
+    pie.dataLabels.showPercent = True
+    pie.dataLabels.showVal = True
+    pie.width = 10
+    pie.height = 7
+    ws_dashboard.add_chart(pie, "P9")
+    
+    # ===== DATA SHEET =====
+    ws_data = wb.create_sheet("Bileşenler")
+    
+    headers = ["Bileşen Adı", "Malzeme Kodu", "Adet", "Firma", "Proje", "Uygunluk", "Geçerlilik", "Açıklama"]
+    header_fill_data = PatternFill(start_color="0d9488", end_color="0d9488", fill_type="solid")
+    header_font = Font(color="FFFFFF", bold=True)
+    
+    for col, header in enumerate(headers, 1):
+        cell = ws_data.cell(row=1, column=col, value=header)
+        cell.fill = header_fill_data
+        cell.font = header_font
+        cell.alignment = Alignment(horizontal="center", vertical="center")
+    
+    for row_idx, bilesen in enumerate(bilesenleri, 2):
+        ws_data.cell(row=row_idx, column=1, value=bilesen.get("bileşen_adi", ""))
+        ws_data.cell(row=row_idx, column=2, value=bilesen.get("malzeme_kodu", ""))
+        ws_data.cell(row=row_idx, column=3, value=bilesen.get("bileşen_adedi", 1))
+        ws_data.cell(row=row_idx, column=4, value=bilesen.get("firma_adi", ""))
+        ws_data.cell(row=row_idx, column=5, value=bilesen.get("proje_adi", ""))
+        ws_data.cell(row=row_idx, column=6, value=bilesen.get("uygunluk", ""))
+        ws_data.cell(row=row_idx, column=7, value=bilesen.get("gecerlilik_tarihi", ""))
+        ws_data.cell(row=row_idx, column=8, value=bilesen.get("aciklama", ""))
+    
+    # Auto-fit columns
+    for col in ws_data.columns:
+        max_length = 0
+        column = col[0].column_letter
+        for cell in col:
+            try:
+                if len(str(cell.value)) > max_length:
+                    max_length = len(str(cell.value))
+            except:
+                pass
+        ws_data.column_dimensions[column].width = min(max_length + 2, 40)
+    
+    excel_file = io.BytesIO()
+    wb.save(excel_file)
+    excel_file.seek(0)
+    
+    # Filename
+    filter_parts = []
+    if request.firma and request.firma != 'all':
+        filter_parts.append(request.firma[:10])
+    if request.proje_id and request.proje_id != 'all':
+        filter_parts.append("proje")
+    if request.bilesen_adi_search:
+        filter_parts.append("arama")
+    
+    filter_suffix = "_".join(filter_parts) if filter_parts else "tum"
+    filename = f"iskele_bilesenleri_{filter_suffix}_{total}_adet.xlsx"
+    
+    return StreamingResponse(
+        excel_file,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": f"attachment; filename={filename}"}
+    )
