@@ -14,7 +14,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import api from '@/utils/api';
-import { triggerSaveAs } from '@/utils/fileDownload';
+import { downloadExcel } from '@/utils/fileDownload';
 import {
   Database,
   Search,
@@ -160,7 +160,7 @@ const SansTopuTahmin = () => {
       });
       
       const filename = `sans_topu_kombinasyonlari_${totalCombinations}.xlsx`;
-      await triggerSaveAs(response.data, filename);
+      await downloadExcel(response.data, filename);
       toast.success('Excel dosyası indirildi');
     } catch (error) {
       toast.error('Excel indirme hatası');
