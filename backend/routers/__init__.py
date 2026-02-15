@@ -16,6 +16,7 @@ from .cephe_iskeleleri import router as cephe_iskeleleri_router
 from .draws import router as draws_router
 from .vocabulary import router as vocabulary_router
 from .notifications import router as notifications_router
+from .kombinasyonlar import router as kombinasyonlar_router
 
 __all__ = [
     'auth_router',
@@ -35,5 +36,6 @@ __all__ = [
     'cephe_iskeleleri_router',
     'draws_router',
     'vocabulary_router',
-    'notifications_router'
+    'notifications_router',
+    'kombinasyonlar_router'
 ]
