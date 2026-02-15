@@ -1,18 +1,28 @@
-from fastapi import APIRouter, HTTPException, Depends, UploadFile, File, Form
+from fastapi import APIRouter, HTTPException, Depends, UploadFile, File, Form, Query
 from fastapi.responses import StreamingResponse
 from typing import List, Optional
 from datetime import datetime, timezone
+from pydantic import BaseModel
 import io
 import uuid
 
 from openpyxl import Workbook, load_workbook
-from openpyxl.styles import Font, PatternFill, Alignment
+from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+from openpyxl.utils import get_column_letter
+from openpyxl.chart import PieChart, Reference
+from openpyxl.chart.label import DataLabelList
 
 from models import IskeleBileseni, IskeleBileseniCreate
 from routers.auth import get_current_user
 from database import db
 
 router = APIRouter(tags=["Iskele"])
+
+# Request model for filtered export
+class IskeleBileseniFilteredExportRequest(BaseModel):
+    firma: Optional[str] = None
+    proje_id: Optional[str] = None
+    bilesen_adi_search: Optional[str] = None
 
 # ==================== İSKELE BİLEŞEN ADLARI ====================
 
