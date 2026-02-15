@@ -220,6 +220,112 @@ async def search_combination(request: SearchRequest):
         }
 
 
+class FilterResult(BaseModel):
+    found: bool
+    total_found: int
+    results: List[CombinationItem]
+    message: str
+
+
+@router.post("/filter", response_model=FilterResult)
+async def filter_combinations(request: FilterRequest):
+    """Filter combinations by main numbers and optional bonus"""
+    global COMBINATIONS_CACHE
+    
+    if not COMBINATIONS_CACHE:
+        return {
+            "found": False,
+            "total_found": 0,
+            "results": [],
+            "message": "Cache boş! Önce kombinasyon oluşturun."
+        }
+    
+    main_numbers = request.main_numbers
+    bonus_number = request.bonus_number
+    
+    # Validate main numbers
+    if len(main_numbers) != 5:
+        return {
+            "found": False,
+            "total_found": 0,
+            "results": [],
+            "message": "Tam olarak 5 ana sayı seçmelisiniz."
+        }
+    
+    if any(num < 1 or num > 34 for num in main_numbers):
+        return {
+            "found": False,
+            "total_found": 0,
+            "results": [],
+            "message": "Ana sayılar 1-34 arasında olmalıdır."
+        }
+    
+    if len(set(main_numbers)) != 5:
+        return {
+            "found": False,
+            "total_found": 0,
+            "results": [],
+            "message": "Ana sayılar birbirinden farklı olmalıdır."
+        }
+    
+    # Validate bonus if provided
+    if bonus_number is not None and (bonus_number < 1 or bonus_number > 14):
+        return {
+            "found": False,
+            "total_found": 0,
+            "results": [],
+            "message": "Bonus sayı 1-14 arasında olmalıdır."
+        }
+    
+    # Sort main numbers for comparison
+    sorted_main = sorted(main_numbers)
+    
+    # Search in cache
+    found_results = []
+    for idx, comb in COMBINATIONS_CACHE.items():
+        comb_main = comb[:5]
+        comb_bonus = comb[5]
+        
+        # Check if main numbers match
+        if comb_main == sorted_main:
+            # If bonus specified, check it too
+            if bonus_number is None or comb_bonus == bonus_number:
+                found_results.append({
+                    "index": idx,
+                    "main_numbers": comb_main,
+                    "bonus_number": comb_bonus,
+                    "formatted": f"{comb_main[0]},{comb_main[1]},{comb_main[2]},{comb_main[3]},{comb_main[4]}+{comb_bonus}"
+                })
+    
+    # Limit results to 100
+    limited_results = found_results[:100]
+    
+    if found_results:
+        if bonus_number is None:
+            message = f"Seçilen 5 ana sayı ile {len(found_results)} kombinasyon bulundu (tüm bonus değerleri)"
+        else:
+            message = f"Kombinasyon {len(found_results)} kez bulundu!"
+        
+        return {
+            "found": True,
+            "total_found": len(found_results),
+            "results": limited_results,
+            "message": message
+        }
+    else:
+        if bonus_number is None:
+            message = "Bu ana sayılarla kombinasyon bulunamadı."
+        else:
+            message = "Bu kombinasyon bulunamadı."
+        
+        return {
+            "found": False,
+            "total_found": 0,
+            "results": [],
+            "message": message
+        }
+
+
 @router.get("/sample", response_model=List[CombinationItem])
 async def get_sample_combinations(count: int = 5):
     """Get random sample of combinations"""
