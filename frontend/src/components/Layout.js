@@ -813,6 +813,117 @@ const Layout = ({ children }) => {
           </button>
         </div>
       </nav>
+
+      {/* Feedback Modal */}
+      <Dialog open={showFeedbackModal} onOpenChange={setShowFeedbackModal}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <MessageSquare className="h-5 w-5 text-blue-600" />
+              Geri Bildirim Gönder
+            </DialogTitle>
+            <DialogDescription>
+              Görüşlerinizi, önerilerinizi veya karşılaştığınız sorunları yöneticilere iletebilirsiniz.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="feedback-message">Mesajınız</Label>
+              <Textarea
+                id="feedback-message"
+                placeholder="Geri bildiriminizi buraya yazın..."
+                value={feedbackMessage}
+                onChange={(e) => setFeedbackMessage(e.target.value)}
+                rows={5}
+                className="resize-none"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowFeedbackModal(false);
+                setFeedbackMessage('');
+              }}
+              disabled={sendingFeedback}
+            >
+              İptal
+            </Button>
+            <Button
+              onClick={handleSendFeedback}
+              disabled={sendingFeedback || !feedbackMessage.trim()}
+              className="bg-blue-600 hover:bg-blue-700"
+            >
+              {sendingFeedback ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Gönderiliyor...
+                </>
+              ) : (
+                <>
+                  <Send className="h-4 w-4 mr-2" />
+                  Gönder
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Notification Detail Modal */}
+      <Dialog open={showNotificationDetail} onOpenChange={setShowNotificationDetail}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              {selectedNotification && getNotificationIcon(selectedNotification.type)}
+              {selectedNotification?.title}
+            </DialogTitle>
+          </DialogHeader>
+          {selectedNotification && (
+            <div className="space-y-4 py-4">
+              <div className="bg-gray-50 rounded-lg p-4">
+                <p className="text-gray-800 whitespace-pre-wrap">{selectedNotification.message}</p>
+              </div>
+              <div className="flex items-center justify-between text-sm text-gray-500">
+                <div className="flex items-center gap-2">
+                  <User className="h-4 w-4" />
+                  <span>Gönderen: {selectedNotification.sender_username || 'Sistem'}</span>
+                </div>
+                <span>{formatNotificationDate(selectedNotification.created_at)}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                {selectedNotification.is_read ? (
+                  <span className="flex items-center gap-1 text-green-600 text-sm">
+                    <CheckCheck className="h-4 w-4" />
+                    Okundu
+                  </span>
+                ) : (
+                  <span className="flex items-center gap-1 text-blue-600 text-sm">
+                    <Check className="h-4 w-4" />
+                    Yeni
+                  </span>
+                )}
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => handleDeleteNotification(selectedNotification?.id)}
+              className="text-red-600 hover:text-red-700 hover:bg-red-50"
+            >
+              <Trash2 className="h-4 w-4 mr-2" />
+              Sil
+            </Button>
+            <Button
+              onClick={() => setShowNotificationDetail(false)}
+            >
+              Kapat
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
