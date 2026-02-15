@@ -2,7 +2,14 @@ import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
-import { LayoutDashboard, FileText, Shield, LogOut, Menu, X, Building2, User, Plus, ChevronLeft, ChevronRight, Settings, Truck, Trophy, BookOpen, Brain, ChevronDown } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { LayoutDashboard, FileText, Shield, LogOut, Menu, X, Building2, User, Plus, ChevronLeft, ChevronRight, Settings, Truck, Trophy, BookOpen, Brain, ChevronDown, Bell, Calendar, Clock, UserCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import api from '@/utils/api';
 import LanguageSelector from '@/components/LanguageSelector';
@@ -16,7 +23,27 @@ const Layout = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = React.useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
   const [cekilisOpen, setCekilisOpen] = React.useState(false);
+  const [currentTime, setCurrentTime] = React.useState(new Date());
   const user = JSON.parse(localStorage.getItem('user') || '{}');
+
+  // Update time every minute
+  React.useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 60000);
+    return () => clearInterval(timer);
+  }, []);
+
+  // Format date in Turkish
+  const formatDate = (date) => {
+    const months = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
+    const day = date.getDate();
+    const month = months[date.getMonth()];
+    const year = date.getFullYear();
+    const hours = date.getHours().toString().padStart(2, '0');
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    return `${day} ${month} ${year}, ${hours}:${minutes}`;
+  };
 
   const handleLogout = async () => {
     try {
