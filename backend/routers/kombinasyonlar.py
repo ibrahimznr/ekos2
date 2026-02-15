@@ -28,6 +28,11 @@ class SearchRequest(BaseModel):
     combination_str: str
 
 
+class FilterRequest(BaseModel):
+    main_numbers: List[int]
+    bonus_number: Optional[int] = None
+
+
 class GenerateResponse(BaseModel):
     generated_count: int
     total_count: int
