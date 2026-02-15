@@ -6,10 +6,11 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import Layout from '@/components/Layout';
 import RaporModal from '@/components/RaporModal';
-import { FileText, CheckCircle2, XCircle, Calendar, TrendingUp, AlertTriangle, Plus, FolderKanban, ChevronDown, ChevronUp, Gauge, Filter, X, SlidersHorizontal, FileSpreadsheet, Loader2 } from 'lucide-react';
+import { FileText, CheckCircle2, XCircle, Calendar, TrendingUp, AlertTriangle, Plus, FolderKanban, ChevronDown, ChevronUp, Gauge, Filter, X, SlidersHorizontal, FileSpreadsheet, Loader2, Search } from 'lucide-react';
 import { toast } from 'sonner';
 import api from '@/utils/api';
 import { downloadExcel } from '@/utils/fileDownload';
+import { Input } from '@/components/ui/input';
 
 const Dashboard = () => {
   const { t } = useTranslation();
@@ -31,6 +32,14 @@ const Dashboard = () => {
   const [selectedIl, setSelectedIl] = useState('all');
   const [selectedFirma, setSelectedFirma] = useState('all');
   const [excelLoading, setExcelLoading] = useState(false);
+
+  // İskele Bileşenleri filter states
+  const [iskeleFilterFirma, setIskeleFilterFirma] = useState('all');
+  const [iskeleFilterProje, setIskeleFilterProje] = useState('all');
+  const [iskeleFilterSearch, setIskeleFilterSearch] = useState('');
+  const [iskeleFilterOptions, setIskeleFilterOptions] = useState({ firmalar: [], projeler: [] });
+  const [iskeleFilteredStats, setIskeleFilteredStats] = useState(null);
+  const [iskeleExcelLoading, setIskeleExcelLoading] = useState(false);
 
   // Get unique cities and companies from reports
   const { uniqueIller, uniqueFirmalar } = useMemo(() => {
