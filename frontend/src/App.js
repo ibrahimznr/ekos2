@@ -23,6 +23,9 @@ import DrawResultsPage from '@/pages/cekilis/DrawResultsPage';
 import VocabularyPage from '@/pages/cekilis/VocabularyPage';
 import MindReaderGame from '@/pages/cekilis/MindReaderGame';
 
+// Kombinasyonlar Pages
+import SansTopuTahmin from '@/pages/SansTopuTahmin';
+
 // Public Pages
 import PublicRaporView from '@/pages/PublicRaporView';
 
@@ -165,6 +168,15 @@ function App() {
               element={
                 <ProtectedRoute>
                   <MindReaderGame />
+                </ProtectedRoute>
+              }
+            />
+            {/* Kombinasyonlar Routes */}
+            <Route
+              path="/sans-topu-tahmin"
+              element={
+                <ProtectedRoute>
+                  <SansTopuTahmin />
                 </ProtectedRoute>
               }
             />
