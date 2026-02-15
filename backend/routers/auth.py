@@ -109,6 +109,9 @@ async def register(user_create: UserCreate):
     doc['created_at'] = doc['created_at'].isoformat()
     await db.users.insert_one(doc)
     
+    # Adminlere yeni kullanıcı bildirimi gönder
+    await notify_admins_new_user(user.username, user.email)
+    
     logger.info(f"Verification code for {user.email}: {verification_code}")
     
     return UserResponse(
