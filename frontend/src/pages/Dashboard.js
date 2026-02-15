@@ -718,106 +718,216 @@ const Dashboard = () => {
             <CardHeader className="pb-2 sm:pb-4">
               <CardTitle className="text-base sm:text-lg flex flex-col xs:flex-row xs:items-center xs:justify-between gap-2">
                 <span>İskele Bileşenleri</span>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => navigate('/iskele-bilesenleri')}
-                  className="text-teal-600 border-teal-600 hover:bg-teal-50 w-full xs:w-auto"
-                >
-                  Detaylı Görünüm
-                </Button>
+                <div className="flex gap-2">
+                  <Button
+                    size="sm"
+                    onClick={handleExportIskeleExcel}
+                    disabled={iskeleExcelLoading}
+                    className="bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 text-white"
+                    data-testid="iskele-excel-export-btn"
+                  >
+                    {iskeleExcelLoading ? (
+                      <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                    ) : (
+                      <FileSpreadsheet className="h-4 w-4 mr-1" />
+                    )}
+                    Bölüm Raporu
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => navigate('/iskele-bilesenleri')}
+                    className="text-teal-600 border-teal-600 hover:bg-teal-50"
+                  >
+                    Detaylı Görünüm
+                  </Button>
+                </div>
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {/* Stats Grid - 2 cols on mobile */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4 mb-4 sm:mb-6">
-                <div className="bg-gradient-to-br from-teal-50 to-teal-100 p-2 sm:p-4 rounded-lg border border-teal-200">
-                  <p className="text-xs sm:text-sm font-medium text-gray-600">Toplam</p>
-                  <p className="text-lg sm:text-2xl md:text-3xl font-bold text-teal-700 mt-1">{stats.iskele_stats.total}</p>
+              {/* Filtreleme Paneli */}
+              <div className="bg-gray-50 rounded-lg p-3 mb-4 border border-gray-200">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  {/* Firma Seç */}
+                  <Select value={iskeleFilterFirma} onValueChange={setIskeleFilterFirma}>
+                    <SelectTrigger className="bg-white">
+                      <SelectValue placeholder="Firma Seç" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Tüm Firmalar</SelectItem>
+                      {iskeleFilterOptions.firmalar.map((firma) => (
+                        <SelectItem key={firma} value={firma}>{firma}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+
+                  {/* Proje Seç */}
+                  <Select value={iskeleFilterProje} onValueChange={setIskeleFilterProje}>
+                    <SelectTrigger className="bg-white">
+                      <SelectValue placeholder="Proje Seç" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Tüm Projeler</SelectItem>
+                      {iskeleFilterOptions.projeler.map((proje) => (
+                        <SelectItem key={proje.id} value={proje.id}>{proje.adi}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+
+                  {/* Bileşen Adı Ara */}
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <Input
+                      placeholder="Bileşen Adı Ara..."
+                      value={iskeleFilterSearch}
+                      onChange={(e) => setIskeleFilterSearch(e.target.value)}
+                      className="pl-10 bg-white"
+                    />
+                  </div>
                 </div>
-                <div className="bg-gradient-to-br from-green-50 to-green-100 p-2 sm:p-4 rounded-lg border border-green-200">
-                  <p className="text-xs sm:text-sm font-medium text-gray-600">Uygun</p>
-                  <p className="text-lg sm:text-2xl md:text-3xl font-bold text-green-700 mt-1">{stats.iskele_stats.uygun}</p>
-                </div>
-                <div className="bg-gradient-to-br from-red-50 to-red-100 p-2 sm:p-4 rounded-lg border border-red-200">
-                  <p className="text-xs sm:text-sm font-medium text-gray-600">Uygun Değil</p>
-                  <p className="text-lg sm:text-2xl md:text-3xl font-bold text-red-700 mt-1">{stats.iskele_stats.uygun_degil}</p>
-                </div>
-                <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-2 sm:p-4 rounded-lg border border-blue-200">
-                  <p className="text-xs sm:text-sm font-medium text-gray-600">Oran</p>
-                  <p className="text-lg sm:text-2xl md:text-3xl font-bold text-blue-700 mt-1">{stats.iskele_stats.uygunluk_orani}%</p>
-                </div>
+
+                {/* Aktif Filtreler */}
+                {(iskeleFilterFirma !== 'all' || iskeleFilterProje !== 'all' || iskeleFilterSearch) && (
+                  <div className="flex items-center gap-2 mt-3 pt-3 border-t border-gray-200">
+                    <span className="text-xs text-gray-500">Aktif Filtreler:</span>
+                    <div className="flex flex-wrap gap-1">
+                      {iskeleFilterFirma !== 'all' && (
+                        <span className="bg-teal-100 text-teal-700 text-xs px-2 py-0.5 rounded-full">
+                          Firma: {iskeleFilterFirma}
+                        </span>
+                      )}
+                      {iskeleFilterProje !== 'all' && (
+                        <span className="bg-teal-100 text-teal-700 text-xs px-2 py-0.5 rounded-full">
+                          Proje: {iskeleFilterOptions.projeler.find(p => p.id === iskeleFilterProje)?.adi || iskeleFilterProje}
+                        </span>
+                      )}
+                      {iskeleFilterSearch && (
+                        <span className="bg-teal-100 text-teal-700 text-xs px-2 py-0.5 rounded-full">
+                          Arama: {iskeleFilterSearch}
+                        </span>
+                      )}
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={clearIskeleFilters}
+                      className="text-red-500 hover:text-red-700 hover:bg-red-50 h-6 px-2"
+                    >
+                      <X className="h-3 w-3 mr-1" />
+                      Temizle
+                    </Button>
+                  </div>
+                )}
               </div>
 
-              {/* Bileşen Dağılımı */}
-              {stats.iskele_stats.bilesen_dagilim && stats.iskele_stats.bilesen_dagilim.length > 0 && (
-                <div>
-                  <h4 className="font-semibold text-gray-700 mb-2 sm:mb-3 text-sm sm:text-base">
-                    Bileşen Dağılımı
-                    <span className="text-xs font-normal text-gray-500 ml-2">
-                      ({stats.iskele_stats.bilesen_dagilim.length} çeşit)
-                    </span>
-                  </h4>
-                  <div className="space-y-2 sm:space-y-3">
-                    {(showAllBilesenler
-                      ? stats.iskele_stats.bilesen_dagilim
-                      : stats.iskele_stats.bilesen_dagilim.slice(0, 5)
-                    ).map((item, index) => {
-                      const percentage = stats.iskele_stats.total > 0
-                        ? Math.round((item.count / stats.iskele_stats.total) * 100)
-                        : 0;
-
-                      const colors = [
-                        'bg-teal-600',
-                        'bg-cyan-600',
-                        'bg-sky-600',
-                        'bg-indigo-600',
-                        'bg-purple-600',
-                        'bg-pink-600',
-                        'bg-emerald-600',
-                        'bg-amber-600',
-                        'bg-rose-600',
-                        'bg-violet-600',
-                      ];
-
-                      return (
-                        <div key={index} className="space-y-1">
-                          <div className="flex justify-between text-xs sm:text-sm">
-                            <span className="font-medium text-gray-700 truncate max-w-[60%]">{item.bileşen_adi}</span>
-                            <span className="text-gray-600 flex-shrink-0">{item.count} (%{percentage})</span>
-                          </div>
-                          <div className="w-full bg-gray-200 rounded-full h-1.5 sm:h-2">
-                            <div
-                              className={`h-1.5 sm:h-2 rounded-full ${colors[index % colors.length]}`}
-                              style={{ width: `${percentage}%` }}
-                            ></div>
-                          </div>
-                        </div>
-                      );
-                    })}
+              {/* Stats Grid - Dinamik güncellenen kartlar */}
+              {(() => {
+                const displayStats = iskeleFilteredStats || stats.iskele_stats;
+                return (
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4 mb-4 sm:mb-6">
+                    <div className="bg-gradient-to-br from-teal-50 to-teal-100 p-2 sm:p-4 rounded-lg border border-teal-200">
+                      <p className="text-xs sm:text-sm font-medium text-gray-600">Toplam</p>
+                      <p className="text-lg sm:text-2xl md:text-3xl font-bold text-teal-700 mt-1">{displayStats.total}</p>
+                    </div>
+                    <div className="bg-gradient-to-br from-green-50 to-green-100 p-2 sm:p-4 rounded-lg border border-green-200">
+                      <p className="text-xs sm:text-sm font-medium text-gray-600">Uygun</p>
+                      <p className="text-lg sm:text-2xl md:text-3xl font-bold text-green-700 mt-1">{displayStats.uygun}</p>
+                    </div>
+                    <div className="bg-gradient-to-br from-red-50 to-red-100 p-2 sm:p-4 rounded-lg border border-red-200">
+                      <p className="text-xs sm:text-sm font-medium text-gray-600">Uygun Değil</p>
+                      <p className="text-lg sm:text-2xl md:text-3xl font-bold text-red-700 mt-1">{displayStats.uygun_degil}</p>
+                    </div>
+                    <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-2 sm:p-4 rounded-lg border border-blue-200">
+                      <p className="text-xs sm:text-sm font-medium text-gray-600">Oran</p>
+                      <p className="text-lg sm:text-2xl md:text-3xl font-bold text-blue-700 mt-1">{displayStats.uygunluk_orani}%</p>
+                    </div>
                   </div>
+                );
+              })()}
 
-                  {/* Tümünü Gör / Gizle Butonu */}
-                  {stats.iskele_stats.bilesen_dagilim.length > 5 && (
-                    <button
-                      onClick={() => setShowAllBilesenler(!showAllBilesenler)}
-                      className="mt-3 w-full flex items-center justify-center gap-2 py-2 text-sm text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg transition-colors"
-                    >
-                      {showAllBilesenler ? (
-                        <>
-                          <ChevronUp className="h-4 w-4" />
-                          <span>Gizle</span>
-                        </>
-                      ) : (
-                        <>
-                          <ChevronDown className="h-4 w-4" />
-                          <span>Tümünü Gör ({stats.iskele_stats.bilesen_dagilim.length - 5} daha)</span>
-                        </>
-                      )}
-                    </button>
-                  )}
-                </div>
-              )}
+              {/* Bileşen Dağılımı - Filtrelenmiş veya tümü */}
+              {(() => {
+                const displayStats = iskeleFilteredStats || stats.iskele_stats;
+                const bilesendagilim = displayStats.bilesen_dagilim;
+                
+                if (!bilesendagilim || bilesendagilim.length === 0) {
+                  return (
+                    <div className="text-center py-4 text-gray-500">
+                      <FileText className="h-8 w-8 mx-auto mb-2 text-gray-400" />
+                      <p className="text-sm">Filtrelere uyan bileşen bulunamadı</p>
+                    </div>
+                  );
+                }
+                
+                return (
+                  <div>
+                    <h4 className="font-semibold text-gray-700 mb-2 sm:mb-3 text-sm sm:text-base">
+                      Bileşen Dağılımı
+                      <span className="text-xs font-normal text-gray-500 ml-2">
+                        ({bilesendagilim.length} çeşit)
+                      </span>
+                    </h4>
+                    <div className="space-y-2 sm:space-y-3">
+                      {(showAllBilesenler
+                        ? bilesendagilim
+                        : bilesendagilim.slice(0, 5)
+                      ).map((item, index) => {
+                        const percentage = displayStats.total > 0
+                          ? Math.round((item.count / displayStats.total) * 100)
+                          : 0;
+
+                        const colors = [
+                          'bg-teal-600',
+                          'bg-cyan-600',
+                          'bg-sky-600',
+                          'bg-indigo-600',
+                          'bg-purple-600',
+                          'bg-pink-600',
+                          'bg-emerald-600',
+                          'bg-amber-600',
+                          'bg-rose-600',
+                          'bg-violet-600',
+                        ];
+
+                        return (
+                          <div key={index} className="space-y-1">
+                            <div className="flex justify-between text-xs sm:text-sm">
+                              <span className="font-medium text-gray-700 truncate max-w-[60%]">{item.bileşen_adi}</span>
+                              <span className="text-gray-600 flex-shrink-0">{item.count} (%{percentage})</span>
+                            </div>
+                            <div className="w-full bg-gray-200 rounded-full h-1.5 sm:h-2">
+                              <div
+                                className={`h-1.5 sm:h-2 rounded-full ${colors[index % colors.length]}`}
+                                style={{ width: `${percentage}%` }}
+                              ></div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    {/* Tümünü Gör / Gizle Butonu */}
+                    {bilesendagilim.length > 5 && (
+                      <button
+                        onClick={() => setShowAllBilesenler(!showAllBilesenler)}
+                        className="mt-3 w-full flex items-center justify-center gap-2 py-2 text-sm text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg transition-colors"
+                      >
+                        {showAllBilesenler ? (
+                          <>
+                            <ChevronUp className="h-4 w-4" />
+                            <span>Gizle</span>
+                          </>
+                        ) : (
+                          <>
+                            <ChevronDown className="h-4 w-4" />
+                            <span>Tümünü Gör ({bilesendagilim.length - 5} daha)</span>
+                          </>
+                        )}
+                      </button>
+                    )}
+                  </div>
+                );
+              })()}
             </CardContent>
           </Card>
         )}
