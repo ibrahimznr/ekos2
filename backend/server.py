@@ -44,7 +44,8 @@ from routers import (
     draws_router,
     vocabulary_router,
     notifications_router,
-    kombinasyonlar_router
+    kombinasyonlar_router,
+    arsiv_router
 )
 
 ROOT_DIR = Path(__file__).parent
