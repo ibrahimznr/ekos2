@@ -35,8 +35,9 @@ import {
 } from '@/components/ui/select';
 import Layout from '@/components/Layout';
 import { toast } from 'sonner';
-import { downloadExcel } from '@/utils/fileDownload';
-import { Plus, Trash2, Users, FolderTree, Shield, AlertCircle, FolderKanban, X, Eye, EyeOff, Gauge, ChevronRight, ArrowLeft, Building2, FileText, Save, Download, Upload, FileSpreadsheet, Loader2, Send, Check } from 'lucide-react';
+import { downloadExcel, downloadWithSaveDialog } from '@/utils/fileDownload';
+import { Plus, Trash2, Users, FolderTree, Shield, AlertCircle, FolderKanban, X, Eye, EyeOff, Gauge, ChevronRight, ArrowLeft, Building2, FileText, Save, Download, Upload, FileSpreadsheet, Loader2, Send, Check, Archive, HardDrive, FolderArchive, Database, FileJson, Image, Clock } from 'lucide-react';
+import { Progress } from '@/components/ui/progress';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
