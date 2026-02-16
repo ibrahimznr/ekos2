@@ -792,6 +792,108 @@ const AdminPanel = () => {
     toast.success('Kullanıcı listesi Excel formatında indirildi');
   };
 
+  // Archive Functions
+  const startArchiveGeneration = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.post(`${API}/arsiv/start`, {}, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
+      const taskId = response.data.task_id;
+      setArchiveTaskId(taskId);
+      setArchiveStatus('processing');
+      setArchiveProgress(0);
+      setArchiveMessage('Arşiv hazırlanıyor...');
+      
+      // Start polling for progress
+      const interval = setInterval(() => checkArchiveProgress(taskId), 1000);
+      setArchivePollingInterval(interval);
+      
+      toast.info('Arşiv oluşturma işlemi başlatıldı');
+    } catch (error) {
+      toast.error('Arşiv oluşturma başlatılamadı');
+      setArchiveStatus('error');
+    }
+  };
+
+  const checkArchiveProgress = async (taskId) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get(`${API}/arsiv/progress/${taskId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
+      const data = response.data;
+      setArchiveProgress(data.progress || 0);
+      setArchiveMessage(data.message || '');
+      setArchiveCurrentStep(data.current_step || '');
+      setArchiveStatus(data.status);
+      
+      if (data.status === 'completed') {
+        clearInterval(archivePollingInterval);
+        setArchivePollingInterval(null);
+        toast.success('Arşiv başarıyla oluşturuldu!');
+      } else if (data.status === 'error') {
+        clearInterval(archivePollingInterval);
+        setArchivePollingInterval(null);
+        toast.error(data.message || 'Arşiv oluşturulurken hata oluştu');
+      }
+    } catch (error) {
+      console.error('Progress check error:', error);
+    }
+  };
+
+  const downloadArchive = async () => {
+    if (!archiveTaskId || archiveStatus !== 'completed') {
+      toast.error('İndirilecek arşiv bulunamadı');
+      return;
+    }
+    
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get(`${API}/arsiv/download/${archiveTaskId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+        responseType: 'blob'
+      });
+      
+      const filename = `EKOS_Arsiv_${new Date().toISOString().split('T')[0]}.zip`;
+      await downloadWithSaveDialog(response.data, filename, 'application/zip');
+      
+      toast.success('Arşiv indirildi');
+      
+      // Reset state
+      setArchiveTaskId(null);
+      setArchiveStatus('idle');
+      setArchiveProgress(0);
+      setArchiveMessage('');
+      setArchiveCurrentStep('');
+    } catch (error) {
+      toast.error('Arşiv indirilemedi');
+    }
+  };
+
+  const resetArchive = () => {
+    if (archivePollingInterval) {
+      clearInterval(archivePollingInterval);
+    }
+    setArchiveTaskId(null);
+    setArchiveStatus('idle');
+    setArchiveProgress(0);
+    setArchiveMessage('');
+    setArchiveCurrentStep('');
+    setArchivePollingInterval(null);
+  };
+
+  // Cleanup polling on unmount
+  useEffect(() => {
+    return () => {
+      if (archivePollingInterval) {
+        clearInterval(archivePollingInterval);
+      }
+    };
+  }, [archivePollingInterval]);
+
   if (loading) {
     return (
       <Layout>
