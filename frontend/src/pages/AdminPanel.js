@@ -50,10 +50,18 @@ const AdminPanel = () => {
   const [projeler, setProjeler] = useState([]);
   const [iskeleBilesenAdlari, setIskeleBilesenAdlari] = useState([]);
   const [kalibrasyonCihazlari, setKalibrasyonCihazlari] = useState([]);
-  const [activeSection, setActiveSection] = useState(null); // null = show cards, 'users' | 'kategoriler' | 'projeler' | 'bilesen-adlari' | 'kalibrasyon' | 'sozlesme' = show section
+  const [activeSection, setActiveSection] = useState(null); // null = show cards, 'users' | 'kategoriler' | 'projeler' | 'bilesen-adlari' | 'kalibrasyon' | 'sozlesme' | 'arsiv' = show section
   const [userAgreement, setUserAgreement] = useState('');
   const [agreementSaving, setAgreementSaving] = useState(false);
   const [loading, setLoading] = useState(true);
+
+  // Archive state
+  const [archiveTaskId, setArchiveTaskId] = useState(null);
+  const [archiveProgress, setArchiveProgress] = useState(0);
+  const [archiveStatus, setArchiveStatus] = useState('idle'); // idle, processing, completed, error
+  const [archiveMessage, setArchiveMessage] = useState('');
+  const [archiveCurrentStep, setArchiveCurrentStep] = useState('');
+  const [archivePollingInterval, setArchivePollingInterval] = useState(null);
 
   const [showUserDialog, setShowUserDialog] = useState(false);
   const [showKategoriDialog, setShowKategoriDialog] = useState(false);
