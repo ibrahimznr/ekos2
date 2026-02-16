@@ -87,6 +87,7 @@ api_router.include_router(draws_router)
 api_router.include_router(vocabulary_router)
 api_router.include_router(notifications_router)
 api_router.include_router(kombinasyonlar_router)
+api_router.include_router(arsiv_router)
 
 # Include the main API router
 app.include_router(api_router)
