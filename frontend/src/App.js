@@ -26,6 +26,9 @@ import MindReaderGame from '@/pages/cekilis/MindReaderGame';
 // Kombinasyonlar Pages
 import SansTopuTahmin from '@/pages/SansTopuTahmin';
 
+// CAD Viewer
+import CADViewerPage from '@/pages/CADViewerPage';
+
 // Public Pages
 import PublicRaporView from '@/pages/PublicRaporView';
 
