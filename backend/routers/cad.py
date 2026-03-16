@@ -313,8 +313,9 @@ async def parse_cad_file(
         # Read file content
         content = await file.read()
         
-        # Parse DXF
-        doc = ezdxf.read(io.BytesIO(content))
+        # Parse DXF - ezdxf requires a stream that can be decoded
+        stream = io.StringIO(content.decode('utf-8', errors='ignore'))
+        doc = ezdxf.read(stream)
         msp = doc.modelspace()
         
         entities = []
