@@ -241,45 +241,66 @@ def calculate_bounds(entities: List[CADEntity]) -> Dict[str, float]:
     }
 
 
-def parse_dxf_file_sync(content: bytes, max_entities: int = 50000) -> Dict:
+def parse_dxf_file_sync(content: bytes, max_entities: int = 50000, file_path: str = None) -> Dict:
     """
     Synchronous DXF parsing with Binary DXF support and recovery mode
     Optimized for large files with entity limit
+    
+    For large binary DXF files, use file_path parameter for better compatibility
     """
     doc = None
     auditor = None
     is_recovered = False
+    errors_found = []
     
-    # Try multiple parsing strategies
-    parsing_strategies = [
-        # Strategy 1: Direct binary read
-        lambda: ezdxf.read(io.BytesIO(content)),
-        # Strategy 2: Recovery mode for corrupted files
-        lambda: recover.readfile(io.BytesIO(content))[0],
-        # Strategy 3: UTF-8 decoded string (ASCII DXF)
-        lambda: ezdxf.read(io.StringIO(content.decode('utf-8', errors='ignore'))),
-        # Strategy 4: Latin-1 decoded string
-        lambda: ezdxf.read(io.StringIO(content.decode('latin-1', errors='ignore'))),
-        # Strategy 5: CP1252 (Windows) decoded string
-        lambda: ezdxf.read(io.StringIO(content.decode('cp1252', errors='ignore'))),
-    ]
-    
-    last_error = None
-    for i, strategy in enumerate(parsing_strategies):
+    # If we have a file path, try file-based reading first (better for binary DXF)
+    if file_path and os.path.exists(file_path):
         try:
-            result = strategy()
-            if isinstance(result, tuple):
-                doc, auditor = result
-                is_recovered = True
-            else:
-                doc = result
-            break
+            # Strategy 0: Direct file read with recover (BEST for binary DXF)
+            doc, auditor = recover.readfile(file_path)
+            is_recovered = True
+            if auditor and auditor.has_errors:
+                errors_found = [str(e) for e in auditor.errors[:5]]
         except Exception as e:
-            last_error = e
-            continue
+            try:
+                # Strategy 0b: Direct ezdxf.readfile
+                doc = ezdxf.readfile(file_path)
+            except Exception as e2:
+                pass  # Continue with memory-based strategies
     
+    # If file-based reading failed, try memory-based strategies
     if doc is None:
-        raise Exception(f"Tüm okuma yöntemleri başarısız: {str(last_error)}")
+        parsing_strategies = [
+            # Strategy 1: Recovery mode with bytes stream (handles corrupted files)
+            ("recover_bytes", lambda: recover.read(io.BytesIO(content))),
+            # Strategy 2: Direct binary read
+            ("direct_bytes", lambda: (ezdxf.read(io.BytesIO(content)), None)),
+            # Strategy 3: UTF-8 decoded string (ASCII DXF)
+            ("utf8_string", lambda: (ezdxf.read(io.StringIO(content.decode('utf-8', errors='ignore'))), None)),
+            # Strategy 4: Latin-1 decoded string
+            ("latin1_string", lambda: (ezdxf.read(io.StringIO(content.decode('latin-1', errors='ignore'))), None)),
+            # Strategy 5: CP1252 (Windows) decoded string
+            ("cp1252_string", lambda: (ezdxf.read(io.StringIO(content.decode('cp1252', errors='ignore'))), None)),
+        ]
+        
+        last_error = None
+        for strategy_name, strategy_func in parsing_strategies:
+            try:
+                result = strategy_func()
+                if isinstance(result, tuple):
+                    doc, auditor = result
+                    if auditor and hasattr(auditor, 'has_errors') and auditor.has_errors:
+                        is_recovered = True
+                        errors_found = [str(e) for e in auditor.errors[:5]] if hasattr(auditor, 'errors') else []
+                else:
+                    doc = result
+                break
+            except Exception as e:
+                last_error = e
+                continue
+        
+        if doc is None:
+            raise Exception(f"Tüm okuma yöntemleri başarısız: {str(last_error)}")
     
     # Get modelspace
     msp = doc.modelspace()
@@ -314,6 +335,12 @@ def parse_dxf_file_sync(content: bytes, max_entities: int = 50000) -> Dict:
     
     bounds = calculate_bounds(entities)
     
+    message = f"{len(entities)} öğe işlendi"
+    if is_recovered:
+        message += " (kurtarma modu)"
+    if errors_found:
+        message += f" - {len(errors_found)} uyarı"
+    
     return {
         "success": True,
         "entities": entities,
@@ -322,7 +349,8 @@ def parse_dxf_file_sync(content: bytes, max_entities: int = 50000) -> Dict:
         "entity_count": len(entities),
         "skipped_count": skipped,
         "is_recovered": is_recovered,
-        "message": f"{len(entities)} öğe işlendi" + (f" (kurtarma modunda)" if is_recovered else "")
+        "errors": errors_found,
+        "message": message
     }
 
 
