@@ -26,9 +26,6 @@ import MindReaderGame from '@/pages/cekilis/MindReaderGame';
 // Kombinasyonlar Pages
 import SansTopuTahmin from '@/pages/SansTopuTahmin';
 
-// CAD Viewer
-import CADViewerPage from '@/pages/CADViewerPage';
-
 // Metraj
 import MetrajCetveli from '@/pages/MetrajCetveli';
 
@@ -183,15 +180,6 @@ function App() {
               element={
                 <ProtectedRoute>
                   <SansTopuTahmin />
-                </ProtectedRoute>
-              }
-            />
-            {/* CAD Viewer Route */}
-            <Route
-              path="/cad-viewer"
-              element={
-                <ProtectedRoute>
-                  <CADViewerPage />
                 </ProtectedRoute>
               }
             />

@@ -46,7 +46,6 @@ from routers import (
     notifications_router,
     kombinasyonlar_router,
     arsiv_router,
-    cad_router,
     metraj_router
 )
 
@@ -92,7 +91,6 @@ api_router.include_router(vocabulary_router)
 api_router.include_router(notifications_router)
 api_router.include_router(kombinasyonlar_router)
 api_router.include_router(arsiv_router)
-api_router.include_router(cad_router)
 api_router.include_router(metraj_router)
 
 # Include the main API router

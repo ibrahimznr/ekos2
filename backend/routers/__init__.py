@@ -18,7 +18,6 @@ from .vocabulary import router as vocabulary_router
 from .notifications import router as notifications_router
 from .kombinasyonlar import router as kombinasyonlar_router
 from .arsiv import router as arsiv_router
-from .cad import router as cad_router
 from .metraj import router as metraj_router
 
 __all__ = [
@@ -42,6 +41,5 @@ __all__ = [
     'notifications_router',
     'kombinasyonlar_router',
     'arsiv_router',
-    'cad_router',
     'metraj_router'
 ]
