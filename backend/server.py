@@ -45,7 +45,8 @@ from routers import (
     vocabulary_router,
     notifications_router,
     kombinasyonlar_router,
-    arsiv_router
+    arsiv_router,
+    cad_router
 )
 
 ROOT_DIR = Path(__file__).parent
@@ -89,6 +90,7 @@ api_router.include_router(vocabulary_router)
 api_router.include_router(notifications_router)
 api_router.include_router(kombinasyonlar_router)
 api_router.include_router(arsiv_router)
+api_router.include_router(cad_router)
 
 # Include the main API router
 app.include_router(api_router)
