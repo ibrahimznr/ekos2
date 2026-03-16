@@ -29,6 +29,9 @@ import SansTopuTahmin from '@/pages/SansTopuTahmin';
 // CAD Viewer
 import CADViewerPage from '@/pages/CADViewerPage';
 
+// Metraj
+import MetrajCetveli from '@/pages/MetrajCetveli';
+
 // Public Pages
 import PublicRaporView from '@/pages/PublicRaporView';
 
@@ -189,6 +192,15 @@ function App() {
               element={
                 <ProtectedRoute>
                   <CADViewerPage />
+                </ProtectedRoute>
+              }
+            />
+            {/* Metraj Route */}
+            <Route
+              path="/metraj"
+              element={
+                <ProtectedRoute>
+                  <MetrajCetveli />
                 </ProtectedRoute>
               }
             />

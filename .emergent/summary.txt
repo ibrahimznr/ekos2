@@ -1,66 +1,129 @@
 <analysis>**original_problem_statement:**
-The user has a series of sequential feature requests for the EKOS application.
-1.  **(COMPLETED)** Integrate a Çekiliş (Raffle/Games) feature from an external repository.
-2.  **(COMPLETED)** Create public, shareable links and QR codes for individual reports.
-3.  **(PARTIALLY COMPLETED)** Add full internationalization (TR/EN) support, including a language switcher.
-4.  **(BUG FIX - COMPLETED)** Fix a failing Excel export feature.
-5.  **(CURRENT TASK)** Add a dynamic, accordion-style filter panel to the Dashboard page. This panel should contain dropdowns for 'Proje', 'İl', and 'Firma Adı' to filter the dashboard's stat cards and category chart.
+The user has provided a series of sequential feature requests to enhance the EKOS application.
+
+1.  **(COMPLETED)** Add a new Kombinasyonlar (Combinations) section with a Şans Topu Tahmin Üretici (Lucky Ball Guess Generator) page. This includes features to generate 1 million combinations, clear the cache, search for a specific combination, view random samples, and export all combinations to Excel. The user provided the core Python logic for this.
+2.  **(COMPLETED)** Replace the text-based search on the Şans Topu page with a visual Kombinasyon Filtreleme (Combination Filtering) panel, allowing users to select numbers from a grid to filter results.
+3.  **(STARTED/INTERRUPTED)** Add a Sistem Arşiv Merkezi (System Archive Center) to the Admin Panel to back up all system data (reports, components, database collections, media files) into a categorized ZIP file. This feature was started but paused.
+4.  **(COMPLETED)** Implement a web-based CAD (DWG/DXF) viewer module. The backend should use usage: ezdxf [-h] [-V] [-f] [-v] [--config CONFIG] [--log LOG]
+             {audit,draw,view,browse,browse-acis,strip,config,info,hpgl} ...
+
+Command launcher for the Python package "ezdxf":
+https://pypi.org/project/ezdxf/
+
+positional arguments:
+  {audit,draw,view,browse,browse-acis,strip,config,info,hpgl}
+    audit               audit and repair DXF files
+    draw                draw and save DXF as a bitmap or vector image
+    view                view DXF files by the PyQt viewer
+    browse              browse DXF file structure
+    browse-acis         browse ACIS structures in DXF files
+    strip               strip comments from DXF files
+    config              manage config files
+    info                show information and optional stats of DXF files as
+                        loaded by ezdxf, this may not represent the original
+                        content of the file, use the browse command to see the
+                        original content
+    hpgl                view and/or convert HPGL/2 plot files to various
+                        formats
+
+options:
+  -h, --help            show this help message and exit
+  -V, --version         show version and exit
+  -f, --fonts           rebuild system font cache and print all fonts found
+  -v, --verbose         give more output
+  --config CONFIG       path to a config file
+  --log LOG             path to a verbose appending log, "stderr" logs to the
+                        standard error stream to parse files and send geometry data as JSON to the React frontend, which will render it on an SVG/Canvas with zoom and pan controls.
+5.  **(COMPLETED)** Add an ID-based search feature to the Şans Topu generator.
+6.  **(COMPLETED)** Optimize the CAD viewer to handle binary DXF files, fix parsing errors for large/corrupt files using , and implement backend performance improvements like asynchronous processing with FastAPI's .
+7.  **(COMPLETED)** Increase the file upload limit for the entire application to 5 GB, which involved configuring both Nginx () and FastAPI (streaming uploads).
+8.  **(USER VERIFICATION PENDING)** Fix a specific error (Invalid binary data near line: 33572) when uploading a 1GB binary DXF file by implementing a more robust file recovery and disk-based reading strategy.
+9.  **(IN PROGRESS)** Create a Metraj ve Pozlandırma Modülü (Bill of Quantities and Positioning Module). This involves a new MongoDB collection, FastAPI CRUD endpoints with Excel export, and a dynamic, editable table in the React frontend, potentially in a split-screen view with the CAD viewer.
 
 **User's preferred language**: The user's primary language is **Turkish**. The next agent MUST respond in Turkish only.
 
 **what currently exists?**
-The application is a full-stack React and FastAPI project. Key functionalities include project and report management (EKOS), a new Çekiliş (Raffle/Games) section, and public report sharing via QR codes/links. A foundational internationalization (i18n) system for Turkish and English has been set up with a language switcher in the main layout and on the login page. The agent has begun implementing the new filter panel on the Dashboard by adding the necessary state, data-fetching logic, and the initial accordion UI structure.
+The EKOS application is a full-stack project (React/FastAPI/MongoDB). It now includes a new Kombinasyonlar section featuring a sophisticated Şans Topu lottery number generator with visual filtering and ID search. A major new feature is the web-based CAD (DXF) viewer, which is accessible from the sidebar. This viewer is optimized for performance, supports both ASCII and Binary DXF formats, includes recovery for corrupt files, and can handle very large file uploads (up to 5GB). The Admin Panel has placeholders for a System Archive Center, but the functionality is incomplete.
 
 **Last working item**:
-- **Last item agent was working:** Implementing a dynamic filtering panel on the Dashboard page (). The agent was adding the UI and logic for an accordion-style filter with dropdowns for project, city, and company, which will update the dashboard's metrics.
+- **Last item agent was working:** The agent began implementing the Metraj ve Pozlandırma Modülü (Bill of Quantities and Positioning Module) as per the user's latest request. The first step taken was creating the backend router file.
 - **Status:** IN PROGRESS
 - **Agent Testing Done:** N
-- **Which testing method agent to use?** Frontend testing agent. The test should verify that the filter accordion opens/closes, dropdowns are populated, selecting filters correctly updates the stat cards and the Kategori Dağılımı chart, and the Filtreleri Temizle button resets the view.
+- **Which testing method agent to use?** both. The backend requires API testing for the new CRUD endpoints and the Excel export functionality. The frontend requires testing of the editable table component, its dynamic calculations (e.g., auto-sum), and the split-screen layout with the CAD viewer.
 - **User Testing Done:** N
 
 **All Pending/In progress Issue list**:
-- **Issue 1:** The Dashboard filter implementation is incomplete. (Priority: **P0**)
+- **Issue 1:** Binary DXF file parsing failure. (Priority: **P0**)
+- **Issue 2:** Discrepancy in filtered data count on the main dashboard. (Priority: **P1**)
 
-  **Issues Detail:**
-  - **Issue 1:**
-     - **Attempted fixes:** The agent edited  to add state variables (, ), data fetching logic for filter options (), and the basic JSX for the accordion filter panel. The stat cards were partially updated to use .
-     - **Next debug checklist:**
-        1.  In , update the Kategori Dağılımı chart (a  or similar component) to use data derived from  instead of the original unfiltered .
-        2.  Remove the now-unused variable  from the component.
-        3.  Ensure the  and  functions correctly update all dependent UI elements (stat cards and chart).
-        4.  Thoroughly test the feature to ensure filters apply correctly and can be cleared.
-     - **Why fix this issue and what will be achieved with the fix?** Completing this will deliver the user's latest feature request, making the Dashboard interactive and providing more granular data insights.
-     - **Status:** IN PROGRESS
-     - **Is recurring issue?** N
-     - **Should Test frontend/backend/both after fix?** Frontend.
-     - **Blocked on other issue:** None.
+**Issues Detail:**
+- **Issue 1:**
+  - **Description:** The user reported an error  when uploading a ~1GB binary DXF file.
+  - **Attempted fixes:** The agent refactored the backend CAD processing logic in . The new implementation forces the use of  with the file path directly from disk (instead of an in-memory stream) to provide maximum tolerance for binary and potentially corrupt files.
+  - **Next debug checklist:** The fix has been implemented. The next step is to ask the user to re-upload the problematic 1GB file to confirm if the issue is resolved. If it persists, get more details about the file (AutoCAD version, specific DXF format).
+  - **Why fix this issue and what will be achieved with the fix?** This is a blocker for a core functionality (large CAD file viewing) that the user specifically requested. Fixing it will validate the recent optimization work.
+  - **Status:** USER VERIFICATION PENDING
+  - **Is recurring issue?** Y
+  - **Should Test frontend/backend/both after fix?** Backend.
+  - **Blocked on other issue:** None.
+- **Issue 2:**
+  - **Description:** The frontend UI shows a different total count of filtered reports than the backend API for the same filter set (e.g., 112 on UI vs. 471 from API for company REC).
+  - **Attempted fixes:** None in this session. This is a carry-over issue from a previous fork.
+  - **Next debug checklist:**
+    1.  Inspect the filtering logic in , especially the  hooks calculating stats.
+    2.  Review the database query in the  endpoint in .
+    3.  Compare the two for case-sensitivity mismatches or different field comparisons.
+  - **Why fix this issue and what will be achieved with the fix?** Ensures data consistency between the UI and exported reports, which is critical for user trust and data accuracy.
+  - **Status:** NOT STARTED
+  - **Is recurring issue?** N
+  - **Should Test frontend/backend/both after fix?** Both.
+  - **Blocked on other issue:** None.
 
 **In progress Task List**:
-- **Task 1:** Complete the Dashboard Filter Panel.
-     - **Where to resume:** Continue editing  as outlined in Issue 1 above. The immediate next step is to connect the  to the category distribution chart and remove obsolete code.
-     - **What will be achieved with this?** The Dashboard page will feature a fully functional, dynamic filtering system.
-     - **Status:** IN PROGRESS
-     - **Should Test frontend/backend/both after fix?** Frontend.
-     - **Blocked on something:** None.
+- **Task 1:** Complete the Metraj ve Pozlandırma Modülü. (Priority: **P0**)
+- **Task 2:** Complete the Sistem Arşiv Merkezi. (Priority: **P2**)
+
+**Task Detail:**
+- **Task 1:**
+  - **Where to resume:** The file  has been created. The next steps are:
+    1.  Define the MongoDB schema/model for .
+    2.  Implement the CRUD API endpoints (create, read, update, delete) and the Excel export endpoint in .
+    3.  Register the new router in  and .
+    4.  Create a new React component for the editable table.
+    5.  Integrate this component into a page, possibly , to achieve a split-screen layout.
+  - **What will be achieved with this?** A fully functional module for engineers to create and manage Bills of Quantities directly within the application.
+  - **Status:** IN PROGRESS
+  - **Should Test frontend/backend/both after fix?** Both.
+  - **Blocked on something:** None.
+- **Task 2:**
+  - **Where to resume:** The backend router  exists but is empty. The frontend page  has UI elements and state for the archive feature, but the API calls are placeholders. The agent needs to implement the backend logic to query all collections, gather associated files, create a ZIP archive in a background task, and provide a download link.
+  - **What will be achieved with this?** A critical disaster-recovery and data-portability feature, allowing admins to create complete offline backups of the system's data.
+  - **Status:** IN PROGRESS
+  - **Should Test frontend/backend/both after fix?** Both.
+  - **Blocked on something:** None.
 
 **Upcoming and Future Tasks**
 - **Upcoming Tasks:**
-  - **P0: Complete Internationalization (TR/EN):** The i18n framework is in place, but most text in the application is still hardcoded in Turkish. This task involves systematically going through all components and pages, replacing hardcoded strings with  from the  hook, and populating  and  files.
+  - **P1: Complete Internationalization (TR/EN):** A large-scale refactor to move all hardcoded Turkish strings in UI components to i18n translation files.
 - **Future Tasks:**
-  - **P1: Standardize Notifications:** The  component should be adopted application-wide, replacing all remaining instances of  toasts to create a consistent user experience.
-  - **P2: Database Cleanup:** The database contains duplicate project entries from a past migration that could be cleaned up or merged.
+  - **P2: Standardize Notifications:** Audit the app and replace all remaining  toast instances with the centralized notification system in .
+  - **P3: Database Cleanup:** Remove duplicate project entries from the database.
+  - **P4: Media Migration:** Complete the previously aborted task of migrating media files from an old server.
 
 **Completed work in this session**
-- **Çekiliş Feature Integration:** Successfully integrated a new Çekiliş (Raffle/Games) section from an external repository, including backend routes (, ), frontend pages, and navigation updates.
-- **Public Report Sharing & QR Codes:** Implemented a feature for generating public, read-only links and QR codes for reports. This included new backend endpoints in  and UI additions to .
-- **Internationalization (i18n) Setup:** Installed and configured , created translation files, and added a  component to the main layout and login page.
-- **Excel Export Bug Fix:** Corrected an API endpoint URL in  to fix the failing Excel export feature.
-- **Notification System Improvement:** Replaced  toasts with the central  on the main  page.
-- **Backend Bug Fix:** Resolved an  in the new  and  routers related to user object access.
+- **Şans Topu Lottery Module:**
+  - Implemented a new page at  with full functionality for generating, filtering, searching (by numbers and ID), and exporting lottery combinations.
+- **Web-based CAD (DXF) Viewer:**
+  - Created a new page at  with a feature-rich, dark-mode CAD viewer component.
+  - Implemented zoom/pan, layer visibility, and other controls.
+- **Backend Performance & Stability:**
+  - Heavily refactored the CAD processing backend in  to support binary DXF, use  for corrupt files, and optimize large file handling with background tasks.
+- **Increased File Upload Limit:**
+  - Updated Nginx and FastAPI configurations to allow file uploads up to 5GB.
 
 **Earlier issues found/mentioned but not fixed**
-- **Media Migration Aborted:** A planned migration of media files from an old server was started but never completed.
-- **Inconsistent Notification System:** As noted in the 'Future Tasks', the new notification modal is not yet used everywhere.
+- **Inconsistent Notification System:** Some pages may still use the old  toast library instead of the newer centralized system.
+- **Aborted Media Migration:** The task to migrate media files from an old server remains unfinished.
 
 **Known issue recurrence from previous fork**
 - None.
@@ -69,69 +132,166 @@ The application is a full-stack React and FastAPI project. Key functionalities i
 
 
 **Key Technical Concepts**
-- **Dynamic Frontend Filtering:** Using React state (, ) to manage filter inputs and dynamically update data visualizations on the client side.
-- **Internationalization (i18n):** Implementing multi-language support using the  library.
-- **QR Code Generation:** Using the  library on the backend to generate and serve QR codes as image streams.
-- **Public API/UI:** Creating unauthenticated routes and endpoints to share data publicly in a read-only format.
+- **Web-based CAD Processing:** Using usage: ezdxf [-h] [-V] [-f] [-v] [--config CONFIG] [--log LOG]
+             {audit,draw,view,browse,browse-acis,strip,config,info,hpgl} ...
+
+Command launcher for the Python package "ezdxf":
+https://pypi.org/project/ezdxf/
+
+positional arguments:
+  {audit,draw,view,browse,browse-acis,strip,config,info,hpgl}
+    audit               audit and repair DXF files
+    draw                draw and save DXF as a bitmap or vector image
+    view                view DXF files by the PyQt viewer
+    browse              browse DXF file structure
+    browse-acis         browse ACIS structures in DXF files
+    strip               strip comments from DXF files
+    config              manage config files
+    info                show information and optional stats of DXF files as
+                        loaded by ezdxf, this may not represent the original
+                        content of the file, use the browse command to see the
+                        original content
+    hpgl                view and/or convert HPGL/2 plot files to various
+                        formats
+
+options:
+  -h, --help            show this help message and exit
+  -V, --version         show version and exit
+  -f, --fonts           rebuild system font cache and print all fonts found
+  -v, --verbose         give more output
+  --config CONFIG       path to a config file
+  --log LOG             path to a verbose appending log, "stderr" logs to the
+                        standard error stream on the backend to parse ASCII/Binary DXF files (including corrupt ones via ) and converting geometric entities into JSON for frontend rendering.
+- **Large File Handling & Streaming:** Implementing streaming uploads in FastAPI and configuring Nginx () to handle multi-gigabyte files.
+- **Asynchronous Background Tasks:** Using FastAPI's  to process large files without blocking the server response, improving UX.
+- **Frontend Performance Optimization:** Using , , and chunked rendering strategies in the  component to handle large datasets without freezing the browser.
+- **In-Memory Caching:** Using a global Python dictionary () to store and quickly query millions of generated lottery combinations.
 
 **key DB schema**
-- **New Collections:** ,  have been added to support the Çekiliş feature.
+- **notifications**: 
+- **metraj_cetveli (Proposed):** 
+- **cad_files (Proposed):** Storing metadata for uploaded CAD files, like , , , etc.
 
 **changes in tech stack**
-- **Backend:** Added  dependency for QR code generation.
-- **Frontend:** Added , , and  for internationalization.
+- **Added:** usage: ezdxf [-h] [-V] [-f] [-v] [--config CONFIG] [--log LOG]
+             {audit,draw,view,browse,browse-acis,strip,config,info,hpgl} ...
+
+Command launcher for the Python package "ezdxf":
+https://pypi.org/project/ezdxf/
+
+positional arguments:
+  {audit,draw,view,browse,browse-acis,strip,config,info,hpgl}
+    audit               audit and repair DXF files
+    draw                draw and save DXF as a bitmap or vector image
+    view                view DXF files by the PyQt viewer
+    browse              browse DXF file structure
+    browse-acis         browse ACIS structures in DXF files
+    strip               strip comments from DXF files
+    config              manage config files
+    info                show information and optional stats of DXF files as
+                        loaded by ezdxf, this may not represent the original
+                        content of the file, use the browse command to see the
+                        original content
+    hpgl                view and/or convert HPGL/2 plot files to various
+                        formats
+
+options:
+  -h, --help            show this help message and exit
+  -V, --version         show version and exit
+  -f, --fonts           rebuild system font cache and print all fonts found
+  -v, --verbose         give more output
+  --config CONFIG       path to a config file
+  --log LOG             path to a verbose appending log, "stderr" logs to the
+                        standard error stream (Python library for DXF file processing).
 
 **All files of reference**
-- : The file currently being modified to add the filtering panel.
-- : Modified to add public report sharing and QR code endpoints.
-- : Modified to add share/QR code buttons.
-- : Modified to add the Çekiliş menu and the language selector.
-- : New directory containing all internationalization configuration and translation files.
-- : Modified to fix Excel export and improve notification handling.
+- : The core of the new CAD file processing logic.
+- : The frontend rendering component for CAD data.
+- : The complete UI for the lottery number generator feature.
+- : The backend logic for the lottery generator.
+- : Modified to include new routers and configure Starlette for large file uploads.
+- : Modified to set  to .
+- : The starting point for the current task.
 
 **Areas that need refactoring**:
-- **Internationalization:** The app's text is largely hardcoded in Turkish. A full refactor is required to move all user-facing strings into the  translation files.
-- **Notification System:** The notification pattern is inconsistent, with some pages using the new central modal and others using old  toasts. This should be standardized.
+- **Internationalization (i18n):** Remains the largest pending refactoring task. All user-facing strings should be moved to translation files.
+- **:** This file is still very large and would benefit from being broken down into smaller components.
+- **:** The code for the incomplete Archive Center should be completed or cleaned up.
 
 **key api endpoints**
-- **New Endpoints:**
-  - : Fetches a report for public viewing.
-  - : Gets a report's shareable link and QR code URL.
-  - : Returns a QR code image for a report.
-  - : Full set of CRUD endpoints for the Raffle feature.
-  - : Full set of CRUD endpoints for the Vocabulary feature.
+- : Generates new lottery combinations.
+- : Filters combinations based on selected numbers.
+- : Fetches a combination by its ID.
+- : Uploads and parses a DXF file using a streaming request.
+- : Checks the status of a background processing task for a large CAD file.
+-  (Conceptual): Endpoint to trigger the system backup process.
+-  (To be created): CRUD endpoints for the Bill of Quantities.
 
 **Critical Info for New Agent**
-- Your immediate priority is to complete the filter panel on the **Dashboard page** (). Focus on connecting the filtered data to the category distribution chart and cleaning up any remaining old code.
-- After completing and testing the dashboard filter, the next highest priority task is **completing the internationalization (i18n)**. This is a large but important task for the user.
-- Always confirm the next priority with the user after completing a task. Given the history, they are likely to provide the next step sequentially.
+- The user's highest priority is completing the **Metraj ve Pozlandırma Modülü**.
+- The second highest priority is getting user confirmation on the **1GB Binary DXF file fix**. You must ask the user to test this.
+- The **Sistem Arşiv Merkezi** task was interrupted and is incomplete. It should be addressed after the current module.
+- An old, high-priority data consistency bug between the dashboard UI and backend reports () remains unresolved.
 
 **documents and test reports created in this job**
-- : A comprehensive test report showing all tests passed after the Çekiliş feature was integrated.
-- : Updated to reflect completed work.
+-  (for the Kombinasyonlar feature).
+-  was updated multiple times.
 
 **Last 10 User Messages and any pending HUMAN messages**
-1.  **User:** Requests a filter panel on the Dashboard with project, city, and company dropdowns to dynamically update stats and a chart. (CURRENT TASK)
-2.  **User:** Reports a bug with Excel export. (COMPLETED)
-3.  **User:** Asks to begin work on language support (P1). (STARTED)
-4.  **User:** Clarifies that public links should be read-only. (INFO for completed task)
-5.  **User:** Provides instructions on task sequencing (P0 then P1). (INFO)
-6.  **User:** Requests public shareable links/QR codes (P0) and language support (P1). (COMPLETED & STARTED)
-7.  **User:** complete your unfinished work. (INSTRUCTION)
-8.  **User:** Approves P0 (Çekiliş) and P1 (Notifications) tasks. (SUPERSEDED by new requests)
+1.  **Request:** Create a Bill of Quantities (Metraj ve Pozlandırma) module. (Status: IN PROGRESS)
+2.  **Report:** The 1GB DXF file upload fails with a binary data error. (Status: FIX IMPLEMENTED, PENDING USER VERIFICATION)
+3.  **Request:** Increase the max file upload size to 5GB. (Status: COMPLETED)
+4.  **Request:** Fix DXF processing errors and optimize for speed, specifically for binary DXF files. (Status: COMPLETED)
+5.  **Request:** Add an ID number search to the Şans Topu page. (Status: COMPLETED)
+6.  **Request:** Implement a web-based CAD viewer module for DXF/DWG files. (Status: COMPLETED)
+7.  **Clarification:** The user clarified a previous request for a Tkinter-based CAD viewer was a mistake and should be a web-based (React/FastAPI) module. (Status: HANDLED)
+8.  **Request:** Add a System Archive Center to the Admin Panel for full data backup. (Status: STARTED/INTERRUPTED)
+9.  **Request:** Replace the text search on the Şans Topu page with a visual number-grid filter. (Status: COMPLETED)
+10. **Request:** Create the initial Şans Topu Tahmin Üretici page. (Status: COMPLETED)
 
 **Project Health Check:**
-- **Functional:** The application is running. Recent work includes major new features and a critical bug fix.
-- **Broken:** The Dashboard page is mid-modification and will not function correctly until the filter implementation is complete.
+- **Functional:** The application is running. The Dashboard, Kombinasyonlar, and CAD Viewer modules are functional.
+- **Broken / Mocked:**
+    - Large binary DXF file uploads are potentially still broken, awaiting user verification of the fix.
+    - The Sistem Arşiv Merkezi UI is present but the backend functionality is not implemented.
 
 **3rd Party Integrations**
-- None.
+- usage: ezdxf [-h] [-V] [-f] [-v] [--config CONFIG] [--log LOG]
+             {audit,draw,view,browse,browse-acis,strip,config,info,hpgl} ...
+
+Command launcher for the Python package "ezdxf":
+https://pypi.org/project/ezdxf/
+
+positional arguments:
+  {audit,draw,view,browse,browse-acis,strip,config,info,hpgl}
+    audit               audit and repair DXF files
+    draw                draw and save DXF as a bitmap or vector image
+    view                view DXF files by the PyQt viewer
+    browse              browse DXF file structure
+    browse-acis         browse ACIS structures in DXF files
+    strip               strip comments from DXF files
+    config              manage config files
+    info                show information and optional stats of DXF files as
+                        loaded by ezdxf, this may not represent the original
+                        content of the file, use the browse command to see the
+                        original content
+    hpgl                view and/or convert HPGL/2 plot files to various
+                        formats
+
+options:
+  -h, --help            show this help message and exit
+  -V, --version         show version and exit
+  -f, --fonts           rebuild system font cache and print all fonts found
+  -v, --verbose         give more output
+  --config CONFIG       path to a config file
+  --log LOG             path to a verbose appending log, "stderr" logs to the
+                        standard error stream: A Python library for reading/writing DXF files. Version  is installed.
 
 **Testing status**
-- **Testing agent used after significant changes:** YES. It was used after the Çekiliş integration and produced a clean report at .
+- **Testing agent used after significant changes:** YES, for the Kombinasyonlar module (). It was NOT used after implementing the much larger CAD viewer and file size limit changes.
 - **Troubleshoot agent used after agent stuck in loop:** NO
-- **Test files created:** None.
-- **Known regressions:** None.
+- **Test files created:** , 
+- **Known regressions:** None newly introduced, but the pre-existing data discrepancy bug on the dashboard remains.
 
 **Credentials to test flow:**
 - **Admin Email:** 
@@ -139,6 +299,6 @@ The application is a full-stack React and FastAPI project. Key functionalities i
 - **Admin Password:** 
 
 **What agent forgot to execute**
-- The Dashboard filter logic is incomplete; the category distribution chart still uses unfiltered data.
-- The internationalization task was only started. The vast majority of the application's text remains untranslated.
-- The goal of standardizing all notifications to use the new central modal was not fully achieved and is now a future task.</analysis>
+- The agent did not complete the Sistem Arşiv Merkezi feature after starting it.
+- The agent has not addressed the P1 data discrepancy bug from the initial handoff summary.
+- The agent did not run a comprehensive regression test (e.g., via ) after implementing the CAD viewer, a very significant and complex addition to the application.</analysis>

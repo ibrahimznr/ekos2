@@ -19,7 +19,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { LayoutDashboard, FileText, Shield, LogOut, Menu, X, Building2, User, Plus, ChevronLeft, ChevronRight, Settings, Truck, Trophy, BookOpen, Brain, ChevronDown, Bell, Calendar, Clock, UserCircle, MessageSquare, Send, Check, CheckCheck, Trash2, Loader2, Mail, Dices, Dice5, FileCode2 } from 'lucide-react';
+import { LayoutDashboard, FileText, Shield, LogOut, Menu, X, Building2, User, Plus, ChevronLeft, ChevronRight, Settings, Truck, Trophy, BookOpen, Brain, ChevronDown, Bell, Calendar, Clock, UserCircle, MessageSquare, Send, Check, CheckCheck, Trash2, Loader2, Mail, Dices, Dice5, FileCode2, Calculator } from 'lucide-react';
 import { toast } from 'sonner';
 import api from '@/utils/api';
 import LanguageSelector from '@/components/LanguageSelector';
@@ -307,6 +307,25 @@ const Layout = ({ children }) => {
             }`} />
             {sidebarOpen && (
               <span className="font-medium">CAD Görüntüleyici</span>
+            )}
+          </button>
+
+          {/* Metraj Cetveli */}
+          <button
+            onClick={() => navigate('/metraj')}
+            className={`w-full flex items-center gap-3 px-3 py-3 rounded-lg transition-all duration-200 ${
+              location.pathname === '/metraj'
+                ? 'bg-gradient-to-r from-emerald-600 to-teal-700 text-white shadow-md'
+                : 'text-gray-700 hover:bg-gray-100'
+            } ${!sidebarOpen ? 'justify-center' : ''}`}
+            title={!sidebarOpen ? 'Metraj Cetveli' : ''}
+            data-testid="nav-metraj"
+          >
+            <Calculator className={`h-5 w-5 flex-shrink-0 ${
+              location.pathname === '/metraj' ? 'text-white' : 'text-emerald-500'
+            }`} />
+            {sidebarOpen && (
+              <span className="font-medium">Metraj Cetveli</span>
             )}
           </button>
 
@@ -623,6 +642,21 @@ const Layout = ({ children }) => {
               >
                 <FileCode2 className="h-5 w-5 mr-3" />
                 CAD Görüntüleyici
+              </Button>
+
+              {/* Metraj Cetveli */}
+              <Button
+                variant={location.pathname === '/metraj' ? 'default' : 'ghost'}
+                onClick={() => {
+                  navigate('/metraj');
+                  setMobileMenuOpen(false);
+                }}
+                className={`w-full justify-start h-12 ${location.pathname === '/metraj'
+                  ? 'bg-gradient-to-r from-emerald-600 to-teal-700 text-white'
+                  : 'text-gray-700 hover:bg-gray-100'}`}
+              >
+                <Calculator className="h-5 w-5 mr-3" />
+                Metraj Cetveli
               </Button>
 
               {/* Settings Button */}
