@@ -565,6 +565,7 @@ async def process_large_dxf_background(task_id: str, file_path: str, max_entitie
 async def parse_cad_file_async(
     file: UploadFile = File(...),
     background_tasks: BackgroundTasks = None,
+    max_entities: int = 100000,
     current_user: dict = Depends(get_current_user)
 ):
     """
@@ -576,39 +577,78 @@ async def parse_cad_file_async(
     if not filename.endswith('.dxf'):
         raise HTTPException(status_code=400, detail="Sadece DXF dosyaları desteklenmektedir")
     
-    content = await file.read()
-    
-    if len(content) == 0:
-        raise HTTPException(status_code=400, detail="Dosya boş")
-    
-    # Create task ID
+    # Create task ID and temp file
     task_id = str(uuid.uuid4())
+    temp_file_path = os.path.join(tempfile.gettempdir(), f"cad_async_{task_id}.dxf")
     
     # Initialize task status
     processing_tasks[task_id] = {
-        "status": "pending",
+        "status": "uploading",
         "progress": 0,
-        "message": "İşlem sıraya alındı",
+        "message": "Dosya yükleniyor...",
         "filename": file.filename,
+        "temp_path": temp_file_path,
         "result": None
     }
     
-    # Add background task
-    background_tasks.add_task(process_dxf_background, task_id, content)
-    
-    return {"task_id": task_id, "status": "pending", "message": "İşlem başlatıldı"}
+    try:
+        # Stream to temp file
+        total_size = 0
+        with open(temp_file_path, 'wb') as temp_file:
+            while True:
+                chunk = await file.read(CHUNK_SIZE)
+                if not chunk:
+                    break
+                total_size += len(chunk)
+                if total_size > MAX_FILE_SIZE:
+                    raise HTTPException(status_code=413, detail="Dosya boyutu 5GB'ı aşamaz")
+                temp_file.write(chunk)
+        
+        if total_size == 0:
+            raise HTTPException(status_code=400, detail="Dosya boş")
+        
+        processing_tasks[task_id]["status"] = "pending"
+        processing_tasks[task_id]["progress"] = 10
+        processing_tasks[task_id]["message"] = f"Yükleme tamamlandı ({total_size / (1024*1024):.1f} MB)"
+        
+        # Add background task with file path
+        background_tasks.add_task(process_large_dxf_background, task_id, temp_file_path, max_entities)
+        
+        return {"task_id": task_id, "status": "pending", "message": "İşlem başlatıldı"}
+        
+    except HTTPException:
+        if os.path.exists(temp_file_path):
+            os.remove(temp_file_path)
+        if task_id in processing_tasks:
+            del processing_tasks[task_id]
+        raise
+    except Exception as e:
+        if os.path.exists(temp_file_path):
+            os.remove(temp_file_path)
+        if task_id in processing_tasks:
+            del processing_tasks[task_id]
+        raise HTTPException(status_code=500, detail=f"Dosya yüklenirken hata: {str(e)}")
 
 
-async def process_dxf_background(task_id: str, content: bytes):
-    """Background task for DXF processing"""
+async def process_dxf_background(task_id: str, file_path: str, max_entities: int = 100000):
+    """Background task for DXF processing - uses file path for better binary support"""
     try:
         processing_tasks[task_id]["status"] = "processing"
-        processing_tasks[task_id]["progress"] = 10
+        processing_tasks[task_id]["progress"] = 20
         processing_tasks[task_id]["message"] = "Dosya işleniyor..."
         
-        # Run in executor
+        # Read file content
+        with open(file_path, 'rb') as f:
+            content = f.read()
+        
+        processing_tasks[task_id]["progress"] = 40
+        
+        # Run in executor with file path for better binary DXF handling
         loop = asyncio.get_event_loop()
-        result = await loop.run_in_executor(executor, parse_dxf_file_sync, content, 100000)
+        result = await loop.run_in_executor(
+            executor, 
+            lambda: parse_dxf_file_sync(content, max_entities, file_path)
+        )
         
         processing_tasks[task_id]["status"] = "completed"
         processing_tasks[task_id]["progress"] = 100
@@ -618,6 +658,13 @@ async def process_dxf_background(task_id: str, content: bytes):
     except Exception as e:
         processing_tasks[task_id]["status"] = "error"
         processing_tasks[task_id]["message"] = str(e)
+    finally:
+        # Clean up temp file
+        if os.path.exists(file_path):
+            try:
+                os.remove(file_path)
+            except:
+                pass
 
 
 @router.get("/parse-status/{task_id}")
