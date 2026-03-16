@@ -183,6 +183,15 @@ function App() {
                 </ProtectedRoute>
               }
             />
+            {/* CAD Viewer Route */}
+            <Route
+              path="/cad-viewer"
+              element={
+                <ProtectedRoute>
+                  <CADViewerPage />
+                </ProtectedRoute>
+              }
+            />
           </Routes>
         </BrowserRouter>
         <Toaster position="top-right" richColors />
