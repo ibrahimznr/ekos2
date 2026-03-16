@@ -1,10 +1,10 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useCallback, useMemo, memo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
 import {
   Dialog,
   DialogContent,
@@ -19,7 +19,6 @@ import {
   Upload,
   ZoomIn,
   ZoomOut,
-  Move,
   RotateCcw,
   Layers,
   FileCode2,
@@ -31,8 +30,131 @@ import {
   Eye,
   EyeOff,
   Download,
-  Trash2
+  Trash2,
+  AlertTriangle
 } from 'lucide-react';
+
+// Memoized entity renderer for performance
+const EntityRenderer = memo(({ entity, viewBoxWidth }) => {
+  const color = entity.color || '#FFFFFF';
+  const strokeWidth = viewBoxWidth / 500;
+  
+  switch (entity.type) {
+    case 'line':
+      return (
+        <line
+          x1={entity.data.start.x}
+          y1={-entity.data.start.y}
+          x2={entity.data.end.x}
+          y2={-entity.data.end.y}
+          stroke={color}
+          strokeWidth={strokeWidth}
+          vectorEffect="non-scaling-stroke"
+        />
+      );
+      
+    case 'circle':
+      return (
+        <circle
+          cx={entity.data.center.x}
+          cy={-entity.data.center.y}
+          r={entity.data.radius}
+          stroke={color}
+          strokeWidth={strokeWidth}
+          fill="none"
+          vectorEffect="non-scaling-stroke"
+        />
+      );
+      
+    case 'arc': {
+      const { center, radius, start_angle, end_angle } = entity.data;
+      const startRad = (start_angle * Math.PI) / 180;
+      const endRad = (end_angle * Math.PI) / 180;
+      const startX = center.x + radius * Math.cos(startRad);
+      const startY = -center.y - radius * Math.sin(startRad);
+      const endX = center.x + radius * Math.cos(endRad);
+      const endY = -center.y - radius * Math.sin(endRad);
+      const largeArc = Math.abs(end_angle - start_angle) > 180 ? 1 : 0;
+      
+      return (
+        <path
+          d={`M ${startX} ${startY} A ${radius} ${radius} 0 ${largeArc} 0 ${endX} ${endY}`}
+          stroke={color}
+          strokeWidth={strokeWidth}
+          fill="none"
+          vectorEffect="non-scaling-stroke"
+        />
+      );
+    }
+      
+    case 'polyline':
+    case 'spline':
+      if (!entity.data.points || entity.data.points.length < 2) return null;
+      const points = entity.data.points.map(p => `${p.x},${-p.y}`).join(' ');
+      return (
+        <polyline
+          points={points}
+          stroke={color}
+          strokeWidth={strokeWidth}
+          fill="none"
+          vectorEffect="non-scaling-stroke"
+        />
+      );
+      
+    case 'text':
+      return (
+        <text
+          x={entity.data.position.x}
+          y={-entity.data.position.y}
+          fill={color}
+          fontSize={entity.data.height || viewBoxWidth / 50}
+          fontFamily="monospace"
+        >
+          {entity.data.text}
+        </text>
+      );
+      
+    default:
+      return null;
+  }
+});
+
+EntityRenderer.displayName = 'EntityRenderer';
+
+// Chunked entity list for large datasets
+const ChunkedEntityList = memo(({ entities, viewBoxWidth, visibleLayers, chunkSize = 2000 }) => {
+  const [renderedChunks, setRenderedChunks] = useState(1);
+  const totalChunks = Math.ceil(entities.length / chunkSize);
+  
+  useEffect(() => {
+    if (renderedChunks < totalChunks) {
+      const frame = requestAnimationFrame(() => {
+        setRenderedChunks(prev => Math.min(prev + 1, totalChunks));
+      });
+      return () => cancelAnimationFrame(frame);
+    }
+  }, [renderedChunks, totalChunks]);
+  
+  const visibleEntities = useMemo(() => {
+    return entities
+      .slice(0, renderedChunks * chunkSize)
+      .filter(e => visibleLayers[e.layer] !== false);
+  }, [entities, renderedChunks, chunkSize, visibleLayers]);
+  
+  return (
+    <>
+      {visibleEntities.map((entity, index) => (
+        <EntityRenderer
+          key={index}
+          entity={entity}
+          viewBoxWidth={viewBoxWidth}
+        />
+      ))}
+    </>
+  );
+});
+
+ChunkedEntityList.displayName = 'ChunkedEntityList';
 
 const CADViewer = ({ 
   onFileSelect = null, 
@@ -53,6 +175,9 @@ const CADViewer = ({
   const [loading, setLoading] = useState(false);
   const [fileName, setFileName] = useState('');
   const [entityCount, setEntityCount] = useState(0);
+  const [processingProgress, setProcessingProgress] = useState(0);
+  const [isAsyncProcessing, setIsAsyncProcessing] = useState(false);
+  const [asyncTaskId, setAsyncTaskId] = useState(null);
   
   // View state
   const [viewBox, setViewBox] = useState({ x: 0, y: 0, width: 100, height: 100 });
@@ -96,8 +221,42 @@ const CADViewer = ({
       loadSavedFile(initialFileId);
     }
   }, [initialFileId]);
+
+  // Poll async task status
+  useEffect(() => {
+    if (!asyncTaskId || !isAsyncProcessing) return;
+    
+    const pollInterval = setInterval(async () => {
+      try {
+        const response = await api.get(`/cad/parse-status/${asyncTaskId}`);
+        setProcessingProgress(response.data.progress);
+        
+        if (response.data.status === 'completed') {
+          // Fetch result
+          const resultResponse = await api.get(`/cad/parse-result/${asyncTaskId}`);
+          setEntities(resultResponse.data.entities);
+          setBounds(resultResponse.data.bounds);
+          setLayers(resultResponse.data.layers);
+          setEntityCount(resultResponse.data.entity_count);
+          setIsAsyncProcessing(false);
+          setLoading(false);
+          toast.success(resultResponse.data.message);
+          clearInterval(pollInterval);
+        } else if (response.data.status === 'error') {
+          setIsAsyncProcessing(false);
+          setLoading(false);
+          toast.error(response.data.message);
+          clearInterval(pollInterval);
+        }
+      } catch (error) {
+        console.error('Poll error:', error);
+      }
+    }, 1000);
+    
+    return () => clearInterval(pollInterval);
+  }, [asyncTaskId, isAsyncProcessing]);
   
-  // Handle file upload
+  // Handle file upload with size-based routing
   const handleFileUpload = async (event) => {
     const file = event.target.files[0];
     if (!file) return;
@@ -109,60 +268,47 @@ const CADViewer = ({
     
     setLoading(true);
     setFileName(file.name);
+    setProcessingProgress(0);
+    
+    const fileSizeMB = file.size / (1024 * 1024);
     
     try {
       const formData = new FormData();
       formData.append('file', file);
       
-      const response = await api.post('/cad/parse', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
-      
-      if (response.data.success) {
-        setEntities(response.data.entities);
-        setBounds(response.data.bounds);
-        setLayers(response.data.layers);
-        setEntityCount(response.data.entity_count);
-        setZoom(1);
-        toast.success(`${response.data.entity_count} öğe yüklendi`);
+      // Use async processing for large files (> 5MB)
+      if (fileSizeMB > 5) {
+        setIsAsyncProcessing(true);
+        const response = await api.post('/cad/parse-async', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
+        setAsyncTaskId(response.data.task_id);
+        toast.info('Büyük dosya işleniyor, lütfen bekleyin...');
+      } else {
+        // Direct processing for smaller files
+        const response = await api.post('/cad/parse', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
         
-        if (onFileSelect) {
-          onFileSelect(file, response.data);
+        if (response.data.success) {
+          setEntities(response.data.entities);
+          setBounds(response.data.bounds);
+          setLayers(response.data.layers);
+          setEntityCount(response.data.entity_count);
+          setZoom(1);
+          toast.success(response.data.message);
+          
+          if (onFileSelect) {
+            onFileSelect(file, response.data);
+          }
         }
+        setLoading(false);
       }
     } catch (error) {
       const message = error.response?.data?.detail || 'Dosya yüklenirken hata oluştu';
       toast.error(message);
-    } finally {
       setLoading(false);
-    }
-  };
-  
-  // Save file to server
-  const handleSaveFile = async (event) => {
-    const file = event.target.files[0];
-    if (!file) return;
-    
-    setLoading(true);
-    
-    try {
-      const formData = new FormData();
-      formData.append('file', file);
-      if (projectId) formData.append('project_id', projectId);
-      if (reportId) formData.append('report_id', reportId);
-      
-      const response = await api.post('/cad/upload', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
-      
-      if (response.data.success) {
-        toast.success('CAD dosyası kaydedildi');
-        loadFileList();
-      }
-    } catch (error) {
-      toast.error('Dosya kaydedilirken hata oluştu');
-    } finally {
-      setLoading(false);
+      setIsAsyncProcessing(false);
     }
   };
   
@@ -214,30 +360,34 @@ const CADViewer = ({
     }
   };
   
-  // Zoom controls
-  const handleZoomIn = () => {
-    setZoom(prev => Math.min(prev * 1.5, 10));
-    setViewBox(prev => ({
-      ...prev,
-      width: prev.width / 1.5,
-      height: prev.height / 1.5,
-      x: prev.x + prev.width * 0.25 / 1.5,
-      y: prev.y + prev.height * 0.25 / 1.5
-    }));
-  };
+  // Zoom controls - using requestAnimationFrame for smooth updates
+  const handleZoomIn = useCallback(() => {
+    requestAnimationFrame(() => {
+      setZoom(prev => Math.min(prev * 1.5, 10));
+      setViewBox(prev => ({
+        ...prev,
+        width: prev.width / 1.5,
+        height: prev.height / 1.5,
+        x: prev.x + prev.width * 0.25 / 1.5,
+        y: prev.y + prev.height * 0.25 / 1.5
+      }));
+    });
+  }, []);
   
-  const handleZoomOut = () => {
-    setZoom(prev => Math.max(prev / 1.5, 0.1));
-    setViewBox(prev => ({
-      ...prev,
-      width: prev.width * 1.5,
-      height: prev.height * 1.5,
-      x: prev.x - prev.width * 0.25,
-      y: prev.y - prev.height * 0.25
-    }));
-  };
+  const handleZoomOut = useCallback(() => {
+    requestAnimationFrame(() => {
+      setZoom(prev => Math.max(prev / 1.5, 0.1));
+      setViewBox(prev => ({
+        ...prev,
+        width: prev.width * 1.5,
+        height: prev.height * 1.5,
+        x: prev.x - prev.width * 0.25,
+        y: prev.y - prev.height * 0.25
+      }));
+    });
+  }, []);
   
-  const handleReset = () => {
+  const handleReset = useCallback(() => {
     if (bounds) {
       const width = bounds.max_x - bounds.min_x;
       const height = bounds.max_y - bounds.min_y;
@@ -249,180 +399,86 @@ const CADViewer = ({
       });
       setZoom(1);
     }
-  };
+  }, [bounds]);
   
-  // Pan handlers
-  const handleMouseDown = (e) => {
+  // Pan handlers with requestAnimationFrame
+  const handleMouseDown = useCallback((e) => {
     setIsPanning(true);
     setPanStart({ x: e.clientX, y: e.clientY });
-  };
+  }, []);
   
   const handleMouseMove = useCallback((e) => {
     if (!isPanning || !svgRef.current) return;
     
-    const svg = svgRef.current;
-    const rect = svg.getBoundingClientRect();
-    
-    const dx = (e.clientX - panStart.x) * (viewBox.width / rect.width);
-    const dy = (e.clientY - panStart.y) * (viewBox.height / rect.height);
-    
-    setViewBox(prev => ({
-      ...prev,
-      x: prev.x - dx,
-      y: prev.y + dy // Inverted Y for CAD coordinate system
-    }));
-    
-    setPanStart({ x: e.clientX, y: e.clientY });
+    requestAnimationFrame(() => {
+      const svg = svgRef.current;
+      if (!svg) return;
+      
+      const rect = svg.getBoundingClientRect();
+      const dx = (e.clientX - panStart.x) * (viewBox.width / rect.width);
+      const dy = (e.clientY - panStart.y) * (viewBox.height / rect.height);
+      
+      setViewBox(prev => ({
+        ...prev,
+        x: prev.x - dx,
+        y: prev.y + dy
+      }));
+      
+      setPanStart({ x: e.clientX, y: e.clientY });
+    });
   }, [isPanning, panStart, viewBox]);
   
-  const handleMouseUp = () => {
+  const handleMouseUp = useCallback(() => {
     setIsPanning(false);
-  };
+  }, []);
   
-  // Wheel zoom
+  // Wheel zoom with requestAnimationFrame
   const handleWheel = useCallback((e) => {
     e.preventDefault();
-    const delta = e.deltaY > 0 ? 1.1 : 0.9;
     
-    const svg = svgRef.current;
-    if (!svg) return;
-    
-    const rect = svg.getBoundingClientRect();
-    const mouseX = (e.clientX - rect.left) / rect.width;
-    const mouseY = (e.clientY - rect.top) / rect.height;
-    
-    setViewBox(prev => {
-      const newWidth = prev.width * delta;
-      const newHeight = prev.height * delta;
+    requestAnimationFrame(() => {
+      const delta = e.deltaY > 0 ? 1.1 : 0.9;
+      const svg = svgRef.current;
+      if (!svg) return;
       
-      return {
-        x: prev.x + (prev.width - newWidth) * mouseX,
-        y: prev.y + (prev.height - newHeight) * (1 - mouseY),
-        width: newWidth,
-        height: newHeight
-      };
+      const rect = svg.getBoundingClientRect();
+      const mouseX = (e.clientX - rect.left) / rect.width;
+      const mouseY = (e.clientY - rect.top) / rect.height;
+      
+      setViewBox(prev => {
+        const newWidth = prev.width * delta;
+        const newHeight = prev.height * delta;
+        
+        return {
+          x: prev.x + (prev.width - newWidth) * mouseX,
+          y: prev.y + (prev.height - newHeight) * (1 - mouseY),
+          width: newWidth,
+          height: newHeight
+        };
+      });
+      
+      setZoom(prev => prev / delta);
     });
-    
-    setZoom(prev => prev / delta);
   }, []);
   
   // Toggle layer visibility
-  const toggleLayer = (layer) => {
+  const toggleLayer = useCallback((layer) => {
     setVisibleLayers(prev => ({
       ...prev,
       [layer]: !prev[layer]
     }));
-  };
+  }, []);
   
-  // Render entity to SVG
-  const renderEntity = (entity, index) => {
-    if (!visibleLayers[entity.layer]) return null;
-    
-    const color = entity.color || '#FFFFFF';
-    
-    switch (entity.type) {
-      case 'line':
-        return (
-          <line
-            key={index}
-            x1={entity.data.start.x}
-            y1={-entity.data.start.y}
-            x2={entity.data.end.x}
-            y2={-entity.data.end.y}
-            stroke={color}
-            strokeWidth={viewBox.width / 500}
-            vectorEffect="non-scaling-stroke"
-          />
-        );
-        
-      case 'circle':
-        return (
-          <circle
-            key={index}
-            cx={entity.data.center.x}
-            cy={-entity.data.center.y}
-            r={entity.data.radius}
-            stroke={color}
-            strokeWidth={viewBox.width / 500}
-            fill="none"
-            vectorEffect="non-scaling-stroke"
-          />
-        );
-        
-      case 'arc':
-        const { center, radius, start_angle, end_angle } = entity.data;
-        const startRad = (start_angle * Math.PI) / 180;
-        const endRad = (end_angle * Math.PI) / 180;
-        
-        const startX = center.x + radius * Math.cos(startRad);
-        const startY = -center.y - radius * Math.sin(startRad);
-        const endX = center.x + radius * Math.cos(endRad);
-        const endY = -center.y - radius * Math.sin(endRad);
-        
-        const largeArc = Math.abs(end_angle - start_angle) > 180 ? 1 : 0;
-        
-        return (
-          <path
-            key={index}
-            d={`M ${startX} ${startY} A ${radius} ${radius} 0 ${largeArc} 0 ${endX} ${endY}`}
-            stroke={color}
-            strokeWidth={viewBox.width / 500}
-            fill="none"
-            vectorEffect="non-scaling-stroke"
-          />
-        );
-        
-      case 'polyline':
-      case 'spline':
-        if (!entity.data.points || entity.data.points.length < 2) return null;
-        
-        const points = entity.data.points
-          .map(p => `${p.x},${-p.y}`)
-          .join(' ');
-        
-        return (
-          <polyline
-            key={index}
-            points={points}
-            stroke={color}
-            strokeWidth={viewBox.width / 500}
-            fill="none"
-            vectorEffect="non-scaling-stroke"
-          />
-        );
-        
-      case 'text':
-        return (
-          <text
-            key={index}
-            x={entity.data.position.x}
-            y={-entity.data.position.y}
-            fill={color}
-            fontSize={entity.data.height || viewBox.width / 50}
-            fontFamily="monospace"
-          >
-            {entity.data.text}
-          </text>
-        );
-        
-      default:
-        return null;
-    }
-  };
-  
-  // Render grid
-  const renderGrid = () => {
+  // Memoized grid renderer
+  const gridLines = useMemo(() => {
     if (!showGrid) return null;
     
     const gridSize = Math.pow(10, Math.floor(Math.log10(viewBox.width / 10)));
     const lines = [];
     
     const startX = Math.floor(viewBox.x / gridSize) * gridSize;
-    const startY = Math.floor(-viewBox.y / gridSize) * gridSize;
     const endX = viewBox.x + viewBox.width;
-    const endY = -(viewBox.y - viewBox.height);
     
-    // Vertical lines
     for (let x = startX; x <= endX; x += gridSize) {
       lines.push(
         <line
@@ -437,7 +493,9 @@ const CADViewer = ({
       );
     }
     
-    // Horizontal lines
+    const startY = Math.floor(-viewBox.y / gridSize) * gridSize;
+    const endY = -(viewBox.y - viewBox.height);
+    
     for (let y = startY; y <= endY; y += gridSize) {
       lines.push(
         <line
@@ -453,7 +511,7 @@ const CADViewer = ({
     }
     
     return <g className="grid">{lines}</g>;
-  };
+  }, [showGrid, viewBox]);
 
   return (
     <Card className={`border-0 shadow-lg ${className}`}>
@@ -471,7 +529,7 @@ const CADViewer = ({
           <div className="flex items-center gap-2">
             {entityCount > 0 && (
               <Badge variant="outline" className="text-slate-300 border-slate-600">
-                {entityCount} öğe
+                {entityCount.toLocaleString('tr-TR')} öğe
               </Badge>
             )}
           </div>
@@ -483,10 +541,7 @@ const CADViewer = ({
         <div className="flex flex-wrap items-center gap-2 p-3 bg-slate-800 border-b border-slate-700">
           {showUpload && (
             <>
-              <Label
-                htmlFor="cad-file-input"
-                className="cursor-pointer"
-              >
+              <Label htmlFor="cad-file-input" className="cursor-pointer">
                 <Button
                   variant="outline"
                   size="sm"
@@ -621,13 +676,25 @@ const CADViewer = ({
           </div>
         )}
         
+        {/* Processing Progress */}
+        {isAsyncProcessing && (
+          <div className="p-4 bg-slate-800 border-b border-slate-700">
+            <div className="flex items-center gap-3 mb-2">
+              <Loader2 className="h-5 w-5 animate-spin text-cyan-400" />
+              <span className="text-slate-300">Büyük dosya işleniyor...</span>
+              <span className="text-cyan-400 font-medium">{processingProgress}%</span>
+            </div>
+            <Progress value={processingProgress} className="h-2" />
+          </div>
+        )}
+        
         {/* Canvas Area */}
         <div
           ref={containerRef}
           className={`relative bg-slate-900 ${isFullscreen ? 'fixed inset-0 z-50' : ''}`}
           style={{ height: isFullscreen ? '100vh' : '500px' }}
         >
-          {loading && (
+          {loading && !isAsyncProcessing && (
             <div className="absolute inset-0 flex items-center justify-center bg-slate-900/80 z-10">
               <div className="flex flex-col items-center gap-3">
                 <Loader2 className="h-10 w-10 animate-spin text-cyan-400" />
@@ -641,6 +708,17 @@ const CADViewer = ({
               <FileCode2 className="h-16 w-16 mb-4 text-slate-600" />
               <p className="text-lg font-medium">CAD dosyası yüklenmedi</p>
               <p className="text-sm mt-1">DXF dosyası yükleyin veya kayıtlı dosyalardan seçin</p>
+              <div className="mt-4 p-4 bg-slate-800 rounded-lg text-sm">
+                <p className="text-cyan-400 font-medium mb-2 flex items-center gap-2">
+                  <AlertTriangle className="h-4 w-4" />
+                  Desteklenen Formatlar
+                </p>
+                <ul className="text-slate-400 space-y-1">
+                  <li>• ASCII DXF (tüm versiyonlar)</li>
+                  <li>• Binary DXF (R12-2024)</li>
+                  <li>• Kurtarma modu (bozuk dosyalar)</li>
+                </ul>
+              </div>
             </div>
           ) : (
             <svg
@@ -657,9 +735,14 @@ const CADViewer = ({
               onWheel={handleWheel}
               style={{ backgroundColor: '#0f172a' }}
             >
-              {renderGrid()}
+              {gridLines}
               <g className="entities">
-                {entities.map((entity, index) => renderEntity(entity, index))}
+                <ChunkedEntityList
+                  entities={entities}
+                  viewBoxWidth={viewBox.width}
+                  visibleLayers={visibleLayers}
+                  chunkSize={2000}
+                />
               </g>
             </svg>
           )}
@@ -680,12 +763,8 @@ const CADViewer = ({
         {/* Info Bar */}
         {entities.length > 0 && (
           <div className="flex items-center justify-between px-3 py-2 bg-slate-800 text-xs text-slate-400 border-t border-slate-700">
-            <span>
-              ViewBox: X={viewBox.x.toFixed(2)}, Y={viewBox.y.toFixed(2)}
-            </span>
-            <span>
-              Boyut: {viewBox.width.toFixed(2)} x {viewBox.height.toFixed(2)}
-            </span>
+            <span>ViewBox: X={viewBox.x.toFixed(2)}, Y={viewBox.y.toFixed(2)}</span>
+            <span>Boyut: {viewBox.width.toFixed(2)} x {viewBox.height.toFixed(2)}</span>
           </div>
         )}
       </CardContent>
@@ -721,7 +800,7 @@ const CADViewer = ({
                       <div>
                         <p className="font-medium text-slate-200">{file.filename}</p>
                         <p className="text-xs text-slate-400">
-                          {file.entity_count} öğe • {new Date(file.upload_date).toLocaleDateString('tr-TR')}
+                          {file.entity_count?.toLocaleString('tr-TR')} öğe • {new Date(file.upload_date).toLocaleDateString('tr-TR')}
                         </p>
                       </div>
                     </div>
