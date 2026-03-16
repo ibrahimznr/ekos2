@@ -370,6 +370,103 @@ const SansTopuTahmin = () => {
           </CardContent>
         </Card>
 
+        {/* ID Search Panel */}
+        <Card className="border-0 shadow-lg">
+          <CardHeader className="pb-4">
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <Search className="h-5 w-5 text-indigo-600" />
+              ID ile Kombinasyon Ara
+            </CardTitle>
+            <CardDescription>
+              Kombinasyon sıra numarasını girerek doğrudan arayın
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex flex-col sm:flex-row gap-3">
+              <div className="flex-1">
+                <Input
+                  type="number"
+                  placeholder={`1 - ${totalCombinations.toLocaleString('tr-TR')} arası bir ID girin`}
+                  value={searchId}
+                  onChange={(e) => setSearchId(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleIdSearch()}
+                  min={1}
+                  max={totalCombinations}
+                  className="text-lg"
+                  data-testid="id-search-input"
+                />
+              </div>
+              <Button
+                onClick={handleIdSearch}
+                disabled={searchingId || totalCombinations === 0 || !searchId}
+                className="bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 shadow-md"
+                data-testid="id-search-btn"
+              >
+                {searchingId ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Aranıyor...
+                  </>
+                ) : (
+                  <>
+                    <Search className="h-4 w-4 mr-2" />
+                    ID ile Ara
+                  </>
+                )}
+              </Button>
+              {idSearchResult && (
+                <Button
+                  onClick={handleClearIdSearch}
+                  variant="outline"
+                  data-testid="clear-id-search-btn"
+                >
+                  <RotateCcw className="h-4 w-4 mr-2" />
+                  Temizle
+                </Button>
+              )}
+            </div>
+
+            {/* ID Search Result */}
+            {idSearchResult && (
+              <div className="p-4 rounded-lg border bg-gradient-to-br from-indigo-50 to-blue-50 border-indigo-200">
+                <div className="flex items-start gap-3">
+                  <CheckCircle2 className="h-5 w-5 text-indigo-600 mt-0.5" />
+                  <div className="flex-1">
+                    <p className="font-semibold text-indigo-800 mb-3">
+                      #{idSearchResult.index.toLocaleString('tr-TR')} Numaralı Kombinasyon
+                    </p>
+                    
+                    <div className="p-4 bg-white rounded-lg border">
+                      <div className="flex items-center gap-3 flex-wrap">
+                        <span className="text-sm text-gray-600 font-medium">Ana Sayılar:</span>
+                        {idSearchResult.main_numbers.map((num, i) => (
+                          <span 
+                            key={i}
+                            className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-blue-600 text-white flex items-center justify-center font-bold shadow-md"
+                          >
+                            {num}
+                          </span>
+                        ))}
+                        <span className="text-gray-400 text-xl mx-2">+</span>
+                        <span className="text-sm text-gray-600 font-medium">Bonus:</span>
+                        <span className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-500 to-orange-600 text-white flex items-center justify-center font-bold shadow-md">
+                          {idSearchResult.bonus_number}
+                        </span>
+                      </div>
+                      <div className="mt-3 pt-3 border-t">
+                        <span className="text-sm text-gray-600">Format: </span>
+                        <code className="bg-gray-100 px-3 py-1 rounded text-sm font-mono font-semibold">
+                          {idSearchResult.formatted}
+                        </code>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
         {/* Combination Filter Panel */}
         <Card className="border-0 shadow-lg">
           <CardHeader className="pb-4">
