@@ -313,16 +313,63 @@ All critical tasks completed.
 
 ---
 
+## March 16, 2026 - Metraj ve Pozlandırma Modülü (Bill of Quantities)
+
+**Yeni Özellik: Metraj Cetveli** ✅
+- Sidebar'a "Metraj Cetveli" menü öğesi eklendi (yeşil/teal gradient)
+- `/metraj` sayfası oluşturuldu
+- Tam CRUD işlemleri (oluştur, oku, güncelle, sil)
+- Düzenlenebilir tablo arayüzü
+
+**Desteklenen Özellikler:**
+- Metraj cetveli oluşturma/düzenleme/silme
+- Satır ekleme/silme/kopyalama
+- Inline düzenleme (tüm alanlar düzenlenebilir)
+- Otomatik hesaplama (miktar × birim fiyat = toplam)
+- Ağırlık hesaplama (miktar × birim ağırlık = toplam ağırlık)
+- Genel toplam ve ağırlık özeti
+- Birim seçimi dropdown (Adet, m, m², m³, kg, ton, lt, takım, vb.)
+- Profesyonel Excel export
+- Toplu güncelleme (bulk update)
+
+**API Endpoints:**
+- `POST /api/metraj/` - Yeni cetvel oluştur
+- `GET /api/metraj/` - Tüm cetvelleri listele
+- `GET /api/metraj/{cetvel_id}` - Cetvel detayı
+- `PUT /api/metraj/{cetvel_id}` - Cetvel meta bilgisi güncelle
+- `DELETE /api/metraj/{cetvel_id}` - Cetvel sil
+- `POST /api/metraj/{cetvel_id}/satir` - Satır ekle
+- `PUT /api/metraj/{cetvel_id}/satir/{satir_id}` - Satır güncelle
+- `DELETE /api/metraj/{cetvel_id}/satir/{satir_id}` - Satır sil
+- `POST /api/metraj/{cetvel_id}/satir/{satir_id}/duplicate` - Satır kopyala
+- `PUT /api/metraj/{cetvel_id}/bulk-update` - Toplu satır güncelle
+- `GET /api/metraj/{cetvel_id}/export-excel` - Excel export
+- `GET /api/metraj/birimler/liste` - Birim seçenekleri
+
+**MongoDB Collection:**
+- `metraj_cetvelleri`: { id, proje_id, rapor_id, baslik, aciklama, satirlar[], genel_toplam, genel_agirlik, created_at, updated_at, created_by }
+
+**Test Sonuçları:**
+- Backend: %100 (14/14 test geçti)
+- Frontend: %100 (tüm özellikler çalışıyor)
+- Test dosyası: `/app/backend/tests/test_metraj.py`
+- Test raporu: `/app/test_reports/iteration_4.json`
+
+---
+
 ## Prioritized Backlog
 
 ### P0 (Critical)
 - [x] ~~Şans Topu Tahmin Üretici~~ (TAMAMLANDI)
+- [x] ~~Metraj ve Pozlandırma Modülü~~ (TAMAMLANDI - 16.03.2026)
 
 ### P1 (High Priority)  
 - [ ] Veri tutarsızlığı hatası - Dashboard filtreleme sayısı backend ile uyumsuz
 - [ ] Bildirim sistemini standartlaştırma (eski sonner toast'ları kaldırma)
+- [ ] 1GB Binary DXF dosya hatası doğrulaması (kullanıcı testi bekliyor)
 
 ### P2 (Medium Priority)
+- [ ] Sistem Arşiv Merkezi tamamlanması
 - [ ] Uluslararasılaştırma (TR/EN) - i18n framework mevcut ama metinler Türkçe hardcoded
 - [ ] Veritabanı temizliği (tekrarlanan proje kayıtları)
 
