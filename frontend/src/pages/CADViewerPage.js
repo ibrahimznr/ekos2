@@ -58,7 +58,7 @@ const CADViewerPage = () => {
               <li>• <strong>DXF</strong> formatı desteklenir</li>
               <li>• AutoCAD 2000-2024 uyumlu</li>
               <li>• DWG dosyalarını önce DXF'e dönüştürün</li>
-              <li>• Maksimum dosya boyutu: 50MB</li>
+              <li>• Maksimum dosya boyutu: <strong>5GB</strong></li>
             </ul>
           </div>
         </div>
