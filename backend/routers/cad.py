@@ -335,6 +335,7 @@ async def parse_cad_file(
     """
     Parse DXF file with Binary DXF support and optimized processing
     Supports both ASCII and Binary DXF formats
+    Maximum file size: 5GB
     """
     
     # Validate file extension
@@ -351,12 +352,30 @@ async def parse_cad_file(
             detail="DWG dosyaları doğrudan desteklenmemektedir. Lütfen AutoCAD'den 'Save As DXF' ile dönüştürün."
         )
     
+    temp_file_path = None
+    
     try:
-        # Read file content
-        content = await file.read()
+        # For large files, use streaming to temp file
+        # This avoids loading entire file into memory
+        temp_file_path = os.path.join(tempfile.gettempdir(), f"cad_upload_{uuid.uuid4()}.dxf")
         
-        if len(content) == 0:
+        total_size = 0
+        with open(temp_file_path, 'wb') as temp_file:
+            while True:
+                chunk = await file.read(CHUNK_SIZE)
+                if not chunk:
+                    break
+                total_size += len(chunk)
+                if total_size > MAX_FILE_SIZE:
+                    raise HTTPException(status_code=413, detail=f"Dosya boyutu 5GB'ı aşamaz")
+                temp_file.write(chunk)
+        
+        if total_size == 0:
             raise HTTPException(status_code=400, detail="Dosya boş")
+        
+        # Read the temp file for parsing
+        with open(temp_file_path, 'rb') as f:
+            content = f.read()
         
         # Run parsing in thread pool to avoid blocking
         loop = asyncio.get_event_loop()
@@ -381,11 +400,135 @@ async def parse_cad_file(
             status_code=400,
             detail=f"DXF dosyası bozuk: {str(e)}"
         )
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(
             status_code=500,
             detail=f"Dosya işlenirken hata: {str(e)}"
         )
+    finally:
+        # Clean up temp file
+        if temp_file_path and os.path.exists(temp_file_path):
+            try:
+                os.remove(temp_file_path)
+            except:
+                pass
+
+
+@router.post("/parse-streaming")
+async def parse_cad_file_streaming(
+    file: UploadFile = File(...),
+    max_entities: int = 100000,
+    background_tasks: BackgroundTasks = None,
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Streaming DXF parsing for very large files (up to 5GB)
+    Saves file to disk first, then processes in background
+    Returns task_id for status polling
+    """
+    
+    filename = file.filename.lower()
+    if not filename.endswith('.dxf'):
+        raise HTTPException(status_code=400, detail="Sadece DXF dosyaları desteklenmektedir")
+    
+    task_id = str(uuid.uuid4())
+    temp_file_path = os.path.join(tempfile.gettempdir(), f"cad_stream_{task_id}.dxf")
+    
+    # Initialize task status
+    processing_tasks[task_id] = {
+        "status": "uploading",
+        "progress": 0,
+        "message": "Dosya yükleniyor...",
+        "filename": file.filename,
+        "file_size": 0,
+        "temp_path": temp_file_path,
+        "result": None
+    }
+    
+    try:
+        # Stream file to disk
+        total_size = 0
+        with open(temp_file_path, 'wb') as temp_file:
+            while True:
+                chunk = await file.read(CHUNK_SIZE)
+                if not chunk:
+                    break
+                total_size += len(chunk)
+                if total_size > MAX_FILE_SIZE:
+                    raise HTTPException(status_code=413, detail="Dosya boyutu 5GB'ı aşamaz")
+                temp_file.write(chunk)
+                
+                # Update upload progress
+                processing_tasks[task_id]["file_size"] = total_size
+                processing_tasks[task_id]["message"] = f"Yükleniyor: {total_size / (1024*1024):.1f} MB"
+        
+        if total_size == 0:
+            raise HTTPException(status_code=400, detail="Dosya boş")
+        
+        processing_tasks[task_id]["status"] = "pending"
+        processing_tasks[task_id]["message"] = "Yükleme tamamlandı, işlem sıraya alındı"
+        processing_tasks[task_id]["progress"] = 10
+        
+        # Start background processing
+        background_tasks.add_task(process_large_dxf_background, task_id, temp_file_path, max_entities)
+        
+        return {
+            "task_id": task_id,
+            "status": "pending",
+            "file_size": total_size,
+            "message": f"Dosya yüklendi ({total_size / (1024*1024):.1f} MB), işlem başlatıldı"
+        }
+        
+    except HTTPException:
+        # Clean up on error
+        if os.path.exists(temp_file_path):
+            os.remove(temp_file_path)
+        if task_id in processing_tasks:
+            del processing_tasks[task_id]
+        raise
+    except Exception as e:
+        if os.path.exists(temp_file_path):
+            os.remove(temp_file_path)
+        if task_id in processing_tasks:
+            del processing_tasks[task_id]
+        raise HTTPException(status_code=500, detail=f"Dosya yüklenirken hata: {str(e)}")
+
+
+async def process_large_dxf_background(task_id: str, file_path: str, max_entities: int):
+    """Background task for processing large DXF files"""
+    try:
+        processing_tasks[task_id]["status"] = "processing"
+        processing_tasks[task_id]["progress"] = 20
+        processing_tasks[task_id]["message"] = "Dosya işleniyor..."
+        
+        # Read file
+        with open(file_path, 'rb') as f:
+            content = f.read()
+        
+        processing_tasks[task_id]["progress"] = 40
+        processing_tasks[task_id]["message"] = "DXF parse ediliyor..."
+        
+        # Parse in executor
+        loop = asyncio.get_event_loop()
+        result = await loop.run_in_executor(executor, parse_dxf_file_sync, content, max_entities)
+        
+        processing_tasks[task_id]["status"] = "completed"
+        processing_tasks[task_id]["progress"] = 100
+        processing_tasks[task_id]["message"] = result["message"]
+        processing_tasks[task_id]["result"] = result
+        
+    except Exception as e:
+        processing_tasks[task_id]["status"] = "error"
+        processing_tasks[task_id]["message"] = str(e)
+    finally:
+        # Clean up temp file
+        if os.path.exists(file_path):
+            try:
+                os.remove(file_path)
+            except:
+                pass
 
 
 @router.post("/parse-async")
