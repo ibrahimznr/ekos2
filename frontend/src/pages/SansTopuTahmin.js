@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import Layout from '@/components/Layout';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import {
   Table,
@@ -29,7 +30,8 @@ import {
   Dice5,
   Filter,
   RotateCcw,
-  ListFilter
+  ListFilter,
+  Search
 } from 'lucide-react';
 
 const SansTopuTahmin = () => {
@@ -40,6 +42,7 @@ const SansTopuTahmin = () => {
   const [clearing, setClearing] = useState(false);
   const [filtering, setFiltering] = useState(false);
   const [exporting, setExporting] = useState(false);
+  const [searchingId, setSearchingId] = useState(false);
 
   // Filter selections
   const [selectedMainNumbers, setSelectedMainNumbers] = useState([]);
@@ -47,6 +50,10 @@ const SansTopuTahmin = () => {
 
   // Filter results
   const [filterResult, setFilterResult] = useState(null);
+
+  // ID Search
+  const [searchId, setSearchId] = useState('');
+  const [idSearchResult, setIdSearchResult] = useState(null);
 
   // Sample combinations
   const [sampleCombinations, setSampleCombinations] = useState([]);
