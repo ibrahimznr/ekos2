@@ -11,7 +11,7 @@ Bu dosya sadece:
 içerir. Tüm endpoint'ler /routers/ klasöründeki modüllere taşınmıştır.
 """
 
-from fastapi import FastAPI, APIRouter
+from fastapi import FastAPI, APIRouter, Request
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 import os
