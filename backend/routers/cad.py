@@ -537,9 +537,12 @@ async def process_large_dxf_background(task_id: str, file_path: str, max_entitie
         processing_tasks[task_id]["progress"] = 40
         processing_tasks[task_id]["message"] = "DXF parse ediliyor..."
         
-        # Parse in executor
+        # Parse in executor - pass file_path for better binary DXF handling
         loop = asyncio.get_event_loop()
-        result = await loop.run_in_executor(executor, parse_dxf_file_sync, content, max_entities)
+        result = await loop.run_in_executor(
+            executor, 
+            lambda: parse_dxf_file_sync(content, max_entities, file_path)
+        )
         
         processing_tasks[task_id]["status"] = "completed"
         processing_tasks[task_id]["progress"] = 100
