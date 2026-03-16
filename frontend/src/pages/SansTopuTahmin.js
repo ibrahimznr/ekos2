@@ -124,12 +124,48 @@ const SansTopuTahmin = () => {
       setTotalCombinations(0);
       setSampleCombinations([]);
       setFilterResult(null);
+      setIdSearchResult(null);
+      setSearchId('');
       toast.success(response.data.message);
     } catch (error) {
       toast.error('Önbellek temizlenirken hata oluştu');
     } finally {
       setClearing(false);
     }
+  };
+
+  // Search by ID
+  const handleIdSearch = async () => {
+    const id = parseInt(searchId, 10);
+    if (isNaN(id) || id <= 0) {
+      toast.error('Lütfen geçerli bir ID numarası girin');
+      return;
+    }
+    
+    if (id > totalCombinations) {
+      toast.error(`ID ${totalCombinations.toLocaleString('tr-TR')} veya daha küçük olmalıdır`);
+      return;
+    }
+    
+    try {
+      setSearchingId(true);
+      setIdSearchResult(null);
+      const response = await api.get(`/kombinasyonlar/combination/${id}`);
+      setIdSearchResult(response.data);
+      toast.success(`#${id} numaralı kombinasyon bulundu`);
+    } catch (error) {
+      const message = error.response?.data?.detail || 'Kombinasyon bulunamadı';
+      toast.error(message);
+      setIdSearchResult(null);
+    } finally {
+      setSearchingId(false);
+    }
+  };
+
+  // Clear ID search
+  const handleClearIdSearch = () => {
+    setSearchId('');
+    setIdSearchResult(null);
   };
 
   // Toggle main number selection
