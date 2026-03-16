@@ -406,12 +406,11 @@ async def parse_cad_file(
             content = f.read()
         
         # Run parsing in thread pool to avoid blocking
+        # Pass file_path for better binary DXF handling
         loop = asyncio.get_event_loop()
         result = await loop.run_in_executor(
             executor, 
-            parse_dxf_file_sync, 
-            content,
-            max_entities
+            lambda: parse_dxf_file_sync(content, max_entities, temp_file_path)
         )
         
         return CADParseResult(
