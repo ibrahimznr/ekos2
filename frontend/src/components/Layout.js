@@ -291,6 +291,25 @@ const Layout = ({ children }) => {
             );
           })}
 
+          {/* CAD Viewer */}
+          <button
+            onClick={() => navigate('/cad-viewer')}
+            className={`w-full flex items-center gap-3 px-3 py-3 rounded-lg transition-all duration-200 ${
+              location.pathname === '/cad-viewer'
+                ? 'bg-gradient-to-r from-cyan-600 to-blue-700 text-white shadow-md'
+                : 'text-gray-700 hover:bg-gray-100'
+            } ${!sidebarOpen ? 'justify-center' : ''}`}
+            title={!sidebarOpen ? 'CAD Görüntüleyici' : ''}
+            data-testid="nav-cad-viewer"
+          >
+            <FileCode2 className={`h-5 w-5 flex-shrink-0 ${
+              location.pathname === '/cad-viewer' ? 'text-white' : 'text-cyan-500'
+            }`} />
+            {sidebarOpen && (
+              <span className="font-medium">CAD Görüntüleyici</span>
+            )}
+          </button>
+
           {/* Çekiliş Dropdown */}
           <div className="pt-2 border-t border-gray-200 mt-2">
             <button
