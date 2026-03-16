@@ -1,24 +1,33 @@
 """
 CAD Router - DWG/DXF Dosya İşleme ve Görüntüleme
-Web tabanlı CAD Viewer için backend API
+Optimized Version with Binary DXF Support and Background Processing
 """
 
-from fastapi import APIRouter, HTTPException, Depends, UploadFile, File, Form
+from fastapi import APIRouter, HTTPException, Depends, UploadFile, File, Form, BackgroundTasks
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from typing import List, Optional, Dict, Any
 import ezdxf
-from ezdxf.entities import Line, Circle, Arc, LWPolyline, Polyline, Spline, Text, MText, Insert
+from ezdxf import recover
+from ezdxf.entities import Line, Circle, Arc, LWPolyline, Polyline, Spline, Text, MText
 import io
 import os
 import math
 import uuid
+import asyncio
 from datetime import datetime, timezone
+from concurrent.futures import ThreadPoolExecutor
 
 from database import db
 from routers.auth import get_current_user
 
 router = APIRouter(prefix="/cad", tags=["CAD"])
+
+# Thread pool for CPU-intensive DXF parsing
+executor = ThreadPoolExecutor(max_workers=2)
+
+# Progress tracking for background tasks
+processing_tasks = {}
 
 
 class CADEntity(BaseModel):
@@ -37,52 +46,21 @@ class CADParseResult(BaseModel):
     message: str
 
 
-class CADMetadata(BaseModel):
-    id: str
-    filename: str
-    file_path: str
-    upload_date: str
-    entity_count: int
-    layers: List[str]
-    bounds: Dict[str, float]
-    related_project_id: Optional[str] = None
-    related_report_id: Optional[str] = None
-    description: Optional[str] = None
+class ProcessingStatus(BaseModel):
+    task_id: str
+    status: str  # pending, processing, completed, error
+    progress: int
+    message: str
+    entity_count: Optional[int] = None
+    layers: Optional[List[str]] = None
 
 
-# Color mapping for AutoCAD color index
+# AutoCAD Color Index mapping
 ACI_COLORS = {
-    0: "#000000",  # ByBlock
-    1: "#FF0000",  # Red
-    2: "#FFFF00",  # Yellow
-    3: "#00FF00",  # Green
-    4: "#00FFFF",  # Cyan
-    5: "#0000FF",  # Blue
-    6: "#FF00FF",  # Magenta
-    7: "#FFFFFF",  # White
-    8: "#808080",  # Gray
-    9: "#C0C0C0",  # Light Gray
-    10: "#FF0000",
-    11: "#FF7F7F",
-    12: "#CC0000",
-    30: "#FF7F00",
-    40: "#FFBF00",
-    50: "#FFFF00",
-    70: "#7FFF00",
-    90: "#00FF00",
-    110: "#00FF7F",
-    130: "#00FFFF",
-    150: "#007FFF",
-    170: "#0000FF",
-    190: "#7F00FF",
-    210: "#FF00FF",
-    230: "#FF007F",
-    250: "#333333",
-    251: "#505050",
-    252: "#696969",
-    253: "#828282",
-    254: "#BEBEBE",
-    255: "#FFFFFF",
+    0: "#000000", 1: "#FF0000", 2: "#FFFF00", 3: "#00FF00",
+    4: "#00FFFF", 5: "#0000FF", 6: "#FF00FF", 7: "#FFFFFF",
+    8: "#808080", 9: "#C0C0C0", 10: "#FF0000", 250: "#333333",
+    251: "#505050", 252: "#696969", 253: "#828282", 254: "#BEBEBE", 255: "#FFFFFF",
 }
 
 
@@ -93,7 +71,6 @@ def get_color_from_entity(entity) -> str:
         if color_index in ACI_COLORS:
             return ACI_COLORS[color_index]
         elif 0 <= color_index <= 255:
-            # Generate color from index
             r = (color_index * 37) % 256
             g = (color_index * 73) % 256
             b = (color_index * 109) % 256
@@ -103,182 +80,151 @@ def get_color_from_entity(entity) -> str:
         return "#FFFFFF"
 
 
-def parse_line(entity: Line) -> CADEntity:
-    """Parse LINE entity"""
-    return CADEntity(
-        type="line",
-        color=get_color_from_entity(entity),
-        layer=entity.dxf.layer,
-        data={
-            "start": {"x": entity.dxf.start.x, "y": entity.dxf.start.y},
-            "end": {"x": entity.dxf.end.x, "y": entity.dxf.end.y}
-        }
-    )
-
-
-def parse_circle(entity: Circle) -> CADEntity:
-    """Parse CIRCLE entity"""
-    return CADEntity(
-        type="circle",
-        color=get_color_from_entity(entity),
-        layer=entity.dxf.layer,
-        data={
-            "center": {"x": entity.dxf.center.x, "y": entity.dxf.center.y},
-            "radius": entity.dxf.radius
-        }
-    )
-
-
-def parse_arc(entity: Arc) -> CADEntity:
-    """Parse ARC entity"""
-    return CADEntity(
-        type="arc",
-        color=get_color_from_entity(entity),
-        layer=entity.dxf.layer,
-        data={
-            "center": {"x": entity.dxf.center.x, "y": entity.dxf.center.y},
-            "radius": entity.dxf.radius,
-            "start_angle": entity.dxf.start_angle,
-            "end_angle": entity.dxf.end_angle
-        }
-    )
-
-
-def parse_lwpolyline(entity: LWPolyline) -> CADEntity:
-    """Parse LWPOLYLINE entity"""
-    points = []
-    for point in entity.get_points():
-        points.append({"x": point[0], "y": point[1]})
-    
-    return CADEntity(
-        type="polyline",
-        color=get_color_from_entity(entity),
-        layer=entity.dxf.layer,
-        data={
-            "points": points,
-            "closed": entity.closed
-        }
-    )
-
-
-def parse_polyline(entity: Polyline) -> CADEntity:
-    """Parse POLYLINE entity"""
-    points = []
-    for vertex in entity.vertices:
-        points.append({"x": vertex.dxf.location.x, "y": vertex.dxf.location.y})
-    
-    return CADEntity(
-        type="polyline",
-        color=get_color_from_entity(entity),
-        layer=entity.dxf.layer,
-        data={
-            "points": points,
-            "closed": entity.is_closed
-        }
-    )
-
-
-def parse_spline(entity: Spline) -> CADEntity:
-    """Parse SPLINE entity - convert to polyline approximation"""
+def parse_entity(entity) -> Optional[CADEntity]:
+    """Parse a single DXF entity to CADEntity - Optimized"""
     try:
-        points = []
-        # Get control points or fit points
-        if entity.control_points:
-            for point in entity.control_points:
-                points.append({"x": point.x, "y": point.y})
-        elif entity.fit_points:
-            for point in entity.fit_points:
-                points.append({"x": point.x, "y": point.y})
+        entity_type = entity.dxftype()
+        color = get_color_from_entity(entity)
+        layer = entity.dxf.layer if hasattr(entity.dxf, 'layer') else "0"
         
-        return CADEntity(
-            type="spline",
-            color=get_color_from_entity(entity),
-            layer=entity.dxf.layer,
-            data={
-                "points": points,
-                "closed": entity.closed
-            }
-        )
-    except:
-        return None
-
-
-def parse_text(entity) -> CADEntity:
-    """Parse TEXT or MTEXT entity"""
-    try:
-        if hasattr(entity.dxf, 'insert'):
-            x, y = entity.dxf.insert.x, entity.dxf.insert.y
-        else:
-            x, y = 0, 0
-        
-        text_content = ""
-        if hasattr(entity.dxf, 'text'):
-            text_content = entity.dxf.text
-        elif hasattr(entity, 'text'):
-            text_content = entity.text
-        
-        height = entity.dxf.height if hasattr(entity.dxf, 'height') else 1.0
-        
-        return CADEntity(
-            type="text",
-            color=get_color_from_entity(entity),
-            layer=entity.dxf.layer,
-            data={
-                "position": {"x": x, "y": y},
-                "text": text_content,
-                "height": height
-            }
-        )
-    except:
-        return None
+        if entity_type == 'LINE':
+            return CADEntity(
+                type="line",
+                color=color,
+                layer=layer,
+                data={
+                    "start": {"x": float(entity.dxf.start.x), "y": float(entity.dxf.start.y)},
+                    "end": {"x": float(entity.dxf.end.x), "y": float(entity.dxf.end.y)}
+                }
+            )
+            
+        elif entity_type == 'CIRCLE':
+            return CADEntity(
+                type="circle",
+                color=color,
+                layer=layer,
+                data={
+                    "center": {"x": float(entity.dxf.center.x), "y": float(entity.dxf.center.y)},
+                    "radius": float(entity.dxf.radius)
+                }
+            )
+            
+        elif entity_type == 'ARC':
+            return CADEntity(
+                type="arc",
+                color=color,
+                layer=layer,
+                data={
+                    "center": {"x": float(entity.dxf.center.x), "y": float(entity.dxf.center.y)},
+                    "radius": float(entity.dxf.radius),
+                    "start_angle": float(entity.dxf.start_angle),
+                    "end_angle": float(entity.dxf.end_angle)
+                }
+            )
+            
+        elif entity_type == 'LWPOLYLINE':
+            points = [{"x": float(p[0]), "y": float(p[1])} for p in entity.get_points()]
+            if len(points) < 2:
+                return None
+            return CADEntity(
+                type="polyline",
+                color=color,
+                layer=layer,
+                data={"points": points, "closed": entity.closed}
+            )
+            
+        elif entity_type == 'POLYLINE':
+            points = []
+            for vertex in entity.vertices:
+                try:
+                    points.append({"x": float(vertex.dxf.location.x), "y": float(vertex.dxf.location.y)})
+                except:
+                    continue
+            if len(points) < 2:
+                return None
+            return CADEntity(
+                type="polyline",
+                color=color,
+                layer=layer,
+                data={"points": points, "closed": entity.is_closed}
+            )
+            
+        elif entity_type == 'SPLINE':
+            points = []
+            if hasattr(entity, 'control_points') and entity.control_points:
+                points = [{"x": float(p.x), "y": float(p.y)} for p in entity.control_points]
+            elif hasattr(entity, 'fit_points') and entity.fit_points:
+                points = [{"x": float(p.x), "y": float(p.y)} for p in entity.fit_points]
+            if len(points) < 2:
+                return None
+            return CADEntity(
+                type="spline",
+                color=color,
+                layer=layer,
+                data={"points": points, "closed": getattr(entity, 'closed', False)}
+            )
+            
+        elif entity_type in ['TEXT', 'MTEXT']:
+            x, y = 0.0, 0.0
+            if hasattr(entity.dxf, 'insert'):
+                x, y = float(entity.dxf.insert.x), float(entity.dxf.insert.y)
+            text_content = ""
+            if hasattr(entity.dxf, 'text'):
+                text_content = str(entity.dxf.text)
+            elif hasattr(entity, 'text'):
+                text_content = str(entity.text)
+            height = float(entity.dxf.height) if hasattr(entity.dxf, 'height') else 1.0
+            
+            return CADEntity(
+                type="text",
+                color=color,
+                layer=layer,
+                data={"position": {"x": x, "y": y}, "text": text_content, "height": height}
+            )
+            
+    except Exception as e:
+        pass
+    
+    return None
 
 
 def calculate_bounds(entities: List[CADEntity]) -> Dict[str, float]:
-    """Calculate bounding box of all entities"""
+    """Calculate bounding box of all entities - Optimized"""
     if not entities:
         return {"min_x": 0, "min_y": 0, "max_x": 100, "max_y": 100}
     
-    min_x = float('inf')
-    min_y = float('inf')
-    max_x = float('-inf')
-    max_y = float('-inf')
+    min_x, min_y = float('inf'), float('inf')
+    max_x, max_y = float('-inf'), float('-inf')
     
     for entity in entities:
         data = entity.data
+        etype = entity.type
         
-        if entity.type == "line":
-            min_x = min(min_x, data["start"]["x"], data["end"]["x"])
-            min_y = min(min_y, data["start"]["y"], data["end"]["y"])
-            max_x = max(max_x, data["start"]["x"], data["end"]["x"])
-            max_y = max(max_y, data["start"]["y"], data["end"]["y"])
+        if etype == "line":
+            xs = [data["start"]["x"], data["end"]["x"]]
+            ys = [data["start"]["y"], data["end"]["y"]]
+            min_x, max_x = min(min_x, *xs), max(max_x, *xs)
+            min_y, max_y = min(min_y, *ys), max(max_y, *ys)
             
-        elif entity.type == "circle":
-            min_x = min(min_x, data["center"]["x"] - data["radius"])
-            min_y = min(min_y, data["center"]["y"] - data["radius"])
-            max_x = max(max_x, data["center"]["x"] + data["radius"])
-            max_y = max(max_y, data["center"]["y"] + data["radius"])
+        elif etype in ["circle", "arc"]:
+            cx, cy, r = data["center"]["x"], data["center"]["y"], data["radius"]
+            min_x, max_x = min(min_x, cx - r), max(max_x, cx + r)
+            min_y, max_y = min(min_y, cy - r), max(max_y, cy + r)
             
-        elif entity.type == "arc":
-            min_x = min(min_x, data["center"]["x"] - data["radius"])
-            min_y = min(min_y, data["center"]["y"] - data["radius"])
-            max_x = max(max_x, data["center"]["x"] + data["radius"])
-            max_y = max(max_y, data["center"]["y"] + data["radius"])
-            
-        elif entity.type in ["polyline", "spline"]:
-            for point in data["points"]:
-                min_x = min(min_x, point["x"])
-                min_y = min(min_y, point["y"])
-                max_x = max(max_x, point["x"])
-                max_y = max(max_y, point["y"])
+        elif etype in ["polyline", "spline"]:
+            for p in data["points"]:
+                min_x, max_x = min(min_x, p["x"]), max(max_x, p["x"])
+                min_y, max_y = min(min_y, p["y"]), max(max_y, p["y"])
                 
-        elif entity.type == "text":
-            min_x = min(min_x, data["position"]["x"])
-            min_y = min(min_y, data["position"]["y"])
-            max_x = max(max_x, data["position"]["x"])
-            max_y = max(max_y, data["position"]["y"])
+        elif etype == "text":
+            px, py = data["position"]["x"], data["position"]["y"]
+            min_x, max_x = min(min_x, px), max(max_x, px)
+            min_y, max_y = min(min_y, py), max(max_y, py)
     
     # Add padding
-    padding = max(max_x - min_x, max_y - min_y) * 0.05
+    width = max_x - min_x if max_x > min_x else 100
+    height = max_y - min_y if max_y > min_y else 100
+    padding = max(width, height) * 0.05
     
     return {
         "min_x": min_x - padding if min_x != float('inf') else 0,
@@ -288,12 +234,101 @@ def calculate_bounds(entities: List[CADEntity]) -> Dict[str, float]:
     }
 
 
+def parse_dxf_file_sync(content: bytes, max_entities: int = 50000) -> Dict:
+    """
+    Synchronous DXF parsing with Binary DXF support and recovery mode
+    Optimized for large files with entity limit
+    """
+    doc = None
+    auditor = None
+    is_recovered = False
+    
+    # Try multiple parsing strategies
+    parsing_strategies = [
+        # Strategy 1: Direct binary read
+        lambda: ezdxf.read(io.BytesIO(content)),
+        # Strategy 2: Recovery mode for corrupted files
+        lambda: recover.readfile(io.BytesIO(content))[0],
+        # Strategy 3: UTF-8 decoded string (ASCII DXF)
+        lambda: ezdxf.read(io.StringIO(content.decode('utf-8', errors='ignore'))),
+        # Strategy 4: Latin-1 decoded string
+        lambda: ezdxf.read(io.StringIO(content.decode('latin-1', errors='ignore'))),
+        # Strategy 5: CP1252 (Windows) decoded string
+        lambda: ezdxf.read(io.StringIO(content.decode('cp1252', errors='ignore'))),
+    ]
+    
+    last_error = None
+    for i, strategy in enumerate(parsing_strategies):
+        try:
+            result = strategy()
+            if isinstance(result, tuple):
+                doc, auditor = result
+                is_recovered = True
+            else:
+                doc = result
+            break
+        except Exception as e:
+            last_error = e
+            continue
+    
+    if doc is None:
+        raise Exception(f"Tüm okuma yöntemleri başarısız: {str(last_error)}")
+    
+    # Get modelspace
+    msp = doc.modelspace()
+    
+    # Supported entity types for filtering
+    SUPPORTED_TYPES = {'LINE', 'CIRCLE', 'ARC', 'LWPOLYLINE', 'POLYLINE', 'SPLINE', 'TEXT', 'MTEXT'}
+    
+    entities = []
+    layers = set()
+    processed = 0
+    skipped = 0
+    
+    # Process entities with limit
+    for entity in msp:
+        if processed >= max_entities:
+            break
+            
+        try:
+            if entity.dxftype() not in SUPPORTED_TYPES:
+                continue
+                
+            parsed = parse_entity(entity)
+            if parsed:
+                entities.append(parsed)
+                layers.add(parsed.layer)
+                processed += 1
+            else:
+                skipped += 1
+        except:
+            skipped += 1
+            continue
+    
+    bounds = calculate_bounds(entities)
+    
+    return {
+        "success": True,
+        "entities": entities,
+        "bounds": bounds,
+        "layers": list(layers),
+        "entity_count": len(entities),
+        "skipped_count": skipped,
+        "is_recovered": is_recovered,
+        "message": f"{len(entities)} öğe işlendi" + (f" (kurtarma modunda)" if is_recovered else "")
+    }
+
+
 @router.post("/parse", response_model=CADParseResult)
 async def parse_cad_file(
     file: UploadFile = File(...),
+    max_entities: int = 50000,
     current_user: dict = Depends(get_current_user)
 ):
-    """Parse DXF file and return entities as JSON"""
+    """
+    Parse DXF file with Binary DXF support and optimized processing
+    Supports both ASCII and Binary DXF formats
+    """
     
     # Validate file extension
     filename = file.filename.lower()
@@ -306,70 +341,204 @@ async def parse_cad_file(
     if filename.endswith('.dwg'):
         raise HTTPException(
             status_code=400,
-            detail="DWG dosyaları doğrudan desteklenmemektedir. Lütfen DXF formatına dönüştürün veya AutoCAD'den 'Save As DXF' yapın."
+            detail="DWG dosyaları doğrudan desteklenmemektedir. Lütfen AutoCAD'den 'Save As DXF' ile dönüştürün."
         )
     
     try:
         # Read file content
         content = await file.read()
         
-        # Parse DXF - ezdxf requires a stream that can be decoded
-        stream = io.StringIO(content.decode('utf-8', errors='ignore'))
-        doc = ezdxf.read(stream)
-        msp = doc.modelspace()
+        if len(content) == 0:
+            raise HTTPException(status_code=400, detail="Dosya boş")
         
-        entities = []
-        layers = set()
-        
-        # Process entities
-        for entity in msp:
-            parsed = None
-            
-            try:
-                if entity.dxftype() == 'LINE':
-                    parsed = parse_line(entity)
-                elif entity.dxftype() == 'CIRCLE':
-                    parsed = parse_circle(entity)
-                elif entity.dxftype() == 'ARC':
-                    parsed = parse_arc(entity)
-                elif entity.dxftype() == 'LWPOLYLINE':
-                    parsed = parse_lwpolyline(entity)
-                elif entity.dxftype() == 'POLYLINE':
-                    parsed = parse_polyline(entity)
-                elif entity.dxftype() == 'SPLINE':
-                    parsed = parse_spline(entity)
-                elif entity.dxftype() in ['TEXT', 'MTEXT']:
-                    parsed = parse_text(entity)
-                
-                if parsed:
-                    entities.append(parsed)
-                    layers.add(parsed.layer)
-                    
-            except Exception as e:
-                # Skip problematic entities
-                continue
-        
-        bounds = calculate_bounds(entities)
+        # Run parsing in thread pool to avoid blocking
+        loop = asyncio.get_event_loop()
+        result = await loop.run_in_executor(
+            executor, 
+            parse_dxf_file_sync, 
+            content,
+            max_entities
+        )
         
         return CADParseResult(
-            success=True,
-            entities=entities,
-            bounds=bounds,
-            layers=list(layers),
-            entity_count=len(entities),
-            message=f"{len(entities)} öğe başarıyla işlendi"
+            success=result["success"],
+            entities=result["entities"],
+            bounds=result["bounds"],
+            layers=result["layers"],
+            entity_count=result["entity_count"],
+            message=result["message"]
         )
         
     except ezdxf.DXFStructureError as e:
         raise HTTPException(
             status_code=400,
-            detail=f"DXF dosyası bozuk veya geçersiz format: {str(e)}"
+            detail=f"DXF dosyası bozuk: {str(e)}"
         )
     except Exception as e:
         raise HTTPException(
             status_code=500,
-            detail=f"Dosya işlenirken hata oluştu: {str(e)}"
+            detail=f"Dosya işlenirken hata: {str(e)}"
         )
+
+
+@router.post("/parse-async")
+async def parse_cad_file_async(
+    file: UploadFile = File(...),
+    background_tasks: BackgroundTasks = None,
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Async DXF parsing for large files
+    Returns task_id immediately and processes in background
+    """
+    
+    filename = file.filename.lower()
+    if not filename.endswith('.dxf'):
+        raise HTTPException(status_code=400, detail="Sadece DXF dosyaları desteklenmektedir")
+    
+    content = await file.read()
+    
+    if len(content) == 0:
+        raise HTTPException(status_code=400, detail="Dosya boş")
+    
+    # Create task ID
+    task_id = str(uuid.uuid4())
+    
+    # Initialize task status
+    processing_tasks[task_id] = {
+        "status": "pending",
+        "progress": 0,
+        "message": "İşlem sıraya alındı",
+        "filename": file.filename,
+        "result": None
+    }
+    
+    # Add background task
+    background_tasks.add_task(process_dxf_background, task_id, content)
+    
+    return {"task_id": task_id, "status": "pending", "message": "İşlem başlatıldı"}
+
+
+async def process_dxf_background(task_id: str, content: bytes):
+    """Background task for DXF processing"""
+    try:
+        processing_tasks[task_id]["status"] = "processing"
+        processing_tasks[task_id]["progress"] = 10
+        processing_tasks[task_id]["message"] = "Dosya işleniyor..."
+        
+        # Run in executor
+        loop = asyncio.get_event_loop()
+        result = await loop.run_in_executor(executor, parse_dxf_file_sync, content, 100000)
+        
+        processing_tasks[task_id]["status"] = "completed"
+        processing_tasks[task_id]["progress"] = 100
+        processing_tasks[task_id]["message"] = result["message"]
+        processing_tasks[task_id]["result"] = result
+        
+    except Exception as e:
+        processing_tasks[task_id]["status"] = "error"
+        processing_tasks[task_id]["message"] = str(e)
+
+
+@router.get("/parse-status/{task_id}")
+async def get_parse_status(task_id: str, current_user: dict = Depends(get_current_user)):
+    """Get status of async parsing task"""
+    if task_id not in processing_tasks:
+        raise HTTPException(status_code=404, detail="Görev bulunamadı")
+    
+    task = processing_tasks[task_id]
+    
+    response = {
+        "task_id": task_id,
+        "status": task["status"],
+        "progress": task["progress"],
+        "message": task["message"]
+    }
+    
+    if task["status"] == "completed" and task["result"]:
+        response["entity_count"] = task["result"]["entity_count"]
+        response["layers"] = task["result"]["layers"]
+    
+    return response
+
+
+@router.get("/parse-result/{task_id}")
+async def get_parse_result(task_id: str, current_user: dict = Depends(get_current_user)):
+    """Get result of completed async parsing task"""
+    if task_id not in processing_tasks:
+        raise HTTPException(status_code=404, detail="Görev bulunamadı")
+    
+    task = processing_tasks[task_id]
+    
+    if task["status"] != "completed":
+        raise HTTPException(status_code=400, detail=f"Görev henüz tamamlanmadı: {task['status']}")
+    
+    result = task["result"]
+    
+    # Clean up task after retrieval
+    del processing_tasks[task_id]
+    
+    return CADParseResult(
+        success=result["success"],
+        entities=result["entities"],
+        bounds=result["bounds"],
+        layers=result["layers"],
+        entity_count=result["entity_count"],
+        message=result["message"]
+    )
+
+
+@router.post("/parse-paginated")
+async def parse_cad_file_paginated(
+    file: UploadFile = File(...),
+    page: int = 1,
+    page_size: int = 5000,
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Paginated DXF parsing for very large files
+    Returns entities in chunks for lazy loading
+    """
+    
+    filename = file.filename.lower()
+    if not filename.endswith('.dxf'):
+        raise HTTPException(status_code=400, detail="Sadece DXF dosyaları desteklenmektedir")
+    
+    content = await file.read()
+    
+    try:
+        loop = asyncio.get_event_loop()
+        
+        # Parse all entities first (cached for subsequent requests in production)
+        full_result = await loop.run_in_executor(executor, parse_dxf_file_sync, content, 100000)
+        
+        all_entities = full_result["entities"]
+        total_count = len(all_entities)
+        total_pages = math.ceil(total_count / page_size)
+        
+        # Paginate
+        start_idx = (page - 1) * page_size
+        end_idx = start_idx + page_size
+        page_entities = all_entities[start_idx:end_idx]
+        
+        return {
+            "success": True,
+            "entities": page_entities,
+            "bounds": full_result["bounds"],
+            "layers": full_result["layers"],
+            "pagination": {
+                "page": page,
+                "page_size": page_size,
+                "total_entities": total_count,
+                "total_pages": total_pages,
+                "has_next": page < total_pages,
+                "has_prev": page > 1
+            },
+            "message": f"Sayfa {page}/{total_pages} - {len(page_entities)} öğe"
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Dosya işlenirken hata: {str(e)}")
 
 
 @router.post("/upload")
@@ -382,7 +551,6 @@ async def upload_cad_file(
 ):
     """Upload and store CAD file with metadata"""
     
-    # Validate file
     filename = file.filename.lower()
     if not filename.endswith('.dxf'):
         raise HTTPException(status_code=400, detail="Sadece DXF dosyaları desteklenmektedir")
@@ -390,12 +558,9 @@ async def upload_cad_file(
     try:
         content = await file.read()
         
-        # Parse to get metadata
-        doc = ezdxf.read(io.BytesIO(content))
-        msp = doc.modelspace()
-        
-        entity_count = len(list(msp))
-        layers = list(set(e.dxf.layer for e in msp if hasattr(e.dxf, 'layer')))
+        # Quick parse to get metadata
+        loop = asyncio.get_event_loop()
+        result = await loop.run_in_executor(executor, parse_dxf_file_sync, content, 10000)
         
         # Save file
         upload_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "..", "uploads", "cad")
@@ -408,15 +573,17 @@ async def upload_cad_file(
         with open(file_path, 'wb') as f:
             f.write(content)
         
-        # Store metadata in MongoDB
+        # Store metadata
         metadata = {
             "id": file_id,
             "filename": file.filename,
             "file_path": f"/uploads/cad/{safe_filename}",
+            "file_size": len(content),
             "upload_date": datetime.now(timezone.utc).isoformat(),
             "uploaded_by": current_user.get("id"),
-            "entity_count": entity_count,
-            "layers": layers,
+            "entity_count": result["entity_count"],
+            "layers": result["layers"],
+            "bounds": result["bounds"],
             "related_project_id": project_id,
             "related_report_id": report_id,
             "description": description
@@ -428,8 +595,8 @@ async def upload_cad_file(
             "success": True,
             "id": file_id,
             "filename": file.filename,
-            "entity_count": entity_count,
-            "layers": layers,
+            "entity_count": result["entity_count"],
+            "layers": result["layers"],
             "message": "CAD dosyası başarıyla yüklendi"
         }
         
@@ -462,7 +629,6 @@ async def get_cad_file(file_id: str, current_user: dict = Depends(get_current_us
     if not metadata:
         raise HTTPException(status_code=404, detail="CAD dosyası bulunamadı")
     
-    # Read and parse the file
     file_path = os.path.join(
         os.path.dirname(os.path.dirname(__file__)), 
         "..", 
@@ -475,45 +641,17 @@ async def get_cad_file(file_id: str, current_user: dict = Depends(get_current_us
         raise HTTPException(status_code=404, detail="CAD dosyası sunucuda bulunamadı")
     
     try:
-        doc = ezdxf.readfile(file_path)
-        msp = doc.modelspace()
+        with open(file_path, 'rb') as f:
+            content = f.read()
         
-        entities = []
-        layers = set()
-        
-        for entity in msp:
-            parsed = None
-            
-            try:
-                if entity.dxftype() == 'LINE':
-                    parsed = parse_line(entity)
-                elif entity.dxftype() == 'CIRCLE':
-                    parsed = parse_circle(entity)
-                elif entity.dxftype() == 'ARC':
-                    parsed = parse_arc(entity)
-                elif entity.dxftype() == 'LWPOLYLINE':
-                    parsed = parse_lwpolyline(entity)
-                elif entity.dxftype() == 'POLYLINE':
-                    parsed = parse_polyline(entity)
-                elif entity.dxftype() == 'SPLINE':
-                    parsed = parse_spline(entity)
-                elif entity.dxftype() in ['TEXT', 'MTEXT']:
-                    parsed = parse_text(entity)
-                
-                if parsed:
-                    entities.append(parsed)
-                    layers.add(parsed.layer)
-                    
-            except:
-                continue
-        
-        bounds = calculate_bounds(entities)
+        loop = asyncio.get_event_loop()
+        result = await loop.run_in_executor(executor, parse_dxf_file_sync, content, 50000)
         
         return {
             "metadata": metadata,
-            "entities": [e.dict() for e in entities],
-            "bounds": bounds,
-            "layers": list(layers)
+            "entities": [e.dict() for e in result["entities"]],
+            "bounds": result["bounds"],
+            "layers": result["layers"]
         }
         
     except Exception as e:
@@ -530,7 +668,6 @@ async def delete_cad_file(file_id: str, current_user: dict = Depends(get_current
     if not metadata:
         raise HTTPException(status_code=404, detail="CAD dosyası bulunamadı")
     
-    # Delete file from disk
     file_path = os.path.join(
         os.path.dirname(os.path.dirname(__file__)),
         "..",
@@ -542,7 +679,6 @@ async def delete_cad_file(file_id: str, current_user: dict = Depends(get_current
     if os.path.exists(file_path):
         os.remove(file_path)
     
-    # Delete from database
     await db.cad_files.delete_one({"id": file_id})
     
     return {"success": True, "message": "CAD dosyası silindi"}
