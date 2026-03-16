@@ -1,6 +1,7 @@
 """
 CAD Router - DWG/DXF Dosya İşleme ve Görüntüleme
 Optimized Version with Binary DXF Support and Background Processing
+Maximum file size: 5GB
 """
 
 from fastapi import APIRouter, HTTPException, Depends, UploadFile, File, Form, BackgroundTasks
@@ -15,6 +16,8 @@ import os
 import math
 import uuid
 import asyncio
+import tempfile
+import shutil
 from datetime import datetime, timezone
 from concurrent.futures import ThreadPoolExecutor
 
@@ -22,6 +25,10 @@ from database import db
 from routers.auth import get_current_user
 
 router = APIRouter(prefix="/cad", tags=["CAD"])
+
+# Constants
+MAX_FILE_SIZE = 5 * 1024 * 1024 * 1024  # 5 GB
+CHUNK_SIZE = 1024 * 1024  # 1 MB chunks for streaming
 
 # Thread pool for CPU-intensive DXF parsing
 executor = ThreadPoolExecutor(max_workers=2)
