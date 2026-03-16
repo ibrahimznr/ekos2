@@ -60,11 +60,12 @@ logger = logging.getLogger(__name__)
 UPLOAD_DIR = ROOT_DIR.parent / "uploads"
 UPLOAD_DIR.mkdir(exist_ok=True)
 
-# Create the main app
+# Create the main app with increased limits for large file uploads (5GB)
 app = FastAPI(
     title="EKOS - Ekipman Kontrol Otomasyon Sistemi",
     description="Ekipman kontrol ve rapor yönetim sistemi API'si",
-    version="2.0.0"
+    version="2.0.0",
+    # No default body limit - handled per-endpoint
 )
 
 # API Router with /api prefix
