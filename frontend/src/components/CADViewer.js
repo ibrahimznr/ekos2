@@ -271,19 +271,36 @@ const CADViewer = ({
     setProcessingProgress(0);
     
     const fileSizeMB = file.size / (1024 * 1024);
+    const fileSizeGB = file.size / (1024 * 1024 * 1024);
+    
+    // Check file size limit (5GB)
+    if (fileSizeGB > 5) {
+      toast.error('Dosya boyutu 5GB\'ı aşamaz');
+      setLoading(false);
+      return;
+    }
     
     try {
       const formData = new FormData();
       formData.append('file', file);
       
-      // Use async processing for large files (> 5MB)
-      if (fileSizeMB > 5) {
+      // Use streaming for very large files (> 100MB), async for large (> 10MB), direct for smaller
+      if (fileSizeMB > 100) {
         setIsAsyncProcessing(true);
-        const response = await api.post('/cad/parse-async', formData, {
-          headers: { 'Content-Type': 'multipart/form-data' }
+        toast.info(`Büyük dosya (${fileSizeMB.toFixed(1)} MB) yükleniyor ve işleniyor...`);
+        const response = await api.post('/cad/parse-streaming', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+          timeout: 600000 // 10 minute timeout for very large files
         });
         setAsyncTaskId(response.data.task_id);
-        toast.info('Büyük dosya işleniyor, lütfen bekleyin...');
+      } else if (fileSizeMB > 10) {
+        setIsAsyncProcessing(true);
+        const response = await api.post('/cad/parse-async', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+          timeout: 300000 // 5 minute timeout
+        });
+        setAsyncTaskId(response.data.task_id);
+        toast.info('Dosya işleniyor, lütfen bekleyin...');
       } else {
         // Direct processing for smaller files
         const response = await api.post('/cad/parse', formData, {
