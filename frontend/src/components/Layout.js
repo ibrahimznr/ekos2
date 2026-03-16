@@ -610,6 +610,21 @@ const Layout = ({ children }) => {
                 </Button>
               </div>
 
+              {/* CAD Viewer */}
+              <Button
+                variant={location.pathname === '/cad-viewer' ? 'default' : 'ghost'}
+                onClick={() => {
+                  navigate('/cad-viewer');
+                  setMobileMenuOpen(false);
+                }}
+                className={`w-full justify-start h-12 ${location.pathname === '/cad-viewer'
+                  ? 'bg-gradient-to-r from-cyan-600 to-blue-700 text-white'
+                  : 'text-gray-700 hover:bg-gray-100'}`}
+              >
+                <FileCode2 className="h-5 w-5 mr-3" />
+                CAD Görüntüleyici
+              </Button>
+
               {/* Settings Button */}
               <Button
                 variant={isActive('/ayarlar') ? 'default' : 'ghost'}
