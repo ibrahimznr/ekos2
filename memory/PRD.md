@@ -275,6 +275,44 @@ All critical tasks completed.
 
 ---
 
+## March 16, 2026 - CAD Viewer Module
+
+**Yeni Özellik: CAD Görüntüleyici** ✅
+- Sidebar'a "CAD Görüntüleyici" menü öğesi eklendi
+- `/cad-viewer` sayfası oluşturuldu
+- DXF dosya parsing (ezdxf kütüphanesi)
+- SVG tabanlı render engine
+- Dark mode CAD görünümü
+
+**Desteklenen Geometrik Öğeler:**
+- LINE (Çizgi)
+- CIRCLE (Daire)
+- ARC (Yay)
+- LWPOLYLINE/POLYLINE (Çoklu çizgi)
+- SPLINE (Eğri)
+- TEXT/MTEXT (Metin)
+
+**Özellikler:**
+- Zoom In/Out (mouse wheel + butonlar)
+- Pan (sürükle-bırak)
+- Grid görünümü toggle
+- Katman kontrolü (visibility toggle)
+- Tam ekran modu
+- Kayıtlı dosyalar listesi
+- AutoCAD renk indeksi desteği
+
+**API Endpoints:**
+- `POST /api/cad/parse` - DXF dosyasını parse et
+- `POST /api/cad/upload` - CAD dosyasını kaydet
+- `GET /api/cad/files` - Kayıtlı dosyaları listele
+- `GET /api/cad/file/{id}` - Dosya detayı ve içeriği
+- `DELETE /api/cad/file/{id}` - Dosya sil
+
+**MongoDB Collection:**
+- `cad_files`: { id, filename, file_path, upload_date, entity_count, layers, related_project_id, related_report_id }
+
+---
+
 ## Prioritized Backlog
 
 ### P0 (Critical)
