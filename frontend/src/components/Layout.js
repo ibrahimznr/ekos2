@@ -19,7 +19,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { LayoutDashboard, FileText, Shield, LogOut, Menu, X, Building2, User, Plus, ChevronLeft, ChevronRight, Settings, Truck, Trophy, BookOpen, Brain, ChevronDown, Bell, Calendar, Clock, UserCircle, MessageSquare, Send, Check, CheckCheck, Trash2, Loader2, Mail, Dices, Dice5 } from 'lucide-react';
+import { LayoutDashboard, FileText, Shield, LogOut, Menu, X, Building2, User, Plus, ChevronLeft, ChevronRight, Settings, Truck, Trophy, BookOpen, Brain, ChevronDown, Bell, Calendar, Clock, UserCircle, MessageSquare, Send, Check, CheckCheck, Trash2, Loader2, Mail, Dices, Dice5, FileCode2 } from 'lucide-react';
 import { toast } from 'sonner';
 import api from '@/utils/api';
 import LanguageSelector from '@/components/LanguageSelector';
