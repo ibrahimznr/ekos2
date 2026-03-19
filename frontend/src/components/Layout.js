@@ -310,7 +310,8 @@ const Layout = ({ children }) => {
             )}
           </button>
 
-          {/* Çekiliş Dropdown */}
+          {/* Çekiliş Dropdown - Only for admin */}
+          {user.role === 'admin' && (
           <div className="pt-2 border-t border-gray-200 mt-2">
             <button
               onClick={() => setCekilisOpen(!cekilisOpen)}
@@ -376,8 +377,10 @@ const Layout = ({ children }) => {
               </div>
             )}
           </div>
+          )}
 
-          {/* Kombinasyonlar Dropdown */}
+          {/* Kombinasyonlar Dropdown - Only for admin */}
+          {user.role === 'admin' && (
           <div className="pt-2 border-t border-gray-200 mt-2">
             <button
               onClick={() => setKombinasyonlarOpen(!kombinasyonlarOpen)}
@@ -419,6 +422,7 @@ const Layout = ({ children }) => {
               </div>
             )}
           </div>
+          )}
         </nav>
 
         {/* Settings Button */}
@@ -548,7 +552,8 @@ const Layout = ({ children }) => {
                 );
               })}
 
-              {/* Çekiliş Section */}
+              {/* Çekiliş Section - Only for admin */}
+              {user.role === 'admin' && (
               <div className="pt-2 border-t border-gray-200 mt-2">
                 <p className="px-3 py-1 text-xs font-semibold text-purple-600 uppercase">Çekiliş</p>
                 <Button
@@ -591,8 +596,10 @@ const Layout = ({ children }) => {
                   Zeka Oyunları
                 </Button>
               </div>
+              )}
 
-              {/* Kombinasyonlar Section */}
+              {/* Kombinasyonlar Section - Only for admin */}
+              {user.role === 'admin' && (
               <div className="pt-2 border-t border-gray-200 mt-2">
                 <p className="px-3 py-1 text-xs font-semibold text-amber-600 uppercase">Kombinasyonlar</p>
                 <Button
@@ -609,6 +616,7 @@ const Layout = ({ children }) => {
                   Şans Tobu Tahmin Üretici
                 </Button>
               </div>
+              )}
 
               {/* Metraj Cetveli */}
               <Button

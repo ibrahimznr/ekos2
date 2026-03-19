@@ -40,6 +40,22 @@ const ProtectedRoute = ({ children }) => {
   return children;
 };
 
+// Admin-only route protection
+const AdminRoute = ({ children }) => {
+  const token = localStorage.getItem('token');
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  
+  if (!token) {
+    return <Navigate to="/login" replace />;
+  }
+  
+  if (user.role !== 'admin') {
+    return <Navigate to="/" replace />;
+  }
+  
+  return children;
+};
+
 const DashboardRoute = () => {
   const user = JSON.parse(localStorage.getItem('user') || '{}');
 
@@ -125,62 +141,62 @@ function App() {
                 </ProtectedRoute>
               }
             />
-            {/* Çekiliş Routes */}
+            {/* Çekiliş Routes - Admin Only */}
             <Route
               path="/cekilis"
               element={
-                <ProtectedRoute>
+                <AdminRoute>
                   <DrawsListPage />
-                </ProtectedRoute>
+                </AdminRoute>
               }
             />
             <Route
               path="/cekilis/olustur"
               element={
-                <ProtectedRoute>
+                <AdminRoute>
                   <CreateDrawPage />
-                </ProtectedRoute>
+                </AdminRoute>
               }
             />
             <Route
               path="/cekilis/:drawId"
               element={
-                <ProtectedRoute>
+                <AdminRoute>
                   <DrawDetailPage />
-                </ProtectedRoute>
+                </AdminRoute>
               }
             />
             <Route
               path="/cekilis/:drawId/sonuclar"
               element={
-                <ProtectedRoute>
+                <AdminRoute>
                   <DrawResultsPage />
-                </ProtectedRoute>
+                </AdminRoute>
               }
             />
             <Route
               path="/kelime-havuzu"
               element={
-                <ProtectedRoute>
+                <AdminRoute>
                   <VocabularyPage />
-                </ProtectedRoute>
+                </AdminRoute>
               }
             />
             <Route
               path="/zeka-oyunu"
               element={
-                <ProtectedRoute>
+                <AdminRoute>
                   <MindReaderGame />
-                </ProtectedRoute>
+                </AdminRoute>
               }
             />
-            {/* Kombinasyonlar Routes */}
+            {/* Kombinasyonlar Routes - Admin Only */}
             <Route
               path="/sans-topu-tahmin"
               element={
-                <ProtectedRoute>
+                <AdminRoute>
                   <SansTopuTahmin />
-                </ProtectedRoute>
+                </AdminRoute>
               }
             />
             {/* Metraj Route */}
