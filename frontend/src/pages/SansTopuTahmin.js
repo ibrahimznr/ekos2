@@ -96,12 +96,12 @@ const SansTopuTahmin = () => {
     }
   }, [totalCombinations, fetchSamples]);
 
-  // Generate 1 million combinations
+  // Generate 1,030,144 unique combinations
   const handleGenerate = async () => {
     try {
       setGenerating(true);
       const response = await api.post('/kombinasyonlar/generate', {
-        num_combinations: 1000000
+        num_combinations: 1030144
       });
       setTotalCombinations(response.data.total_count);
       toast.success(response.data.message);
@@ -341,7 +341,7 @@ const SansTopuTahmin = () => {
                   ) : (
                     <>
                       <Sparkles className="h-4 w-4 mr-2" />
-                      1 Milyon Yeni Üret
+                      1.030.144 Benzersiz Üret
                     </>
                   )}
                 </Button>
@@ -673,7 +673,7 @@ const SansTopuTahmin = () => {
               <div className="text-center py-12 text-gray-500">
                 <AlertCircle className="h-12 w-12 mx-auto mb-4 text-gray-300" />
                 <p>Henüz kombinasyon oluşturulmadı</p>
-                <p className="text-sm mt-1">Yukarıdaki "1 Milyon Yeni Üret" butonuna tıklayın</p>
+                <p className="text-sm mt-1">Yukarıdaki "1.030.144 Benzersiz Üret" butonuna tıklayın</p>
               </div>
             ) : loadingSamples ? (
               <div className="flex items-center justify-center py-12">
@@ -779,10 +779,11 @@ const SansTopuTahmin = () => {
               <div className="text-sm text-blue-800">
                 <p className="font-medium mb-1">Şans Topu Kuralları:</p>
                 <ul className="list-disc list-inside space-y-1 text-blue-700">
-                  <li>5 ana sayı: 1-34 arasından seçilir</li>
-                  <li>1 bonus sayı (Şans Topu): 1-14 arasından seçilir</li>
-                  <li>Ana sayılar birbirinden farklı olmalıdır</li>
-                  <li>Kombinasyonlar otomatik olarak sıralanır</li>
+                  <li>5 ana sayı: 1-34 arasından seçilir (birbirinden farklı)</li>
+                  <li>1 bonus sayı (Şans Topu): 1-14 arasından rastgele</li>
+                  <li>Toplam benzersiz beşli kombinasyon: C(34,5) = 278.256</li>
+                  <li>Her beşli kombinasyon benzersizdir, tekrar etmez</li>
+                  <li>Hedef: 1.030.144 benzersiz kombinasyon</li>
                 </ul>
               </div>
             </div>

@@ -1,12 +1,19 @@
 """
 Kombinasyonlar Router - Şans Topu Tahmin Üretici
 Rastgele kombinasyon üretme, arama ve Excel'e kaydetme işlemleri
+
+Şans Topu Kuralları:
+- 5 ana sayı: 1-34 arası (birbirinden farklı)
+- 1 bonus sayı: 1-14 arası (rastgele)
+- Toplam benzersiz beşli kombinasyon sayısı: C(34,5) = 278.256
+- Her beşli kombinasyona rastgele bonus ile: ~1.030.144 kombinasyon
 """
 
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
-from typing import List, Optional, Dict, Any
+from typing import List, Optional, Dict, Any, Set, Tuple
 import random
+from itertools import combinations
 import io
 from fastapi.responses import StreamingResponse
 from openpyxl import Workbook
@@ -17,10 +24,15 @@ router = APIRouter(prefix="/kombinasyonlar", tags=["Kombinasyonlar"])
 
 # Global cache for combinations
 COMBINATIONS_CACHE: Dict[int, List[int]] = {}
+# Track unique 5-number combinations
+UNIQUE_FIVES: Set[Tuple[int, ...]] = set()
+
+# Default target: 1,030,144 unique combinations
+DEFAULT_COMBINATION_COUNT = 1030144
 
 
 class GenerateRequest(BaseModel):
-    num_combinations: int = 1000000
+    num_combinations: int = DEFAULT_COMBINATION_COUNT
     seed: Optional[int] = None
 
 
@@ -55,18 +67,28 @@ class CombinationItem(BaseModel):
 
 class StatsResponse(BaseModel):
     total_combinations: int
+    unique_five_combos: Optional[int] = 0
+    default_target: Optional[int] = DEFAULT_COMBINATION_COUNT
 
 
 @router.get("/stats", response_model=StatsResponse)
 async def get_stats():
     """Get current combination statistics"""
-    return {"total_combinations": len(COMBINATIONS_CACHE)}
+    return {
+        "total_combinations": len(COMBINATIONS_CACHE),
+        "unique_five_combos": len(UNIQUE_FIVES),
+        "default_target": DEFAULT_COMBINATION_COUNT
+    }
 
 
 @router.post("/generate", response_model=GenerateResponse)
 async def generate_combinations(request: GenerateRequest):
-    """Generate new combinations and add to cache"""
-    global COMBINATIONS_CACHE
+    """
+    Generate new combinations with UNIQUE 5-number sets.
+    Each 5-number combination appears only once, bonus is random.
+    Target: 1,030,144 unique combinations.
+    """
+    global COMBINATIONS_CACHE, UNIQUE_FIVES
     
     if request.seed:
         random.seed(request.seed)
@@ -75,31 +97,58 @@ async def generate_combinations(request: GenerateRequest):
     if num <= 0:
         raise HTTPException(status_code=400, detail="Kombinasyon sayısı pozitif olmalıdır")
     
-    if num > 10000000:
-        raise HTTPException(status_code=400, detail="Maksimum 10 milyon kombinasyon üretilebilir")
+    # C(34,5) = 278,256 unique 5-number combinations possible
+    max_unique_fives = 278256
     
-    start_index = len(COMBINATIONS_CACHE) + 1
+    if num > max_unique_fives * 14:  # Each five can have 14 different bonuses
+        raise HTTPException(
+            status_code=400, 
+            detail=f"Maksimum {max_unique_fives * 14:,} kombinasyon üretilebilir (278.256 beşli × 14 bonus)"
+        )
     
-    for i in range(start_index, start_index + num):
-        main_numbers = random.sample(range(1, 35), 5)
-        main_numbers.sort()
+    # Clear existing if regenerating
+    COMBINATIONS_CACHE.clear()
+    UNIQUE_FIVES.clear()
+    
+    generated = 0
+    attempts = 0
+    max_attempts = num * 3  # Prevent infinite loop
+    
+    while generated < num and attempts < max_attempts:
+        attempts += 1
+        
+        # Generate unique 5-number combination
+        main_numbers = tuple(sorted(random.sample(range(1, 35), 5)))
+        
+        # Check if this 5-number combo already exists
+        if main_numbers in UNIQUE_FIVES:
+            continue
+        
+        # Add to unique set
+        UNIQUE_FIVES.add(main_numbers)
+        
+        # Random bonus (1-14)
         bonus_number = random.randint(1, 14)
-        combination = main_numbers + [bonus_number]
-        COMBINATIONS_CACHE[i] = combination
+        
+        # Store combination
+        generated += 1
+        combination = list(main_numbers) + [bonus_number]
+        COMBINATIONS_CACHE[generated] = combination
     
     return {
-        "generated_count": num,
+        "generated_count": generated,
         "total_count": len(COMBINATIONS_CACHE),
-        "message": f"{num:,} kombinasyon başarıyla oluşturuldu. Toplam: {len(COMBINATIONS_CACHE):,}"
+        "message": f"{generated:,} benzersiz kombinasyon oluşturuldu. Her beşli farklı!"
     }
 
 
 @router.post("/clear")
 async def clear_cache():
     """Clear all combinations from cache"""
-    global COMBINATIONS_CACHE
+    global COMBINATIONS_CACHE, UNIQUE_FIVES
     count = len(COMBINATIONS_CACHE)
     COMBINATIONS_CACHE.clear()
+    UNIQUE_FIVES.clear()
     return {
         "cleared_count": count,
         "message": f"{count:,} kombinasyon silindi. Önbellek temizlendi."
